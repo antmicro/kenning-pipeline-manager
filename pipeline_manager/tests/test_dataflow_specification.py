@@ -277,6 +277,51 @@ def specification_graph_node_one_interface(specification_graph_node):
 
 
 @pytest.fixture
+def specification_graph_node_with_same_inf_positions(specification_blank_node):
+    specification_blank_node["nodes"][0]["interfaces"] = [
+        {"name": "interface1", "direction": "input"},
+        {"name": "interface2", "direction": "input"},
+    ]
+
+    specification_blank_node["graphs"] = [
+        {
+            "id": "78cc86c4-9ad0-4a8f-88cb-71ee28c48659",
+            "nodes": [
+                {
+                    "name": "TestNode",
+                    "id": "fc7d1706-6240-41e2-a8da-91c8577e09f9",
+                    "position": {"x": 2100, "y": 200},
+                    "interfaces": [
+                        {
+                            "id": "b9344e0e-7f79-4403-9598-12a5a10196ed",
+                            "name": "interface1",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0,
+                        },
+                        {
+                            "id": "56b6716a-68f8-4e00-82aa-ecfb195b28b7",
+                            "name": "interface2",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0,
+                        },
+                    ],
+                    "properties": [],
+                }
+            ],
+            "connections": [],
+        }
+    ]
+
+    specification_blank_node[
+        "entryGraph"
+    ] = "78cc86c4-9ad0-4a8f-88cb-71ee28c48659"
+
+    return specification_blank_node
+
+
+@pytest.fixture
 def specification_with_interface_graph_node(
     specification_graph_node_one_interface,
 ):
@@ -429,6 +474,7 @@ def test_valid_specification(
         "specification_with_missing_interface_in_graph_node",
         "specification_with_invalid_interface_in_graph_node",
         "specification_invalid_node_in_graph_node",
+        "specification_graph_node_with_same_inf_positions",
     ],
 )
 def test_invalid_specification(
