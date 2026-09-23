@@ -4,7 +4,7 @@ import {
     leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
     dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
     AddConnection, getYAMLEditorContent, setYAMLEditorContent, assertPropertyCount,
-    enableSubgraphRemoval, addProperty,
+    enableSubgraphRemoval, addProperty, addInterface, assertInoutCount
 } from './config.js';
 
 
@@ -651,4 +651,39 @@ test('spec edit from GUI', async ({ page }) => {
     await assertPropertyCount(loadVideo, 1);
     await page.keyboard.press('Control+KeyY');
     await assertPropertyCount(loadVideo, 2);
+});
+test('test connections preservation', async ({ page }) => {
+    await page.goto(getUrl());
+    const loadVideo = getNode(page, 'LoadVideo');
+
+    // add interface
+    await addInterface(page, loadVideo);
+    await assertOutputCount(loadVideo,1);
+    await assertInputCount(loadVideo,1);
+    // undo changes
+    await page.keyboard.press('Control+KeyZ');
+
+    await assertOutputCount(loadVideo,1);
+    await assertInputCount(loadVideo,0);
+
+    // take a path of the connection assigned to node
+    const connections = page.locator('.custom-connections-container > g').last();
+    const path = connections.locator('path').first();
+    const pathBefore = await path.getAttribute('d');
+
+    // move node a bit
+    const nodeBBox = await loadVideo.boundingBox();
+
+    await loadVideo.click();
+    await page.mouse.move(nodeBBox.x + 20, nodeBBox.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(nodeBBox.x, nodeBBox.y - 100);
+    await page.mouse.up();
+
+    // take a path of the connection assigned to node
+    const pathAfter = await path.getAttribute('d');
+
+    // connection path should be different after node is moved
+    expect(pathAfter === pathBefore).toBeFalsy();
+
 });
