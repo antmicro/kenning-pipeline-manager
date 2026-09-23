@@ -726,6 +726,15 @@
             "returns": {
                "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "interfaces_swap": {
+            "description": "Swap interfaces",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+               "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {

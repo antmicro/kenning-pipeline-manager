@@ -780,3 +780,11 @@ export async function autolayout_apply() {
     };
     await loadingScreen(apply, editor.events.setLoad);
 }
+
+export async function interfaces_swap() {
+    const { editor } = editorManager.baklavaView;
+    const apply = async () => {
+        editor.swapInterfaces();
+    };
+    await loadingScreen(apply, editor.events.setLoad);
+}
