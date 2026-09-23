@@ -36,6 +36,7 @@ import { menuState, NodeDataConfiguration, configurationState } from '../../../c
 
 import InputInterface from '../../../interfaces/InputInterface.js';
 import newInputInterface from './utils.ts';
+import EditorManager from '../../../core/EditorManager.js';
 
 interface NodeConfigurationInterface extends InputInterface {
     componentName: string,
@@ -48,6 +49,8 @@ export default defineComponent({
 
         const close = () => {
             menuState.layerMenu = false;
+            const editorManager = EditorManager.getEditorManagerInstance();
+            editorManager.giveFocusToEditor();
         };
 
         const nodeLayer = newInputInterface<NodeConfigurationInterface>('Node layer', 'Default layer', 'layer');

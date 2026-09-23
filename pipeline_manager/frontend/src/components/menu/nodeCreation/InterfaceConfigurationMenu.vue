@@ -74,6 +74,8 @@ export default defineComponent({
 
         const close = () => {
             menuState.interfaceMenu = false;
+            const editorManager = EditorManager.getEditorManagerInstance();
+            editorManager.giveFocusToEditor();
         };
 
         const interfaceName = newInputInterface<InterfaceInterface>('Interface name', newInterface.name, 'name');

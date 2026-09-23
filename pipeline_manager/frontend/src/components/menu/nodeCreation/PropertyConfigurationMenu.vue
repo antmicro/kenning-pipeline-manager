@@ -47,6 +47,7 @@ import { menuState } from '../../../core/nodeCreation/ConfigurationState.ts';
 import InputInterface from '../../../interfaces/InputInterface.js';
 import InputInterfaceComponent from '../../../interfaces/InputInterface.vue';
 import newInputInterface from './utils.ts';
+import EditorManager from '../../../core/EditorManager.js';
 
 interface CurrentProperty {
     name: string,
@@ -75,6 +76,8 @@ export default defineComponent({
 
         const close = () => {
             menuState.propertyMenu = false;
+            const editorManager = EditorManager.getEditorManagerInstance();
+            editorManager.giveFocusToEditor();
         };
 
         const propertyName = newInputInterface<PropertyInterface>('Property name', newProperty.name, 'name');

@@ -33,6 +33,7 @@ import { createGroupFromSelection } from '../../../core/nodeCreation/Configurati
 
 import InputInterface from '../../../interfaces/InputInterface.js';
 import newInputInterface from './utils.ts';
+import EditorManager from '../../../core/EditorManager.js';
 
 interface NodeConfigurationInterface extends InputInterface {
     componentName: string,
@@ -56,6 +57,8 @@ export default defineComponent({
         };
         const close = () => {
             menuState.groupMenu = false;
+            const editorManager = EditorManager.getEditorManagerInstance();
+            editorManager.giveFocusToEditor();
         };
 
         const groupName = newInputInterface<NodeConfigurationInterface>('Group name', newGroup.name, 'name');

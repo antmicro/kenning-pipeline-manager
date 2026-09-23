@@ -38,6 +38,7 @@ import InputInterface from '../../../interfaces/InputInterface.js';
 import TextAreaInterface from '../../../interfaces/TextAreaInterface.js';
 import TextAreaInterfaceComponent from '../../../interfaces/TextAreaInterface.vue';
 import newInputInterface from './utils.ts';
+import EditorManager from '../../../core/EditorManager.js';
 
 interface NodeConfigurationInterface extends InputInterface {
     componentName: string,
@@ -63,6 +64,8 @@ export default defineComponent({
 
         const close = () => {
             menuState.configurationMenu.visible = false;
+            const editorManager = EditorManager.getEditorManagerInstance();
+            editorManager.giveFocusToEditor();
         };
 
         const nodeName = newInputInterface<NodeConfigurationInterface>('Node name', 'Custom Node', 'name');
