@@ -384,7 +384,8 @@ export default function createPipelineManagerGraph(graph) {
         // Restoring connections
         const interfaces = [...Object.values(oldNode.inputs), ...Object.values(oldNode.outputs)];
         const connections = this.connections.filter(
-            (c) => interfaces.includes(c.from) || interfaces.includes(c.to) ||
+            (c) => interfaces.some((i) => c.from.id === i.id)
+                || interfaces.some((i) => c.to.id === i.id) ||
                 interfaces.some((i) => i.bus?.stubs?.some((s) => [c.to, c.from].includes(s))),
         );
 
@@ -400,10 +401,10 @@ export default function createPipelineManagerGraph(graph) {
             // Rewiring connections to new interfaces
             connections.forEach((conn) => {
                 [newNodeInstance.inputs, newNodeInstance.outputs].forEach((arr) => {
-                    if (Object.prototype.hasOwnProperty.call(arr, name)) {
+                    if (Object.hasOwn(arr, name)) {
                         const checkAndReadd = (ii, curi) => {
-                            if (conn.from === ii || conn.to === ii) {
-                                const isFrom = conn.from === ii;
+                            if (conn.from.id === ii.id || conn.to.id === ii.id) {
+                                const isFrom = conn.from.id === ii.id;
                                 const fromNode = isFrom ? curi : conn.from;
                                 const toNode = isFrom ? conn.to : curi;
 
