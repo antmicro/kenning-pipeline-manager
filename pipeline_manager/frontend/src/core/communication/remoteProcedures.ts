@@ -17,7 +17,7 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import { v4 as uuidv4 } from 'uuid';
 import runInfo from './runInformation';
 import EditorManager from '../EditorManager';
-import NotificationHandler from '../notifications';
+import NotificationHandler, { LOG_LEVEL } from '../notifications';
 import { MAIN_TERMINAL, terminalStore } from '../stores';
 import { saveSpecificationConfiguration } from '../../components/saveConfiguration.ts';
 
@@ -713,4 +713,24 @@ export function return_from_subgraph() {
     }
 
     return { has_returned: isInSubgraph };
+}
+
+export async function notifications_get_verbosity(
+    params: { all: boolean | undefined },
+): Promise<{verbosity: string} | string[]> {
+    if (params && params.all) {
+        return Object.keys(LOG_LEVEL).map((s) => s.toUpperCase());
+    }
+    return { verbosity: editorManager.baklavaView.logLevel };
+}
+
+export async function notifications_set_verbosity(
+    params: { verbosity: string },
+): Promise<string[] | null> {
+    const possibleValues = Object.keys(LOG_LEVEL).map((s) => s.toUpperCase());
+    if (!possibleValues.includes(params.verbosity)) {
+        throw Error(`Invalid verbosity value: ${params.verbosity}`);
+    }
+    editorManager.baklavaView.logLevel = params.verbosity;
+    return null;
 }

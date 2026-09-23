@@ -609,6 +609,45 @@
                 ],
                 "additionalProperties": false
             }
+        },
+        "notifications_get_verbosity": {
+            "description": "Obtains current notifications verbosity level or all possible values",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "all": {
+                        "description": "Set all to true to obtain all possible values",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "returns": {
+                "description": "Current notification verbosity level or a list of all possible values",
+                "type": ["object", "array"],
+                "properties": {
+                    "verbosity": {
+                        "type": ["string"]
+                    }
+                },
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "notifications_set_verbosity": {
+            "description": "Sets notifications verbosity level",
+            "params": {
+                "description": "The new verbosity level, pass null to obtain possible values",
+                "type": "object",
+                "properties": {
+                    "verbosity": {
+                        "type": ["string"]
+                    }
+                }
+            },
+            "returns": {
+                "type": "null"
+            }
         }
     },
     "backend_endpoints": {
