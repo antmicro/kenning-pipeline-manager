@@ -304,6 +304,14 @@ export default defineComponent({
         });
         props.viewModel.editor.events.setLoad = setLoad;
 
+        const giveFocus = new BaklavaEvent();
+        giveFocus.subscribe('editor', () => {
+            if (el.value !== undefined) {
+                el.value.focus();
+            }
+        });
+        props.viewModel.editor.events.giveFocus = giveFocus;
+
         const appendSelectMultipleNodes = () => {
             graph.value.nodes.forEach((node) => {
                 if (graph.value.selectedNodes.includes(node)) {
