@@ -315,8 +315,8 @@
                 },
                 "properties": {
                     "multiline": {
-                        "--baklava-control-color-hover": "#443E48",
-                        "--baklava-control-color-background": "#332D37",
+                        "--baklava-control-color-hover": "#443E4844",
+                        "--baklava-control-color-background": "transparent",
                         "--baklava-control-color-foreground": "#FFFFFF",
                         "--kpm-property-display-label": "none"
                     },
