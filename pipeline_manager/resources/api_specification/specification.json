@@ -687,6 +687,36 @@
             "returns": {
                 "type": "null"
             }
+        },
+        "background_get_grid_size": {
+            "description": "Obtains current background grid size",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "description": "Current background grid size",
+                "type": "object",
+                "properties": {
+                    "size": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "background_set_grid_size": {
+            "description": "Sets background grid size",
+            "params": {
+                "description": "The new background grid size",
+                "type": "object",
+                "properties": {
+                    "size": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "returns": {
+                "type": "null"
+            }
         }
     },
     "backend_endpoints": {

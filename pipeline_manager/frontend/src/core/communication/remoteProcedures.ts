@@ -761,3 +761,14 @@ export async function connections_set_style(
     });
     return null;
 }
+
+export async function background_get_grid_size(): Promise<{size: number}> {
+    return { size: editorManager.baklavaView.settings.background.gridSize };
+}
+
+export async function background_set_grid_size(
+    params: { size: number },
+): Promise<null> {
+    editorManager.baklavaView.settings.background.gridSize = params.size;
+    return null;
+}
