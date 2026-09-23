@@ -14,7 +14,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
     ICommandHandler, ICommand,
-    useViewModel,
 } from '@baklavajs/renderer-vue';
 import notifyEvents from '../custom/notifyEvents.js';
 
@@ -144,7 +143,7 @@ class NodeStep extends Step {
 
             const save = this.nodeTuple[0].save();
             // remove the current version of the node
-            graph.value.removeNode(this.nodeTuple[0]);
+            (<any>graph.value).removeNode(this.nodeTuple[0], true, false);
 
             // save the current version and load the previous save
             const n = graph.value.addNode(this.nodeTuple[0]);
