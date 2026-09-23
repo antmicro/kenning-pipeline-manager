@@ -1563,6 +1563,15 @@ export default class PipelineManagerEditor extends Editor {
         showHiddenInterfaces(interfaces);
     }
 
+    clear() {
+        this.graphs.forEach((graph) => graph.setSpecGraph(false));
+        this.unregisterGraphs();
+        this.deepCleanEditor();
+        this.unregisterNodes();
+        this.editorManager.setSpecificationLoaded(false);
+        this.editorManager.resetEditorMetadata();
+    }
+
     updateNodesPosition(updatedGraph) {
         updatedGraph.nodes.forEach((updatedState) => {
             const node = this.graph.nodes.filter(

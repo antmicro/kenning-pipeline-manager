@@ -789,7 +789,7 @@ export async function interfaces_swap() {
     await loadingScreen(apply, editor.events.setLoad);
 }
 
-export async function hide_unconnected_interfaces() {
+export async function interfaces_hide_unconnected() {
     const { editor } = editorManager.baklavaView;
     const apply = async () => {
         await editor.hideUnconnectedInterfaces();
@@ -797,10 +797,14 @@ export async function hide_unconnected_interfaces() {
     await loadingScreen(apply, editor.events.setLoad);
 }
 
-export async function show_hidden_interfaces() {
+export async function interfaces_show_hidden() {
     const { editor } = editorManager.baklavaView;
     const apply = async () => {
         await editor.showHiddenInterfaces();
     };
     await loadingScreen(apply, editor.events.setLoad);
+}
+
+export function editor_clear() {
+    editorManager.baklavaView.editor.clear();
 }

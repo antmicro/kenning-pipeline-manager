@@ -236,13 +236,8 @@ export default {
         });
 
         const clearEditor = computed(() => {
-            const button = new ButtonInterface('Clean editor', () => {
-                props.viewModel.editor.graphs.forEach((graph) => graph.setSpecGraph(false));
-                props.viewModel.editor.unregisterGraphs();
-                props.viewModel.editor.deepCleanEditor();
-                props.viewModel.editor.unregisterNodes();
-                props.viewModel.editor.editorManager.setSpecificationLoaded(false);
-                props.viewModel.editor.editorManager.resetEditorMetadata();
+            const button = new ButtonInterface('Clear editor', () => {
+                props.viewModel.editor.clear();
             });
             return button;
         });

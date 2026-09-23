@@ -736,7 +736,7 @@
                "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "hide_unconnected_interfaces": {
+        "interfaces_hide_unconnected": {
             "description": "Hides unconnected interfaces",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
@@ -745,8 +745,17 @@
                "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "show_hidden_interfaces": {
+        "interfaces_show_hidden": {
             "description": "Shows previously hidden interfaces",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+               "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "editor_clear": {
+            "description": "Clears editor",
             "params": {
                 "$ref": "common_types#/$defs/null_or_empty"
             },

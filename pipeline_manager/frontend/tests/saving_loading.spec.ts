@@ -24,7 +24,7 @@ import {
 async function deepCleanEditor(page: Page) {
     await openSettingsPanel(page);
 
-    const button = page.getByText('Clean editor');
+    const button = page.getByText('Clear editor');
     expect(button).toBeVisible();
     await button.dispatchEvent('click');
 }
