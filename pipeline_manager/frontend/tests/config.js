@@ -660,6 +660,17 @@ export function getNode(page, name) {
 }
 
 /**
+ * Get a group with a specific name.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ * @param {string} name - group name to look for.
+ * @returns {import('@playwright/test').Locator} A locator pointing to a specified group.
+ */
+export function getGroup(page, name) {
+    return page.locator('.grouping-container').getByText(name).locator('..');
+}
+
+/**
  * Get a node with a specific id.
  *
  * @param {import('@playwright/test').Page} page - The Playwright page object.

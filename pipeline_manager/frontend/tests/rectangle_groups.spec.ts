@@ -4,11 +4,11 @@ import {
     Locator,
 } from '@playwright/test';
 import {
-    getUrl, loadSpecification, loadDataflow, getContextMenu, deleteNode, getNode, openSettingsPanel
+    deleteNode, getGroup, getContextMenu, getUrl, loadDataflow, loadSpecification, openSettingsPanel,
 } from './config.js';
 
-function getGroup(page: Page, name: string): Locator {
-    return page.locator('.grouping-container').getByText(name).locator('..');
+function getNode(page: Page, name: string): Locator {
+    return page.locator(`.baklava-node[data-node-type="${name}"]`);
 }
 
 async function getRect(nodes: Locator[]) {

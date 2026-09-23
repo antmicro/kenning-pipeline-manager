@@ -4,7 +4,7 @@ import {
     leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
     dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
     AddConnection, getYAMLEditorContent, setYAMLEditorContent, assertPropertyCount,
-    enableSubgraphRemoval, addProperty, addInterface, assertInoutCount
+    enableSubgraphRemoval, addProperty, addInterface, assertInoutCount, getGroup
 } from './config.js';
 
 
@@ -686,4 +686,35 @@ test('test connections preservation', async ({ page }) => {
     // connection path should be different after node is moved
     expect(pathAfter === pathBefore).toBeFalsy();
 
+});
+test('test node history in node groups', async ({ page }) => {
+    await page.goto(getUrl());
+
+    await loadSpecification(page, 'sample-rectangle-grouping-specification.json');
+    await loadDataflow(page, 'sample-rectangle-grouping-dataflow.json');
+
+    const group = getGroup(page, 'Dataset Wrapper');
+    const nodeA = getNode(page, 'Dataset');
+
+    const nodeBBoxBefore = await nodeA.boundingBox();
+    const groupBBoxBefore = await group.boundingBox();
+
+    await nodeA.click();
+    await page.mouse.down({'button': 'left'});
+    await page.mouse.move(nodeBBoxBefore.x - 100 ,nodeBBoxBefore.y);
+    await page.mouse.up({'button': 'left'});
+
+    await page.keyboard.press('Control+KeyZ');
+
+    const nodeBBoxAfter = await nodeA.boundingBox();
+
+    const checkBBoxes = (bboxA, bboxB) => {
+
+        return ( Math.abs(bboxA.x - bboxB.x) < 20 ) &&
+        ( Math.abs(bboxA.y - bboxB.y) < 20 ) &&
+        ( Math.abs(bboxA.width - bboxB.width) < 20 ) &&
+        ( Math.abs(bboxA.height - bboxB.height) < 20 );
+    };
+
+    expect(checkBBoxes(nodeBBoxBefore,nodeBBoxAfter)).toBeTruthy();
 });
