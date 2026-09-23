@@ -34,7 +34,6 @@ import CheckboxInterface from '../interfaces/CheckboxInterface.js';
 import IntegerInterface from '../interfaces/IntegerInterface.js';
 import ButtonInterface from '../interfaces/ButtonInterface.js';
 import { loadingScreen, ConnectionStyles } from '../core/utils';
-import { hideUnconnectedInterfaces, showHiddenInterfaces } from '../custom/CustomNode.js';
 
 export default {
     props: {
@@ -219,14 +218,7 @@ export default {
         const hideUnconnectedButton = computed(() => {
             const button = new ButtonInterface('Hide unconnected interfaces', async () => {
                 const apply = async () => {
-                    let interfaces = [];
-                    props.viewModel.editor.graph.nodes.forEach((n) => {
-                        interfaces = interfaces.concat(
-                            Object.entries(n.inputs).filter(([name, ni]) => !ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
-                            Object.values(n.outputs).filter((ni) => !ni.hidden),
-                        );
-                    });
-                    hideUnconnectedInterfaces(interfaces);
+                    await props.viewModel.editor.hideUnconnectedInterfaces();
                 };
                 await loadingScreen(apply, props.viewModel.editor.events.setLoad);
             });
@@ -236,14 +228,7 @@ export default {
         const showHiddenInterfacesButton = computed(() => {
             const button = new ButtonInterface('Show hidden interfaces', async () => {
                 const apply = async () => {
-                    let interfaces = [];
-                    props.viewModel.editor.graph.nodes.forEach((n) => {
-                        interfaces = interfaces.concat(
-                            Object.entries(n.inputs).filter(([name, ni]) => ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
-                            Object.values(n.outputs).filter((ni) => ni.hidden),
-                        );
-                    });
-                    showHiddenInterfaces(interfaces);
+                    await props.viewModel.editor.showHiddenInterfaces();
                 };
                 await loadingScreen(apply, props.viewModel.editor.events.setLoad);
             });

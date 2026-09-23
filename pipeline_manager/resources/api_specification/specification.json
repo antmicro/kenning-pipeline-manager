@@ -735,6 +735,24 @@
             "returns": {
                "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "hide_unconnected_interfaces": {
+            "description": "Hides unconnected interfaces",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+               "$ref": "common_types#/$defs/null_or_empty"
+            }
+        },
+        "show_hidden_interfaces": {
+            "description": "Shows previously hidden interfaces",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+               "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {

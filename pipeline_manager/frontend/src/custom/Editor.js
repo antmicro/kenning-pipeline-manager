@@ -25,6 +25,7 @@ import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGrap
 import { ir } from '../core/interfaceRegistry.ts';
 import { hexToRGB } from '../core/nodeCreation/nodeColors.js';
 import CustomMenusManager from './CustomMenus.js';
+import { hideUnconnectedInterfaces, showHiddenInterfaces } from './CustomNode.js';
 
 import globalProperties from '../globalProperties.ts';
 
@@ -1538,6 +1539,28 @@ export default class PipelineManagerEditor extends Editor {
             });
         });
         await this.load(graphs);
+    }
+
+    async hideUnconnectedInterfaces() {
+        let interfaces = [];
+        this.graph.nodes.forEach((n) => {
+            interfaces = interfaces.concat(
+                Object.entries(n.inputs).filter(([name, ni]) => !ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
+                Object.values(n.outputs).filter((ni) => !ni.hidden),
+            );
+        });
+        hideUnconnectedInterfaces(interfaces);
+    }
+
+    async showHiddenInterfaces() {
+        let interfaces = [];
+        this.graph.nodes.forEach((n) => {
+            interfaces = interfaces.concat(
+                Object.entries(n.inputs).filter(([name, ni]) => ni.hidden && !name.startsWith('property_')).map(([, ni]) => ni),
+                Object.values(n.outputs).filter((ni) => ni.hidden),
+            );
+        });
+        showHiddenInterfaces(interfaces);
     }
 
     updateNodesPosition(updatedGraph) {
