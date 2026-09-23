@@ -218,6 +218,14 @@ export default class EditorManager {
         this.modifiedNodeSpecificationRegistry = {};
     }
 
+    /**
+     * Function that calls giveFocus editor's event that allows to
+     * retain focus for editor component.
+     */
+    giveFocusToEditor() {
+        this.editor.events?.giveFocus.emit();
+    }
+
     findChildren(type, children = new Set()) {
         if (children.has(type)) {
             return;
