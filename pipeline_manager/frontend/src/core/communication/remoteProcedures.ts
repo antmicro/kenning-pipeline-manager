@@ -772,3 +772,11 @@ export async function background_set_grid_size(
     editorManager.baklavaView.settings.background.gridSize = params.size;
     return null;
 }
+
+export async function autolayout_apply() {
+    const { editor } = editorManager.baklavaView;
+    const apply = async () => {
+        await editor.applyAutolayout(true, true, true);
+    };
+    await loadingScreen(apply, editor.events.setLoad);
+}

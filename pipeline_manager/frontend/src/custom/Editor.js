@@ -1424,7 +1424,7 @@ export default class PipelineManagerEditor extends Editor {
         return this.subgraphStack.length > 0;
     }
 
-    async applyAutolayout(resetLocations = true) {
+    async applyAutolayout(resetLocations = true, swapInterfaces = false, centerZoom = false) {
         const nodeToLayers = new Map();
         const infToType = new Map();
         this.graph.nodes.forEach((n) => {
@@ -1456,6 +1456,14 @@ export default class PipelineManagerEditor extends Editor {
         this.layoutManager.registerGraph(state);
         const updatedGraph = await this.layoutManager.computeLayout(state);
         this.updateNodesPosition(updatedGraph);
+
+        if (swapInterfaces) {
+            await this.swapInterfaces();
+        }
+
+        if (centerZoom) {
+            await this.editorManager?.centerZoom();
+        }
     }
 
     getPosition(arr) {

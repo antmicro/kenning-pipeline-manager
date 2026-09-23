@@ -717,6 +717,15 @@
             "returns": {
                 "type": "null"
             }
+        },
+        "autolayout_apply": {
+            "description": "Apply autolayout algorithm",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+               "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {

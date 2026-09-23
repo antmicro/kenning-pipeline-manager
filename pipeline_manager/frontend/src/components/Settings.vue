@@ -199,9 +199,7 @@ export default {
         const LayoutApply = computed(() => {
             const button = new ButtonInterface('Apply autolayout', async () => {
                 const apply = async () => {
-                    await props.viewModel.editor.applyAutolayout();
-                    await props.viewModel.editor.swapInterfaces();
-                    props.viewModel.editor.editorManager.centerZoom();
+                    await props.viewModel.editor.applyAutolayout(true, true, true);
                 };
                 await loadingScreen(apply, props.viewModel.editor.events.setLoad);
             });
