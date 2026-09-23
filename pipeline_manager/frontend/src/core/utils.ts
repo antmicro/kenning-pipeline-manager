@@ -77,3 +77,11 @@ export const loadingScreen = async (
         await sleep(0);
     }
 };
+
+export const ConnectionStyles = {
+    curved: 'Curved',
+    orthogonal: 'Orthogonal',
+    alternativeOrthogonal: 'Alternative orthogonal',
+    straight: 'Straight',
+    aStar: 'A*-based',
+};

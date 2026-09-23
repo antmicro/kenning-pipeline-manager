@@ -24,9 +24,9 @@ import { saveSpecificationConfiguration } from '../../components/saveConfigurati
 // eslint-disable-next-line import/no-cycle
 import getExternalApplicationManager from './ExternalApplicationManager';
 import { checkTerminalExistence, TerminalView } from './utils';
+import { ConnectionStyles, loadingScreen, sleep } from '../utils';
 import { prepareSubgraphInstance } from '../../custom/CustomGraphNode';
 import PipelineManagerEditor from '../../custom/Editor.js';
-import { sleep } from '../utils.ts';
 
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable camelcase */
@@ -732,5 +732,32 @@ export async function notifications_set_verbosity(
         throw Error(`Invalid verbosity value: ${params.verbosity}`);
     }
     editorManager.baklavaView.logLevel = params.verbosity;
+    return null;
+}
+
+export async function connections_get_style(
+    params: { all: boolean | undefined }): Promise<{style: string} | string[]> {
+    if (params && params.all) {
+        return Object.values(ConnectionStyles);
+    }
+    return {
+        style: ConnectionStyles[
+            editorManager.baklavaView.connectionRenderer.style as keyof (typeof ConnectionStyles)
+        ],
+    };
+}
+
+export async function connections_set_style(
+    params: { style: string },
+) {
+    const possibleValues = Object.values(ConnectionStyles);
+    if (!possibleValues.includes(params.style)) {
+        throw Error(`Invalid connection style: ${params.style}`);
+    }
+    Object.entries(ConnectionStyles).forEach(([key, value]) => {
+        if (value === params.style) {
+            editorManager.baklavaView.connectionRenderer.style = key;
+        }
+    });
     return null;
 }

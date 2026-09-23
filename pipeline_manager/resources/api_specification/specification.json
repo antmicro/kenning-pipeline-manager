@@ -648,6 +648,45 @@
             "returns": {
                 "type": "null"
             }
+        },
+        "connections_get_style": {
+            "description": "Obtains current connections style, or a list of all possible values",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "all": {
+                        "description": "Set all to true to obtain all possible values",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "returns": {
+                "description": "Current connections style or a list of all possible values",
+                "type": ["object", "array"],
+                "properties": {
+                    "style": {
+                        "type": "string"
+                    }
+                },
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "connections_set_style": {
+            "description": "Sets connections style",
+            "params": {
+                "description": "The new connection style",
+                "type": "object",
+                "properties": {
+                    "style": {
+                        "type": "string"
+                    }
+                }
+            },
+            "returns": {
+                "type": "null"
+            }
         }
     },
     "backend_endpoints": {

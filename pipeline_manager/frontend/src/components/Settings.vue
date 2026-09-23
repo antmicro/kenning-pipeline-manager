@@ -33,7 +33,7 @@ import SelectInterface from '../interfaces/SelectInterface.js';
 import CheckboxInterface from '../interfaces/CheckboxInterface.js';
 import IntegerInterface from '../interfaces/IntegerInterface.js';
 import ButtonInterface from '../interfaces/ButtonInterface.js';
-import { loadingScreen } from '../core/utils';
+import { loadingScreen, ConnectionStyles } from '../core/utils';
 import { hideUnconnectedInterfaces, showHiddenInterfaces } from '../custom/CustomNode.js';
 
 export default {
@@ -53,13 +53,7 @@ export default {
         };
 
         const connectionStyleOption = computed(() => {
-            const items = [
-                { text: 'Curved', value: 'curved' },
-                { text: 'Orthogonal', value: 'orthogonal' },
-                { text: 'Alternative orthogonal', value: 'alternativeOrthogonal' },
-                { text: 'Straight', value: 'straight' },
-                { text: 'A*-based', value: 'aStar' },
-            ];
+            const items = Object.keys(ConnectionStyles).map((value) => ({ text: ConnectionStyles[value], value })); // eslint-disable-line max-len
             const option = new SelectInterface(
                 'Connection style',
                 props.viewModel.connectionRenderer.style,

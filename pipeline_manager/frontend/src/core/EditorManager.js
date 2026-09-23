@@ -140,7 +140,8 @@ export default class EditorManager {
      * @type {import('baklavajs').IBaklavaViewModel & {
      *    editor: PipelineManagerEditor,
      *    settings: any,
-     *    logLevel: any
+     *    logLevel: any,
+     *    connectionRenderer: any
      * }}
      */
     baklavaView = useBaklava(this.editor);
