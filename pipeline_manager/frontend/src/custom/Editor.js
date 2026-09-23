@@ -1246,6 +1246,7 @@ export default class PipelineManagerEditor extends Editor {
                 this.readonly = true;
             }
         }
+        this.editorManager.updateDefaultStyles(subgraphNode.subgraph.id);
     }
 
     /**
@@ -1296,6 +1297,8 @@ export default class PipelineManagerEditor extends Editor {
                 });
         });
 
+        this.editorManager.updateDefaultStyles(targetGraph.id);
+
         suppressHistoryLogging(false);
     }
 
@@ -1338,6 +1341,7 @@ export default class PipelineManagerEditor extends Editor {
         }
 
         suppressHistoryLogging(false);
+        this.editorManager.updateDefaultStyles(newGraph.id);
     }
 
     /**
