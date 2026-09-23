@@ -15,11 +15,32 @@ import {
     enableNavigationBar,
     getNode,
     openSettingsPanel,
-    expectNoErrors,
     saveFileAs,
     waitForSubgraph,
     verifyNodeCount,
 } from './config.js';
+
+async function expectNoWarningsAndErrors(page: Page) {
+    const loading = page.locator('.loading-screen');
+    await loading.waitFor({ state: 'hidden' });
+    await expect(loading).not.toBeVisible();
+    const notifications = page.locator(
+        '.notifications > .panel > ul > *:not(:has(.info))',
+    );
+    const count = await notifications.count();
+    expect(count).toBe(0);
+}
+
+async function expectNoErrors(page: Page) {
+    const loading = page.locator('.loading-screen');
+    await loading.waitFor({ state: 'hidden' });
+    await expect(loading).not.toBeVisible();
+    const notifications = page.locator(
+        '.notifications > .panel > ul > *:has(.error)',
+    );
+    const count = await notifications.count();
+    expect(count).toBe(0);
+}
 
 async function deepCleanEditor(page: Page) {
     await openSettingsPanel(page);
@@ -138,11 +159,11 @@ examples.forEach(({
         } else {
             await loadSpecification(page, specification);
         }
-        await expectNoErrors(page);
+        await expectNoWarningsAndErrors(page);
         const filepath = await saveSpecificationAs(page, testInfo, 'temp');
-        await expectNoErrors(page);
+        await expectNoWarningsAndErrors(page);
         await loadSpecificationFromFile(page, filepath);
-        await expectNoErrors(page);
+        await expectNoWarningsAndErrors(page);
     });
 
     if (!dataflow) return;
@@ -153,7 +174,7 @@ examples.forEach(({
         }
         await page.goto(getUrl());
         await loadSpecification(page, specification);
-        await expectNoErrors(page);
+        await expectNoWarningsAndErrors(page);
         await loadDataflow(page, dataflow);
         await expectNoErrors(page);
         if (graphCount) {
@@ -170,7 +191,7 @@ examples.forEach(({
         await page.goto(getUrl());
         await deepCleanEditor(page);
         const continueProcessing = await dragAndDropFile(page, '.welcome-container', specification, testInfo);
-        await expectNoErrors(page);
+        await expectNoWarningsAndErrors(page);
         if (!continueProcessing) {
             return;
         }
@@ -185,7 +206,7 @@ examples.forEach(({
         await page.goto(getUrl());
         await deepCleanEditor(page);
         await dragAndDropFile(page, '.baklava-editor', specification, testInfo);
-        await expectNoErrors(page);
+        await expectNoWarningsAndErrors(page);
         await dragAndDropFile(page, '.baklava-editor', dataflow, testInfo);
         await expectNoErrors(page);
     });
@@ -196,7 +217,7 @@ examples.forEach(({
         }
         await page.goto(getUrl());
         await loadSpecification(page, specification);
-        await expectNoErrors(page);
+        await expectNoWarningsAndErrors(page);
         await loadDataflow(page, dataflow);
         await expectNoErrors(page);
         const filepath = await saveDataflowAs(page, testInfo, 'temp');
@@ -229,16 +250,16 @@ test(`subgraph load+save with saved current view location`, async ({ page }, tes
 test('save and load graph partially', async ({ page }, testInfo) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-subgraph-specification.json');
-    await expectNoErrors(page);
+    await expectNoWarningsAndErrors(page);
     await loadDataflow(page, 'sample-subgraph-dataflow.json');
     const savedSub = 'Test subgraph #1';
     const filepath = await saveDataflowAs(page, testInfo, 'temp', [
         'Graph with nested subgraphs',
         savedSub,
     ]);
-    await expectNoErrors(page);
+    await expectNoWarningsAndErrors(page);
     await loadDatflowFromFile(page, filepath);
-    await expectNoErrors(page);
+    await expectNoWarningsAndErrors(page);
     await enableNavigationBar(page);
     const paletteTitle = await page.locator('.palette-title');
     await paletteTitle.getByText('Graphs', { exact: true }).first().click();
@@ -291,7 +312,7 @@ test(`entryGraph ${exampleNested.specification} in middle of structure`, async (
 
     await page.goto(getUrl());
     await loadSpecification(page, exampleNested.specification);
-    await expectNoErrors(page);
+    await expectNoWarningsAndErrors(page);
     const fileChooserSpec = await openFileChooser(page, 'dataflow');
     await fileChooserSpec.setFiles(outputPath);
     expect(getNode(page, 'MultipleIOGraphNode')).not.toBeVisible();
