@@ -91,6 +91,35 @@ In this configuration `VoltageStyle` is the style used for node representing vol
 
 ![Custom shaped node example](img/example_node_shape_with_interfaces.png)
 
+It is possible to hide interface names permanently by using `hiddenNames` property in node's style.
+User can provide a list with names of interfaces that should have hidden name or set property to `all`, which makes all interfaces names to hide permanently.
+Example usage of `hiddenNames`:
+``` json
+"NPNStyle":
+    {
+        "shape": "svgs/npn.svg",
+        "hiddenNames": [
+            "c",
+            "b",
+            "e"
+        ],
+        "positions": {
+            "c": {
+                "x": 81,
+                "y": 0
+            },
+            "b": {
+                "x": 0,
+                "y": 50
+            },
+            "e": {
+                "x": 81,
+                "y": 100
+            }
+        }
+    },
+```
+
 ## Adding positioned interfaces
 
 When node shape is set, `Add interface` option in a context menu allows for setting interface side and interface position.
