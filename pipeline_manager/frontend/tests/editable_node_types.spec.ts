@@ -277,6 +277,28 @@ test('check custom shape node interface popup', async ({ page }) => {
     await expect(rightInterface.locator('.__port-name')).toBeVisible();
 });
 
+test('check custom shape node hidden interface name', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-with-shape-specification.json');
+    await loadDataflow(page, 'sample-with-shape-dataflow.json');
+
+    const npnNode = getNode(page,'NPN');
+    await assertInoutCount(npnNode, 3);
+    const interfaces = npnNode.locator('.baklava-node-interface.--positioned');
+
+    const cInterfaces = interfaces.first();
+    await cInterfaces.locator('.__port').hover();
+    await expect(cInterfaces.locator('.__port-name')).not.toBeVisible();
+
+    const bInterface = interfaces.nth(1);
+    await bInterface.locator('.__port').hover();
+    await expect(bInterface.locator('.__port-name')).not.toBeVisible();
+
+    const eInterface = interfaces.nth(2);
+    await eInterface.locator('.__port').hover();
+    await expect(eInterface.locator('.__port-name')).not.toBeVisible();
+});
+
 test('add inout interface to custom shape node', async ({ page }, testInfo) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-with-shape-specification.json');
