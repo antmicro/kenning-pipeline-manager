@@ -12784,29 +12784,15 @@ hterm.ScrollPort.prototype.paintIframeContents_ = function() {
   // focus.
   this.scrollUpButton_ = this.document_.createElement('div');
   this.scrollUpButton_.id = 'hterm:a11y:page-up';
-  this.scrollUpButton_.innerText = hterm.msg('BUTTON_PAGE_UP', [], 'Page up');
-  this.scrollUpButton_.setAttribute('role', 'button');
-  this.scrollUpButton_.style.cssText = a11yButtonStyle;
-  this.scrollUpButton_.style.top = `${-a11yButtonTotalHeight}px`;
   this.scrollUpButton_.addEventListener('click', this.scrollPageUp.bind(this));
 
   this.scrollDownButton_ = this.document_.createElement('div');
   this.scrollDownButton_.id = 'hterm:a11y:page-down';
-  this.scrollDownButton_.innerText =
-      hterm.msg('BUTTON_PAGE_DOWN', [], 'Page down');
-  this.scrollDownButton_.setAttribute('role', 'button');
-  this.scrollDownButton_.style.cssText = a11yButtonStyle;
-  this.scrollDownButton_.style.bottom = `${-a11yButtonTotalHeight}px`;
   this.scrollDownButton_.addEventListener(
       'click', this.scrollPageDown.bind(this));
 
   this.optionsButton_ = this.document_.createElement('div');
   this.optionsButton_.id = 'hterm:a11y:options';
-  this.optionsButton_.innerText =
-      hterm.msg('OPTIONS_BUTTON_LABEL', [], 'Options');
-  this.optionsButton_.setAttribute('role', 'button');
-  this.optionsButton_.style.cssText = a11yButtonStyle;
-  this.optionsButton_.style.bottom = `${-2 * a11yButtonTotalHeight}px`;
   this.optionsButton_.addEventListener(
       'click', this.publish.bind(this, 'options'));
 
