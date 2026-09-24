@@ -141,7 +141,9 @@ export default class EditorManager {
      *    editor: PipelineManagerEditor & { events: any },
      *    settings: any,
      *    logLevel: any,
-     *    connectionRenderer: any
+     *    connectionRenderer: any,
+     *    layers: any,
+     *    ignoredLayers: any,
      * }}
      */
     baklavaView = useBaklava(this.editor);

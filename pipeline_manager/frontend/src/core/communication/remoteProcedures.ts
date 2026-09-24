@@ -808,3 +808,42 @@ export async function interfaces_show_hidden() {
 export function editor_clear() {
     editorManager.baklavaView.editor.clear();
 }
+
+export async function layers_get_list(): Promise<string[]> {
+    return editorManager.baklavaView.layers.map((layer: any) => layer.name);
+}
+
+export async function layer_get_hidden(
+    params: { name: string },
+): Promise<{ hidden: boolean }> {
+    const viewModel = editorManager.baklavaView;
+    if (viewModel.layers.find((layer: any) => layer.name === params.name) === undefined) {
+        throw Error(`Unknown layer: ${params.name}`);
+    }
+    const displayedGraphId = viewModel.displayedGraph.id;
+    const ignoredLayers = viewModel.ignoredLayers.get(displayedGraphId);
+    if (ignoredLayers === undefined) {
+        return { hidden: false };
+    }
+    return { hidden: ignoredLayers.has(params.name) };
+}
+
+export function layer_set_hidden(
+    params: {name: string, hidden: boolean},
+) {
+    const viewModel = editorManager.baklavaView;
+    if (viewModel.layers.find((layer: any) => layer.name === params.name) === undefined) {
+        throw Error(`Unknown layer: ${params.name}`);
+    }
+    const displayedGraphId = viewModel.displayedGraph.id;
+    if (viewModel.ignoredLayers.get(displayedGraphId) === undefined) {
+        viewModel.ignoredLayers.set(displayedGraphId, new Set());
+    }
+    const ignoredLayers = viewModel.ignoredLayers.get(displayedGraphId);
+    if (params.hidden) {
+        ignoredLayers.add(params.name);
+    } else {
+        ignoredLayers.delete(params.name);
+    }
+    return null;
+}

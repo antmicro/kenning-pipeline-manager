@@ -762,6 +762,59 @@
             "returns": {
                "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "layers_get_list": {
+            "description": "Obtains list of available layers",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "description": "List of available layers",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "layer_get_hidden": {
+            "description": "Obtains layer state",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Layer name",
+                        "type": "string"
+                    }
+                }
+            },
+            "returns": {
+                "description": "Current layer state",
+                "type": "object",
+                "properties": {
+                    "hidden": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
+        "layer_set_hidden": {
+            "description": "Sets layer state",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Layer name",
+                        "type": "string"
+                    },
+                    "hidden": {
+                        "description": "Hide or unhide layer",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "returns": {
+                "type": "null"
+            }
         }
     },
     "backend_endpoints": {
