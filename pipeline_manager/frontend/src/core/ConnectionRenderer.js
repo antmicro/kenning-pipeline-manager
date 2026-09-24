@@ -12,6 +12,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
+import { useViewModel } from '@baklavajs/renderer-vue';
 import getDomElements from '../custom/connection/domResolver.js';
 import getPortCoordinates from '../custom/connection/connectionTools.js';
 
@@ -761,20 +762,29 @@ export default class ConnectionRenderer {
             return;
         }
 
+        const { viewModel } = useViewModel();
+        const { editor } = viewModel.value;
+
+        if (this.aStarZoneInfo.graphId !== editor.graph.id) {
+            return;
+        }
+
         const nInfo = this.dumpNodeData(node);
 
         // Check whether node is already in zone
         const zoneKeys = this.aStarZoneInfo.rZoneInfo.get(nInfo.id);
-        // Remove it from zones
-        zoneKeys.forEach((key) => {
-            const zList = this.aStarZoneInfo.zoneInfo.get(key);
+        if (zoneKeys !== undefined) {
+            // Remove it from zones
+            zoneKeys.forEach((key) => {
+                const zList = this.aStarZoneInfo.zoneInfo.get(key);
 
-            const index = zList.findIndex((n) => n.id === nInfo.id);
+                const index = zList.findIndex((n) => n.id === nInfo.id);
 
-            zList.splice(index, 1);
+                zList.splice(index, 1);
 
-            this.aStarZoneInfo.zoneInfo.set(key, zList);
-        });
+                this.aStarZoneInfo.zoneInfo.set(key, zList);
+            });
+        }
 
         this.aStarZoneInfo.rZoneInfo.set(nInfo.id, []);
 
@@ -783,7 +793,9 @@ export default class ConnectionRenderer {
 
     generateZoneInfo(graph) {
         if (this.aStarZoneInfo !== undefined) {
-            return;
+            if (this.aStarZoneInfo.graphId === graph.id) {
+                return;
+            }
         }
 
         const nodesInfo = graph.nodes.map((node) => this.dumpNodeData(node));
@@ -799,6 +811,7 @@ export default class ConnectionRenderer {
             nodesInfo,
             zoneInfo,
             rZoneInfo,
+            graphId: graph.id,
         };
 
         // Initialization of spatial hashing data and zones
@@ -830,7 +843,7 @@ export default class ConnectionRenderer {
 
         this.generateZoneInfo(graph);
 
-        const { zoneInfo, nodesInfo } = this.aStarZoneInfo;
+        const { zoneInfo } = this.aStarZoneInfo;
 
         if (connection.to) {
             const shift = this.getShift(nc.from, nc.to, graph);
