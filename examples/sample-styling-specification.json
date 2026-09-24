@@ -283,11 +283,11 @@
                 "positions": {
                     "frames_out": {
                         "x": 150,
-                        "y": 30
+                        "y": 50
                     },
                     "frames_in": {
                         "x": 0,
-                        "y": 30
+                        "y": 50
                     }
                 },
                 "properties": {
