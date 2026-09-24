@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -105,16 +105,39 @@ export default class NotificationHandler {
      * @param {string} type Type of the toast notification
      * @param {string} title Title of the message used both for toast and terminal notification.
      * Preferably without any punctuation marks at the end
-     * @param {Array[string] | string | undefined} messages messages that are displayed in
-     * the terminal
+     * @param {Array[string | Error] | string | Error | undefined}
+     * messages messages that are displayed in the terminal
      * @param {string | null} timestamp timestamp that is displayed alongside messages
      */
     static terminalLog(type, title, messages, timestamp = null) {
+        function flatten(arr) {
+            return arr.reduce((flat, toFlatten) =>
+                flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten), []);
+        }
+
         NotificationHandler.showToast(type, title, timestamp);
         let timestampCurrent = timestamp ?? `[${this.#currentTimestamp()}]`;
         if (timestampCurrent) {
             timestampCurrent += ' ';
         }
-        terminalStore.addParsed(timestampCurrent + title, messages);
+        let messagesArray;
+        if (!Array.isArray(messages)) {
+            messagesArray = [messages];
+        } else {
+            messagesArray = messages;
+        }
+        messagesArray = flatten(messagesArray);
+        if (messagesArray.length > 0) {
+            messagesArray.forEach((mess) => {
+                if (typeof mess === 'string') {
+                    terminalStore.addParsed(timestampCurrent + title, mess);
+                } else {
+                    if (process.env.NODE_ENV === 'development') {
+                        console.error(mess);
+                    }
+                    terminalStore.addParsed(timestampCurrent + title, mess.message);
+                }
+            });
+        }
     }
 }
