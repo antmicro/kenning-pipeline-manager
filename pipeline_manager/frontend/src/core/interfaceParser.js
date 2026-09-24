@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -84,8 +84,8 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                 const name = `${io.name}[${j}]`;
 
                 if (tempParsed[direction][name] !== undefined) {
-                    errors.push(
-                        `Interface named '${name}' of direction '${direction}' is a duplicate.`,
+                    errors.push(new Error(
+                        `Interface named '${name}' of direction '${direction}' is a duplicate.`),
                     );
                 }
                 tempIO.externalName = io.externalName ? `${io.externalName}[${j}]` : undefined;
@@ -95,8 +95,8 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
             }
         } else {
             if (tempParsed[direction][io.name] !== undefined) {
-                errors.push(
-                    `Interface named '${io.name}' of direction '${direction}' is a duplicate.`,
+                errors.push(new Error(
+                    `Interface named '${io.name}' of direction '${direction}' is a duplicate.`),
                 );
             }
 
@@ -136,9 +136,9 @@ function parseSingleInterfaces(interfaces, interfaceGroup = false) {
                         && intf.side === state.side);
 
             if (duplicate) {
-                errors.push(
+                errors.push(new Error(
                     `Interface named '${name}' of direction '${direction}' ` +
-                        `is a duplicate. There already exists an input or output of this name.`,
+                        `is a duplicate. There already exists an input or output of this name.`),
                 );
             }
             return !duplicate;
@@ -192,7 +192,10 @@ export function validateInterfaceGroupsNames(enabledInterfaceGroups, inputs, out
                 const intfDirection = intfName.slice(0, intfName.indexOf('_'));
                 const parsedIntfName = intfName.slice(intfName.indexOf('_') + 1);
 
-                errors.push([parsedIntfName, intfDirection, groupName, groupDirection]);
+                errors.push([new Error(parsedIntfName),
+                    new Error(intfDirection),
+                    new Error(groupName),
+                    new Error(groupDirection)]);
             } else {
                 usedInterfaces.add(intfName);
             }
@@ -267,10 +270,10 @@ export function applySidePositions(inputs, outputs) {
     Object.entries(tempParsedSides.left).forEach(([name, intf]) => {
         if (intf.sidePosition !== undefined) {
             if (occupiedInputSidePositions.has(intf.sidePosition)) {
-                errors.push(
+                errors.push(new Error(
                     `Interface named '${stripName(name)}' of direction '${intf.direction}' has ` +
                         `invalid sidePosition value '${intf.sidePosition}'. ` +
-                        `There already exists an input or output with this sidePosition.`,
+                        `There already exists an input or output with this sidePosition.`),
                 );
             }
             occupiedInputSidePositions.add(intf.sidePosition);
@@ -280,10 +283,10 @@ export function applySidePositions(inputs, outputs) {
     Object.entries(tempParsedSides.right).forEach(([name, intf]) => {
         if (intf.sidePosition !== undefined) {
             if (occupiedOutputSidePositions.has(intf.sidePosition)) {
-                errors.push(
+                errors.push(new Error(
                     `Interface named '${stripName(name)}' of direction '${intf.direction}' has ` +
                         `invalid sidePosition value '${intf.sidePosition}'. ` +
-                        `There already exists an input or output with this sidePosition.`,
+                        `There already exists an input or output with this sidePosition.`),
                 );
             }
             occupiedOutputSidePositions.add(intf.sidePosition);
@@ -404,9 +407,9 @@ export function generateProperties(interfaces) {
                         dynamicCounter: true,
                     });
                 } else {
-                    errors.push(
+                    errors.push(new Error(
                         `Interface '${intf.name}' has invalid 'dynamic' attribute. ` +
-                        'It should be either a boolean or an array with two integer elements.',
+                        'It should be either a boolean or an array with two integer elements.'),
                     );
                 }
             }
@@ -454,20 +457,20 @@ export function parseInterfaces(
                     if (
                         !Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)
                     ) {
-                        errors.push(
+                        errors.push(new Error(
                             `Interface named '${intf.name}[${j}]' of direction '${direction}' ` +
                                 `used for interface group '${intfG.name}' of direction ` +
-                                `'${directionG}' does not exist.`,
+                                `'${directionG}' does not exist.`),
                         );
                     }
                 }
             } else {
                 const name = `${direction}_${intf.name}`;
                 if (!Object.keys({ ...tempParsed.input, ...tempParsed.output }).includes(name)) {
-                    errors.push(
+                    errors.push(new Error(
                         `Interface named '${intf.name}' of direction '${direction}' ` +
                             `used for interface group '${intfG.name}' of direction ` +
-                            `'${directionG}' does not exist.`,
+                            `'${directionG}' does not exist.`),
                     );
                 }
             }

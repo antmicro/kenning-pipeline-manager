@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -91,7 +91,7 @@ export function parseProperties(properties) {
                 if (usedNames.has(pgroupname)) {
                     const realname = pgroupname.slice(pgroupname.indexOf('_') + 1);
                     errors.push(
-                        `Property named '${realname}' in a group property '${newProp.name}' is a duplicate.`,
+                        new Error(`Property named '${realname}' in a group property '${newProp.name}' is a duplicate.`),
                     );
                 }
                 usedNames.add(pgroupname);
@@ -102,7 +102,7 @@ export function parseProperties(properties) {
 
         if (usedNames.has(`property_${newProp.name}`)) {
             errors.push(
-                `Property named '${newProp.name}' is a duplicate.`,
+                new Error(`Property named '${newProp.name}' is a duplicate.`),
             );
         }
 
@@ -114,8 +114,8 @@ export function parseProperties(properties) {
 
                 if (Array.isArray(items)) {
                     if (defaultValue !== 'constant' && !items.map(String).includes(String(defaultValue))) {
-                        errors.push(
-                            `Default value for '${newProp.name}' mismatch. Expected '${items}' (type: ${typeof items}), got '${defaultValue}' (type: ${typeof defaultValue}).`,
+                        errors.push(new Error(
+                            `Default value for '${newProp.name}' mismatch. Expected '${items}' (type: ${typeof items}), got '${defaultValue}' (type: ${typeof defaultValue}).`),
                         );
 
                         newProp.default = items.at(0);
@@ -128,11 +128,11 @@ export function parseProperties(properties) {
                 const mismatchedElements = validateList(items, dtype);
 
                 if (mismatchedElements.length > 0) {
-                    errors.push(
+                    errors.push(new Error(
                         `Property '${newProp.name}' default value mismatch. ` +
                         `Items: '${mismatchedElements.join(' ')}' are not of '${dtype}' dtype.` +
                         `Items are of type: ${mismatchedElements.map((val) => typeof val).join(', ')} ` +
-                        `Removing them from list.`,
+                        `Removing them from list.`),
                     );
                 }
 
@@ -349,27 +349,27 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             !Object.prototype.hasOwnProperty.call(outputs, ioName)
         ) {
             if (direction === 'property') {
-                errors.push(`Property named '${name}' not found in specification!`);
+                errors.push(new Error(`Property named '${name}' not found in specification!`));
             } else {
-                errors.push(`Interface named '${name}' of direction '${direction}' not found in specification!`);
+                errors.push(new Error(`Interface named '${name}' of direction '${direction}' not found in specification!`));
             }
         } else if (direction === 'property') {
             // Verifying property type defined in the node and the value passed
             const parsedValue = parsedState.inputs[ioName].value;
             const propertyType = inputs[ioName].type;
             if (!checkType(propertyType, parsedValue)) {
-                errors.push(`Property '${name}' type mismatch. ${propertyType} expected, ${typeof parsedValue} found.`);
+                errors.push(new Error(`Property '${name}' type mismatch. ${propertyType} expected, ${typeof parsedValue} found.`));
             } else if (propertyType === 'select') {
                 const { items } = inputs[ioName];
                 if (Array.isArray(items)) {
                     if (!items.map(String).includes(String(parsedValue))) {
-                        errors.push(
-                            `Property '${name}' value mismatch. ${parsedValue} (type: ${typeof parsedValue}) not found in ${JSON.stringify(items)}`,
+                        errors.push(new Error(
+                            `Property '${name}' value mismatch. ${parsedValue} (type: ${typeof parsedValue}) not found in ${JSON.stringify(items)}`),
                         );
                     }
                 } else if (String(parsedValue) !== String(items)) {
-                    errors.push(
-                        `Property '${name}' value mismatch. Expected '${items}' (type: ${typeof items}), found '${parsedValue}' (type: ${typeof parsedValue}).`,
+                    errors.push(new Error(
+                        `Property '${name}' value mismatch. Expected '${items}' (type: ${typeof items}), found '${parsedValue}' (type: ${typeof parsedValue}).`),
                     );
                 }
             } else if (propertyType === 'list') {
@@ -378,10 +378,10 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
                 const mismatchedElements = validateList(parsedValue, dtype);
 
                 if (mismatchedElements.length > 0) {
-                    errors.push(
+                    errors.push(new Error(
                         `Property '${name}' value mismatch. ` +
                         `Items: '${mismatchedElements.join(' ')}' are not of '${dtype}' dtype.` +
-                        `Items are of type: ${mismatchedElements.map((val) => typeof val).join(', ')}`,
+                        `Items are of type: ${mismatchedElements.map((val) => typeof val).join(', ')}`),
                     );
                 }
             }
@@ -397,7 +397,7 @@ function detectDiscrepancies(parsedState, inputs, outputs) {
             const direction = groupName.slice(0, groupName.indexOf('_'));
             const name = groupName.slice(groupName.indexOf('_') + 1);
 
-            errors.push(`Interface group named '${name}' of direction '${direction}' not found in specification!`);
+            errors.push(new Error(`Interface group named '${name}' of direction '${direction}' not found in specification!`));
         }
     });
 
@@ -442,8 +442,8 @@ function resolveDiscrepancies(parsedState, inputs, outputs) {
             const { items } = inputs[ioName];
             if (Array.isArray(items)) {
                 if (!items.map(String).includes(String(parsedValue))) {
-                    errors.push(
-                        `Value for '${name}' mismatch. Expected '${items}' (type: ${typeof items}), got '${parsedValue}' (type: ${typeof parsedValue}),falling back to default value`,
+                    errors.push(new Error(
+                        `Value for '${name}' mismatch. Expected '${items}' (type: ${typeof items}), got '${parsedValue}' (type: ${typeof parsedValue}),falling back to default value`),
                     );
 
                     newState.inputs[ioName].value = defaultValue;
@@ -455,11 +455,11 @@ function resolveDiscrepancies(parsedState, inputs, outputs) {
             const mismatchedElements = validateList(parsedValue, dtype);
 
             if (mismatchedElements.length > 0) {
-                errors.push(
+                errors.push(new Error(
                     `Property '${name}' value mismatch. ` +
                     `Items: '${mismatchedElements.join(' ')}' are not of '${dtype}' dtype.` +
                     `Items are of type: ${mismatchedElements.map((val) => typeof val).join(', ')} ` +
-                    `Removing them from list.`,
+                    `Removing them from list.`),
                 );
             }
 
@@ -468,7 +468,7 @@ function resolveDiscrepancies(parsedState, inputs, outputs) {
 
             newState.inputs[ioName].value = filteredValue;
         } else if (!checkType(propertyType, parsedValue)) {
-            errors.push(`Property '${name}' type mismatch. ${propertyType} expected, ${typeof parsedValue} found, falling back to default value.`);
+            errors.push(new Error(`Property '${name}' type mismatch. ${propertyType} expected, ${typeof parsedValue} found, falling back to default value.`));
             newState.inputs[ioName].value = defaultValue;
         }
     };
@@ -486,10 +486,10 @@ function resolveDiscrepancies(parsedState, inputs, outputs) {
         ) {
             if (direction === 'property') {
                 PropertiesToRemove.push(ioName);
-                errors.push(`Property named '${name}' not found in specification!`);
+                errors.push(new Error(`Property named '${name}' not found in specification!`));
             } else {
                 InterfacesToRemove.push(ioName);
-                errors.push(`Interface named '${name}' of direction '${direction}' not found in specification!`);
+                errors.push(new Error(`Interface named '${name}' of direction '${direction}' not found in specification!`));
             }
         } else if (direction === 'property') {
             checkProperty(ioName);

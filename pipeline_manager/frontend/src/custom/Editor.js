@@ -440,7 +440,7 @@ export default class PipelineManagerEditor extends Editor {
                         (template) => template.id === n.subgraph,
                     );
                     if (fittingTemplate.length !== 1) {
-                        result.errors.push([`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`]);
+                        result.errors.push([new Error(`Expected exactly one template with ID ${n.name}, got ${fittingTemplate.length}`)]);
                     }
 
                     const { subgraphId } = this.nodeTypes.get(n.name) ?? {};
@@ -455,7 +455,7 @@ export default class PipelineManagerEditor extends Editor {
                 }
                 n.relatedGraphs
                     ?.filter(({ id }) => state.graphs.find((el) => el.id === id) === undefined)
-                    .forEach(({ id }) => result.errors.push([`The related graph of id ${id} is not defined`]));
+                    .forEach(({ id }) => result.errors.push([new Error(`The related graph of id ${id} is not defined`)]));
                 this.setNodeColor(n.id, n.color);
                 if (n.pill?.text) {
                     this.nodePills.set(n.id, n.pill);
@@ -515,7 +515,7 @@ export default class PipelineManagerEditor extends Editor {
             // appropriate error is returned.
             this.cleanEditor();
             this.readonly = readonlySetting;
-            result.errors.push(err.toString());
+            result.errors.push(err);
             return result;
         }
         if (Array.isArray(result.errors) && result.errors.length && !globalProperties.softLoad) {
@@ -562,7 +562,7 @@ export default class PipelineManagerEditor extends Editor {
                 });
             }
         } catch (err) {
-            result.errors.push(err.toString());
+            result.errors.push(err);
         }
 
         if (this.layoutManager.layoutEngine.activeAlgorithm !== 'NoLayout') {

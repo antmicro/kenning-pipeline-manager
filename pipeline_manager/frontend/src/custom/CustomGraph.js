@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -670,7 +670,7 @@ export default function createPipelineManagerGraph(graph) {
             const nodeInformation = this.editor.nodeTypes.get(n.name);
 
             if (!nodeInformation) {
-                nodesErrors.push(`Node type ${n.name} is not registered`);
+                nodesErrors.push(new Error(`Node type ${n.name} is not registered`));
             } else {
                 const node = new nodeInformation.type(); // eslint-disable-line new-cap
 
@@ -714,13 +714,13 @@ export default function createPipelineManagerGraph(graph) {
                 }
                 const nodeErrors = node.load(n);
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
-                    nodesErrors.push(`Node '${node.type}' with id ${specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, n.id)} is invalid:`, ...nodeErrors.map((e) => `    ${e}`));
+                    nodesErrors.push(new Error(`Node '${node.type}' with id ${specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, n.id)} is invalid:`), ...nodeErrors);
                 }
                 // check for bus stubs not connected to anything
                 n.interfaces?.filter((i) => i.bus?.stubs !== undefined).forEach((intf) => {
                     (intf.bus?.stubs ?? []).forEach((stub) => {
                         if (!connectedIds.includes(stub.id)) {
-                            errors.push(`Interface bus stub ${stub.id} in interface ${intf.id} is not connected to anything`);
+                            errors.push(new Error(`Interface bus stub ${stub.id} in interface ${intf.id} is not connected to anything`));
                         }
                     });
                 });
@@ -728,7 +728,7 @@ export default function createPipelineManagerGraph(graph) {
                 this.addNodeViews(n.id, n.views);
             }
         });
-        if (nodesErrors.length) errors.push('Node errors:', ...nodesErrors.map((e) => `    ${e}`));
+        if (nodesErrors.length) errors.push(...nodesErrors);
 
         // Assigning ids to connections that do not have them
         state.connections.forEach((c) => {
@@ -744,11 +744,11 @@ export default function createPipelineManagerGraph(graph) {
                 (conn) => conn.id === c.id && (conn.from !== c.from || conn.to !== c.to),
             );
 
-            if (otherExists) connectionErrors.push(`ID is already taken.`);
+            if (otherExists) connectionErrors.push(new Error(`ID is already taken.`));
 
             const reportIfMissing = (direction, intf, id) => {
                 if (intf) return;
-                connectionErrors.push(`Missing ${direction} ${specOrGenerated(state.graphLoadingState?.newToSpecIntfIds, id)}`);
+                connectionErrors.push(new Error(`Missing ${direction} ${specOrGenerated(state.graphLoadingState?.newToSpecIntfIds, id)}`));
             };
 
             reportIfMissing('src', fromIf, c.from);
@@ -762,7 +762,7 @@ export default function createPipelineManagerGraph(graph) {
                         specOrGenerated(state.graphLoadingState?.newToSpecIntfIds, intf.id);
                     const nodeIdLabel =
                         specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, node.id);
-                    connectionErrors.push(`Found   ${direction} ${intfIdLabel} '${intf.name}' in node '${node.type}' with id ${nodeIdLabel}`);
+                    connectionErrors.push(new Error(`Found   ${direction} ${intfIdLabel} '${intf.name}' in node '${node.type}' with id ${nodeIdLabel}`));
                 };
 
                 reportIfFound('src', fromIf);
@@ -770,7 +770,7 @@ export default function createPipelineManagerGraph(graph) {
 
                 const connIdLabel =
                     specOrGenerated(state.graphLoadingState?.newToSpecConnIds, c.id);
-                connectionsErrors.push(`Connection ${connIdLabel} is invalid:`, ...connectionErrors.map((e) => `    ${e}`));
+                connectionsErrors.push(new Error(`Connection ${connIdLabel} is invalid:`), ...connectionErrors);
             } else {
                 // Manually adding connections instead of using `addConnection` from baklavajs
                 // as we want to get a feedback message from `checkConnection` function
@@ -780,7 +780,7 @@ export default function createPipelineManagerGraph(graph) {
                     const fromNodeName = state?.nodes.find((n) => n.id === fromIf.nodeId)?.name;
                     const toNodeName = state?.nodes.find((n) => n.id === toIf.nodeId)?.name;
                     errors.push(
-                        `Could not create connection from node '${fromNodeName}' (interface: ${fromIf.name}, node ID: ${fromIf.nodeId}) to '${toNodeName}' (interface: ${toIf.name}, node ID: ${toIf.nodeId}) of ID '${c.id}'. ${checkConnectionResult.error}`,
+                        new Error(`Could not create connection from node '${fromNodeName}' (interface: ${fromIf.name}, node ID: ${fromIf.nodeId}) to '${toNodeName}' (interface: ${toIf.name}, node ID: ${toIf.nodeId}) of ID '${c.id}'. ${checkConnectionResult.error}`),
                     );
                 } else {
                     checkConnectionResult.connectionsInDanger.forEach((connectionToRemove) => {
@@ -819,7 +819,7 @@ export default function createPipelineManagerGraph(graph) {
             }
         });
 
-        if (connectionsErrors.length) errors.push('Connection errors:', ...connectionsErrors.map((e) => `    ${e}`));
+        if (connectionsErrors.length) errors.push(new Error('Connection errors:'), ...connectionsErrors);
 
         this.hooks.load.execute(state);
         return errors;

@@ -642,11 +642,11 @@ export default class EditorManager {
                 ({ url: specificationUrl, style } = specificationUrl);
             }
             if (currentImports.has(specificationUrl)) {
-                errors.push(`Specification is included multiple times, skipping ${specificationUrl}`);
+                errors.push(new Error(`Specification is included multiple times, skipping ${specificationUrl}`));
                 return;
             }
             if (trace.has(specificationUrl)) {
-                errors.push(`Circular dependency detected in included specification ${specificationUrl}`);
+                errors.push(new Error(`Circular dependency detected in included specification ${specificationUrl}`));
                 return;
             }
             currentImports.add(specificationUrl);
@@ -655,7 +655,7 @@ export default class EditorManager {
                 this.globalVisitedSpecs.add(specificationUrl);
                 const [status, val] = await loadJsonFromRemoteLocation(specificationUrl);
                 if (status === false) {
-                    errors.push(`Could not load the included specification from ${specificationUrl}. Reason: ${val}`);
+                    errors.push(new Error(`Could not load the included specification from ${specificationUrl}. Reason: ${val}`));
                 } else {
                     specificationAndTrace.push(
                         {
@@ -711,7 +711,7 @@ export default class EditorManager {
         if (includeGraphs.length === 0) {
             return { graphs, errors };
         } if (includeGraphs.length !== new Set(includeGraphs).size) {
-            errors.push('Duplicate subgraph includes detected. Aborting.');
+            errors.push(new Error('Duplicate subgraph includes detected. Aborting.'));
             return { graphs, errors };
         }
 
@@ -719,7 +719,7 @@ export default class EditorManager {
         await Promise.all(includeGraphs.map(async (dataflow) => {
             const [status, val] = await loadJsonFromRemoteLocation(dataflow.url);
             if (status === false) {
-                errors.push(`Could not load the included dataflow from '${dataflow.url}'. Reason: ${val}`);
+                errors.push(new Error(`Could not load the included dataflow from '${dataflow.url}'. Reason: ${val}`));
                 return;
             }
 
@@ -733,7 +733,7 @@ export default class EditorManager {
             const dataflowMetadata = includeGraphs[i];
 
             if (dataflow.graphs.length !== 1) {
-                errors.push(`Only single graph dataflows are supported. Aborting loading subgraph include from ${dataflowMetadata.url}.`);
+                errors.push(new Error(`Only single graph dataflows are supported. Aborting loading subgraph include from ${dataflowMetadata.url}.`));
                 continue; // eslint-disable-line no-continue
             }
 
@@ -1779,7 +1779,7 @@ export default class EditorManager {
                 this.baklavaView.editor.cleanEditor();
 
                 if (loadingWarnings.length) warnings.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingWarnings.map((w) => `    ${w}`));
-                if (loadingErrors.length) errors.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingErrors.map((w) => `    ${w}`));
+                if (loadingErrors.length) errors.push(new Error(`Graph '${graph.name ?? graph.id}' is invalid:`), ...loadingErrors.map((w) => `    ${w}`));
             };
 
             // Validate subgraphs
@@ -1822,7 +1822,7 @@ export default class EditorManager {
             for (const graphId of relatedGraphIds) { // eslint-disable-line no-restricted-syntax
                 const graph = graphs.find(({ id }) => id === graphId);
                 if (graph === undefined) {
-                    errors.push([`The related graph with ID ${graphId} was not found`]);
+                    errors.push([new Error(`The related graph with ID ${graphId} was not found`)]);
                     continue; // eslint-disable-line no-continue
                 }
 
@@ -2205,8 +2205,8 @@ export default class EditorManager {
                 if (resolvedNodes.find((n) => n.name === eName) !== undefined) {
                     node.extends.push(eName);
                 } else {
-                    errors.push(
-                        `No parent node of type ${eName} found for node type ${node.name}`,
+                    errors.push(new Error(
+                        `No parent node of type ${eName} found for node type ${node.name}`),
                     );
                 }
             });
@@ -2228,7 +2228,7 @@ export default class EditorManager {
         const style = Array.isArray(node.style) ? node.style : [node.style];
         const styleSet = new Set(style);
         if (styleSet.size !== style.length) {
-            errors.push(`Repeated styles in "${EditorManager.getNodeName(node)}" node`);
+            errors.push(new Error(`Repeated styles in "${EditorManager.getNodeName(node)}" node`));
         }
 
         errors.push(...Array.from(styleSet)
@@ -2607,7 +2607,7 @@ export default class EditorManager {
                 if (globalProperties.softLoad) {
                     status.warnings.push(msg);
                 } else {
-                    status.errors.push(msg);
+                    status.errors.push(new Error(msg), err);
                 }
 
                 return status;
@@ -2654,8 +2654,8 @@ export default class EditorManager {
             );
 
             if (exposedInterfaces.length < interfaces.length - 1) {
-                errors.push(`The interface with id = ${sharedId} seems to ` +
-                    `be exposed but lacks "externalName" property.`);
+                errors.push(new Error(`The interface with id = ${sharedId} seems to ` +
+                    `be exposed but lacks "externalName" property.`));
                 return;
             }
 
@@ -2677,7 +2677,7 @@ export default class EditorManager {
                     `Mismatch between "externalName" of the original interface ` +
                     `and "name" of the exposed version of the interface, ` +
                     `for the interface with id = ${sharedId}\n`;
-                errors.push(errorMessage);
+                errors.push(new Error(errorMessage));
             }
         });
 
@@ -2910,7 +2910,7 @@ export default class EditorManager {
         const errors = [];
         categoryNodes.forEach((node) => {
             if (node.name in definedCategories) {
-                errors.push(`Category '${node.category}' has multiple nodes defining it.`);
+                errors.push(new Error(`Category '${node.category}' has multiple nodes defining it.`));
             } else {
                 definedCategories[node.name] = node.category.split('/').slice(0, -1).join('/');
             }
@@ -2939,7 +2939,7 @@ export default class EditorManager {
                         node.extends === undefined ||
                         !node.extends.includes(categoryNodeName)
                     ) {
-                        errors.push(`Node '${node.name}' does not extend its category node '${categoryNodeName}'.`);
+                        errors.push(new Error(`Node '${node.name}' does not extend its category node '${categoryNodeName}'.`));
                     }
                     break;
                 }
@@ -2956,8 +2956,8 @@ export default class EditorManager {
                         `${definedCategories[extendedNode]}/${extendedNode}` : extendedNode;
 
                     if (!category.includes(commonPrefix)) {
-                        errors.push(
-                            `Node '${node.name}' extends from a category node '${extendedNode}' but is not in its category`,
+                        errors.push(new Error(
+                            `Node '${node.name}' extends from a category node '${extendedNode}' but is not in its category`),
                         );
                         break;
                     }
@@ -2966,7 +2966,7 @@ export default class EditorManager {
 
             // Finding multiple nodes with the same name
             if (nodeNames.has(node.name)) {
-                errors.push(`Node '${node.name}' is defined multiple times`);
+                errors.push(new Error(`Node '${node.name}' is defined multiple times`));
             }
             nodeNames.add(node.name);
         });

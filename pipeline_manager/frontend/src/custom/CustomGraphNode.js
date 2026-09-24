@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Antmicro <www.antmicro.com>
+ * Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -85,7 +85,7 @@ export function prepareSubgraphInstance(
 
     // Ensure subgraph nodes have IDs to distinguish instances in nested layers
     const predicate = (node) => node.subgraph !== undefined && node.id === undefined;
-    if (template.nodes.some(predicate)) errors.push('Node defining a nested graph in a subgraph template should have their own ID');
+    if (template.nodes.some(predicate)) errors.push(new Error('Node defining a nested graph in a subgraph template should have their own ID'));
     if (errors.length) return { errors };
 
     const isRoot = graphLoadingState === undefined;
