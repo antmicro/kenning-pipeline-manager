@@ -149,11 +149,10 @@ export function parseProperties(properties) {
  * Creates a property based on its specification.
  *
  * @param p property specification with name and type
- * @param hidden whether the property should be hidden
  *
  * @returns property object of a given type
  * */
-export function newProperty(p, hidden = false) {
+export function newProperty(p) {
     const propName = p.name;
     const propType = p.type;
     let propDef = p.default;
@@ -232,7 +231,7 @@ export function newProperty(p, hidden = false) {
             console.error(propType, ' input type is not recognized.');
     }
     if (intf !== undefined) {
-        intf.hidden = hidden;
+        intf.hidden = !!p.hidden;
         intf.type = propType;
         intf.default = propDef;
         intf.hideOnDefault = p.hideOnDefault;
