@@ -214,7 +214,8 @@ export default defineComponent({
         });
 
         const onClick = (item) => {
-            context.emit('click', item.value);
+            // A URL item is a link and opens by itself; only actions have a value
+            if (item.value !== undefined) context.emit('click', item.value);
             context.emit('update:modelValue', false);
             opened.value = false;
             context.emit('close');
