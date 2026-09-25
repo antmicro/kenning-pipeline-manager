@@ -189,7 +189,28 @@ def copy_frontend_to_workspace(
         root_diff = filecmp.dircmp(
             workspace_directory / "frontend", frontend_path
         )
-        return _check_subdir(root_diff, Path(""))
+        changed = _check_subdir(root_diff, Path(""))
+
+        # The frontend imports resources too (API specification, schemas),
+        # so they have to follow the sources, not only be copied once
+        workspace_resources = workspace_directory / "resources"
+
+        def _differs(diff: filecmp.dircmp) -> bool:
+            return bool(
+                diff.diff_files or diff.left_only or diff.right_only
+            ) or any(_differs(subdir) for subdir in diff.subdirs.values())
+
+        differs = not workspace_resources.exists() or _differs(
+            filecmp.dircmp(workspace_resources, resources_path)
+        )
+        if differs:
+            # Replace the directory entirely so that files removed from
+            # the sources are also removed from the workspace
+            if workspace_resources.exists():
+                shutil.rmtree(workspace_resources)
+            shutil.copytree(resources_path, workspace_resources)
+            changed = True
+        return changed
     else:
         return False
 

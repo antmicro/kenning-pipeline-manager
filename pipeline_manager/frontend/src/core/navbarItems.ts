@@ -11,4 +11,5 @@ export interface NavbarItem {
     icon?: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     procedureName: string
     allowToRunInParallelWith?: [string]
+    openUrl?: string
 }

@@ -301,6 +301,9 @@ export default {
             }
             const activeAction = this.activeNavbarItemsNames.includes(actionItem.procedureName);
             if (activeAction && !this.isInProgress(actionItem.procedureName)) {
+                // Before anything is awaited, while this is still the click:
+                // otherwise the browser blocks the new tab as a popup
+                if (actionItem.openUrl) window.open(actionItem.openUrl, '_blank');
                 await this.externalApplicationManager.requestDataflowAction(
                     actionItem.procedureName,
                     actionItem.requireResponse,
