@@ -56,8 +56,17 @@ export default {
     },
     async mounted() {
         // Listen for fullscreen change
-        document.addEventListener('fullscreenchange', () => {
+        document.addEventListener('fullscreenchange', async () => {
             this.fullscreenPanel.isOpen = !fullscreen.isFullscreen;
+            const supportsKeyboardLock = ('keyboard' in navigator) && ('lock' in navigator.keyboard);
+            if (!supportsKeyboardLock) {
+                return;
+            }
+            if (document.fullscreenElement) {
+                await navigator.keyboard.lock(['Escape']);
+                return;
+            }
+            navigator.keyboard.unlock();
         });
     },
 };

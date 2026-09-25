@@ -45,7 +45,19 @@ export default defineComponent({
             }
         };
 
-        return { close };
+        const handleKeyUp = (event) => {
+            if (event.key === 'Escape') {
+                close();
+            }
+        };
+
+        return { close, handleKeyUp };
+    },
+    mounted() {
+        document.addEventListener('keyup', this.handleKeyUp);
+    },
+    unmounted() {
+        document.removeEventListener('keyup', this.handleKeyUp);
     },
 });
 </script>
