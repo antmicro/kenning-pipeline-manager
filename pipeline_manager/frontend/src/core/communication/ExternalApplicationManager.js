@@ -100,6 +100,8 @@ class ExternalApplicationManager {
 
     backend = false;
 
+    pendingDataflow = null;
+
     constructor() {
         /**
          * Assigning the ExternalApplicationManager instance to the EditorManager properties.
@@ -160,6 +162,12 @@ class ExternalApplicationManager {
                 await this.updateSpecification(specification);
 
                 NotificationHandler.terminalLog('info', 'Specification loaded successfully');
+
+                if (this.pendingDataflow !== null) {
+                    const dataflow = this.pendingDataflow;
+                    this.pendingDataflow = null;
+                    await this.updateDataflow(dataflow);
+                }
             } else if (data.type === PMMessageType.WARNING) {
                 message = data.content;
                 NotificationHandler.terminalLog('warning', message);
@@ -292,6 +300,19 @@ class ExternalApplicationManager {
             NotificationHandler.terminalLog('warning', 'Dataflow loaded with warning', warnings);
         } else if (Array.isArray(info) && info.length) {
             NotificationHandler.terminalLog('info', 'Dataflow loaded', info);
+        }
+    }
+
+    /**
+     * Loads a dataflow once the backend has sent the specification.
+     *
+     * @param {object|string} dataflow - Dataflow, or the URL to load it from.
+     */
+    async loadDataflowAfterSpecification(dataflow) {
+        if (this.editorManager.isSpecificationLoaded()) {
+            await this.updateDataflow(dataflow);
+        } else {
+            this.pendingDataflow = dataflow;
         }
     }
 

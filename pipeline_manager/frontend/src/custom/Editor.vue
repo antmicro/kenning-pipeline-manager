@@ -1095,6 +1095,11 @@ export default defineComponent({
                 if (dataflow) {
                     await updateDataflow(dataflow, centerAtTop);
                 }
+            } else if (urlParams.has('graph') && externalApplicationManager.usesBackend()) {
+                // The specification comes from the backend once it connects
+                await externalApplicationManager.loadDataflowAfterSpecification(
+                    urlParams.get('graph'),
+                );
             }
             NotificationHandler.restoreShowNotification();
         };
