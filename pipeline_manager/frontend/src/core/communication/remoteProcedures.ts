@@ -15,6 +15,8 @@
 
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { v4 as uuidv4 } from 'uuid';
+import { toRaw } from 'vue';
+import { api as fullscreen } from 'vue-fullscreen';
 import runInfo from './runInformation';
 import EditorManager from '../EditorManager';
 import NotificationHandler, { LOG_LEVEL } from '../notifications';
@@ -846,4 +848,29 @@ export function layer_set_hidden(
         ignoredLayers.delete(params.name);
     }
     return null;
+}
+
+export async function panel_toggle(
+    params: { name: string | null },
+): Promise<string[] | null> {
+    const { navbarOptions } = editorManager;
+    const possibleValues = Object.keys(toRaw(navbarOptions.panels));
+    if (!navbarOptions.mounted) {
+        throw Error('Unable to toggle panels: Navbar not mounted');
+    }
+    if (params.name === null) {
+        return possibleValues;
+    }
+    if (possibleValues.find((value) => value === params.name) === undefined) {
+        throw Error('Invalid panel name');
+    }
+    navbarOptions.togglePanel(navbarOptions.panels[params.name]);
+    return null;
+}
+
+export function fullscreen_toggle() {
+    if (!fullscreen.isEnabled) {
+        throw Error('Fullscreen is not supported');
+    }
+    fullscreen.toggle();
 }

@@ -162,6 +162,17 @@ export default class EditorManager {
     defaultStyles = new Map();
 
     /**
+     * @type {
+     *     mounted: boolean,
+     *     panels: any,
+     *     togglePanel: function
+     * }
+     */
+    navbarOptions = {
+        mounted: false,
+    };
+
+    /**
      * 'externalApplicationManager' property is set when ExternalApplicationManager
      * is initialized, in its constructor, to avoid the cycle problem if it were
      * imported normally.

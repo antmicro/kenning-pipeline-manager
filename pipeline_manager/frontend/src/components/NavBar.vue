@@ -428,6 +428,12 @@ export default {
         this.buttonWidth = this.$refs.palette.getRef().offsetWidth;
         this.windowWidth = window.innerWidth;
 
+        this.editorManager.navbarOptions = {
+            mounted: true,
+            togglePanel: this.togglePanel,
+            panels: this.panels,
+        };
+
         window.addEventListener('resize', () => {
             this.windowWidth = window.innerWidth;
             if (this.$refs.palette.getRef()) {

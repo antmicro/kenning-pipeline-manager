@@ -815,6 +815,34 @@
             "returns": {
                 "type": "null"
             }
+        },
+        "panel_toggle": {
+            "description": "Toggle navbar panels",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Panel name, pass null to obtain a list of possible values",
+                        "type": ["string", "null"]
+                    }
+                }
+            },
+            "returns": {
+                "description": "Either a null or a list of possible name values",
+                "type": ["array", "null"],
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "fullscreen_toggle": {
+            "description": "Toggle editor fullscreen mode",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+               "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {
