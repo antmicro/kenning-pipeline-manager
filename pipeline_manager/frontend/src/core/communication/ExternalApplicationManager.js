@@ -164,9 +164,7 @@ class ExternalApplicationManager {
                 NotificationHandler.terminalLog('info', 'Specification loaded successfully');
 
                 if (this.pendingDataflow !== null) {
-                    const dataflow = this.pendingDataflow;
-                    this.pendingDataflow = null;
-                    await this.updateDataflow(dataflow);
+                    await this.updateDataflow(this.pendingDataflow.dataflow);
                 }
             } else if (data.type === PMMessageType.WARNING) {
                 message = data.content;
@@ -177,6 +175,11 @@ class ExternalApplicationManager {
             }
         } catch (error) {
             RPCTerminalLog('error', error);
+        } finally {
+            if (this.pendingDataflow !== null) {
+                this.pendingDataflow.done();
+                this.pendingDataflow = null;
+            }
         }
     }
 
@@ -304,7 +307,8 @@ class ExternalApplicationManager {
     }
 
     /**
-     * Loads a dataflow once the backend has sent the specification.
+     * Loads a dataflow once the backend has sent the specification, and
+     * resolves when it is loaded.
      *
      * @param {object|string} dataflow - Dataflow, or the URL to load it from.
      */
@@ -312,7 +316,7 @@ class ExternalApplicationManager {
         if (this.editorManager.isSpecificationLoaded()) {
             await this.updateDataflow(dataflow);
         } else {
-            this.pendingDataflow = dataflow;
+            await new Promise((done) => { this.pendingDataflow = { dataflow, done }; });
         }
     }
 
