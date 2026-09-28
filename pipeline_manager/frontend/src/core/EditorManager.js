@@ -2665,6 +2665,11 @@ export default class EditorManager {
                 }
             } else if (typeof value === 'object' && typeof primaryObject[key] === 'object') {
                 // For example, metadata is an object and it has to be merged instead of overwritten
+                if (key === 'styles') {
+                    // Use styles from dataflow
+                    primaryObject[key] = value;
+                    return;
+                }
                 const {
                     errors: mergeErrors, warnings: mergeWarnings,
                 } = EditorManager.mergeObjects(primaryObject[key], value);
