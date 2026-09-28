@@ -4,7 +4,6 @@
         {
             "name": "LOGO",
             "width": 300,
-            "height": 100,
             "style": "AntmicroStyle"
         },
         {
@@ -13,7 +12,6 @@
                 {"name": "a", "direction": "inout", "side": "top"}
             ],
             "width": 150,
-            "height": 200,
             "style": "GNDStyle"
         },
         {
@@ -23,7 +21,6 @@
                 {"name": "b", "direction": "inout", "side": "bottom"}
             ],
             "width": 200,
-            "height": 250,
             "style": "VoltageStyle"
         },
         {
@@ -33,7 +30,6 @@
                 {"name": "b", "direction": "inout", "side": "bottom"}
             ],
             "width": 200,
-            "height": 250,
             "style": "SignalStyle"
         },
         {
@@ -43,7 +39,6 @@
                 {"name": "b", "direction": "inout", "side": "right"}
             ],
             "width": 200,
-            "height": 50,
             "style": "ResistorStyle"
         },
         {
@@ -54,7 +49,6 @@
                 {"name": "e", "direction": "inout", "side": "bottom"}
             ],
             "width": 150,
-            "height": 150,
             "style": "NPNStyle"
         },
         {
@@ -65,7 +59,6 @@
                 {"name": "e", "direction": "inout", "side": "top"}
             ],
             "width": 150,
-            "height": 150,
             "style": "PNPStyle"
         },
         {
@@ -193,12 +186,12 @@
                         "y": 0
                     },
                     "b": {
-                        "x": 0,
+                        "x": 5,
                         "y": 50
                     },
                     "c": {
                         "x": 73,
-                        "y": 100
+                        "y": 95
                     }
                 }
             }
