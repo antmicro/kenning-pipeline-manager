@@ -73,7 +73,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                 @mouseleave="clearHighlight"
             >
                 <CustomNode
-                    v-memo="[visibleNodes, ...selectedNodes,
+                    v-memo="[visibleNodes, ...selectedNodes, ...greyedOutNodes,
                     currentViewName, ignoredInterfacesTypes]"
                     v-for="node in visibleNodes"
                     :key="node.id + counter.toString()"
