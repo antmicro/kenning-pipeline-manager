@@ -4,7 +4,7 @@ import {
     Locator,
 } from '@playwright/test';
 import {
-    getUrl, loadSpecification, loadDataflow, getContextMenu, deleteNode,
+    deleteNode, getContextMenu, getUrl, loadDataflow, loadSpecification, openSettingsPanel,
 } from './config.js';
 
 function getNode(page: Page, name: string): Locator {
@@ -175,4 +175,20 @@ test('delete group', async ({ page }) => {
     await deleteNode(nodeB, page);
 
     await expect(newGroup).not.toBeVisible();
+});
+test('groups are preserved after swapping interfaces', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-rectangle-grouping-specification.json');
+    await loadDataflow(page, 'sample-rectangle-grouping-dataflow.json');
+
+    const selectedGroup = getGroup(page, 'Dataset Wrapper');
+    let groupsCount = await page.locator('.grouping-container > div').count();
+    await expect(groupsCount).toBe(6);
+
+    await openSettingsPanel(page);
+    await page.getByRole('button', { name: 'Swap interfaces' }).click();
+
+    groupsCount = await page.locator('.grouping-container > div').count();
+    await expect(groupsCount).toBe(6);
+    await expect(selectedGroup).toBeVisible();
 });

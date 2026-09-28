@@ -630,6 +630,10 @@ export default function createPipelineManagerGraph(graph) {
     };
     graph.load = function load(state, loadAll = false) {
         const errors = [];
+        // Optimization to let saved and rendered graph use shared `groups` to avoid deepcopy
+        // If it caused a bug, please remove it and add deepcopy for `groups` at
+        // CustomGraph.js::createPipelineManagerGraph()::save()
+        this.groups = [];
 
         // Clear current state
         for (let i = this.connections.length - 1; i >= 0; i -= 1) {
