@@ -874,3 +874,13 @@ export function fullscreen_toggle() {
     }
     fullscreen.toggle();
 }
+
+export async function search_get_query(): Promise<{ query: string | null }> {
+    return {
+        query: editorManager.baklavaView.editor.searchQuery ?? null,
+    };
+}
+
+export function search_set_query(params: { query: string | null }) {
+    editorManager.baklavaView.editor.searchQuery = params.query ?? undefined;
+}

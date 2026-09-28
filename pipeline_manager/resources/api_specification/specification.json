@@ -843,6 +843,36 @@
             "returns": {
                "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "search_get_query": {
+            "description": "Obtains the current search query",
+            "params": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            },
+            "returns": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "description": "Current search query",
+                        "type": ["string", "null"]
+                    }
+                }
+            }
+        },
+        "search_set_query": {
+            "description": "Sets the current search query",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "description": "New search query, pass null to clear search",
+                        "type": ["string", "null"]
+                    }
+                }
+            },
+            "returns": {
+               "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {

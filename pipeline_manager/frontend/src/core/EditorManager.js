@@ -138,7 +138,7 @@ export default class EditorManager {
 
     /**
      * @type {import('baklavajs').IBaklavaViewModel & {
-     *    editor: PipelineManagerEditor & { events: any },
+     *    editor: PipelineManagerEditor & { events: any, searchQuery: any },
      *    settings: any,
      *    logLevel: any,
      *    connectionRenderer: any,
