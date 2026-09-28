@@ -88,19 +88,17 @@ from moving or deleting the nodes.
             <!-- disable transition to avoid rendering additional redraw for viewport adjustment -->
 
         </div>
-        <svg
+        <img :src="customShape + '#svgView(preserveAspectRatio(none))'"
             v-if="customShape !== undefined"
             class="--shape"
             draggable="false"
             ref="svgRef"
+            :style="customShapeStyle"
             @pointerdown.left.exact="onMouseDown"
             @pointerdown.left="startDragWrapper($event)"
             @pointerdown.right="openContextMenuTitle"
             v-long-press:500="openContextMenuTitle"
-            preserveAspectRatio="none"
-        >
-            <image :href="customShape" preserveAspectRatio="none" width="100%" height="100%"/>
-        </svg>
+        />
         <!-- Positioned inputs -->
         <template v-for="input in positionedInterfaces">
             <CustomInterface
@@ -1136,6 +1134,20 @@ const styles = computed(() => ({
     cursor: menuState.addingPositionedInterface ? 'default' : undefined,
 }));
 
+const customShapeStyle = computed(() => {
+    // When an explicit height is provided, stretch the custom shape to fill the
+    // whole node, changing its aspect ratio to match the node dimensions.
+    if (props.node.height === undefined || props.node.width === undefined) {
+        return {};
+    }
+    return {
+        width: props.node.width,
+        height: props.node.height,
+        display: 'block',
+        objectFit: 'fill',
+    };
+});
+
 // another potential source of issue
 const displayedRightRows = computed(() => getRows(displayedRightSockets.value));
 const displayedLeftRows = computed(() => getRows(displayedLeftSockets.value));
@@ -1236,6 +1248,15 @@ const nodeTitleStyle = computed(() => {
         style.width = 'fit-content';
         style.height = 'fit-content';
         style.padding = 0;
+    }
+
+    // When the custom shape is stretched to fill the whole node (height provided),
+    // keep the title rendered above the shape.
+    if (customShape.value !== undefined && props.node.height !== undefined) {
+        if (style.position === undefined) {
+            style.position = 'relative';
+        }
+        style.zIndex = '1';
     }
 
     if (!viewModel.value.editor.readonly) {
