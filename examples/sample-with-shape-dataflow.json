@@ -330,6 +330,11 @@
         }
     ],
     "entryGraph": "cc9e70c2-2357-4368-b36c-f1a8058a5a74",
+    "metadata": {
+        "editableTypes": true,
+        "toggleableEditableTypes": false,
+        "connectionStyle": "orthogonal"
+    },
     "version": "20250623.14"
 }
 

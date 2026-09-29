@@ -9,7 +9,11 @@
         {
             "name": "GND",
             "interfaces": [
-                {"name": "a", "direction": "inout", "side": "top"}
+                {
+                    "name": "a",
+                    "direction": "inout",
+                    "side": "top"
+                }
             ],
             "width": 150,
             "style": "GNDStyle"
@@ -17,8 +21,16 @@
         {
             "name": "Voltage",
             "interfaces": [
-                {"name": "a", "direction": "inout", "side": "top"},
-                {"name": "b", "direction": "inout", "side": "bottom"}
+                {
+                    "name": "a",
+                    "direction": "inout",
+                    "side": "top"
+                },
+                {
+                    "name": "b",
+                    "direction": "inout",
+                    "side": "bottom"
+                }
             ],
             "width": 200,
             "style": "VoltageStyle"
@@ -26,8 +38,16 @@
         {
             "name": "Signal",
             "interfaces": [
-                {"name": "a", "direction": "inout", "side": "top"},
-                {"name": "b", "direction": "inout", "side": "bottom"}
+                {
+                    "name": "a",
+                    "direction": "inout",
+                    "side": "top"
+                },
+                {
+                    "name": "b",
+                    "direction": "inout",
+                    "side": "bottom"
+                }
             ],
             "width": 200,
             "style": "SignalStyle"
@@ -35,8 +55,16 @@
         {
             "name": "Resistor",
             "interfaces": [
-                {"name": "a", "direction": "inout", "side": "left"},
-                {"name": "b", "direction": "inout", "side": "right"}
+                {
+                    "name": "a",
+                    "direction": "inout",
+                    "side": "left"
+                },
+                {
+                    "name": "b",
+                    "direction": "inout",
+                    "side": "right"
+                }
             ],
             "width": 200,
             "style": "ResistorStyle"
@@ -44,9 +72,21 @@
         {
             "name": "NPN",
             "interfaces": [
-                {"name": "c", "direction": "inout", "side": "top"},
-                {"name": "b", "direction": "inout", "side": "left"},
-                {"name": "e", "direction": "inout", "side": "bottom"}
+                {
+                    "name": "c",
+                    "direction": "inout",
+                    "side": "top"
+                },
+                {
+                    "name": "b",
+                    "direction": "inout",
+                    "side": "left"
+                },
+                {
+                    "name": "e",
+                    "direction": "inout",
+                    "side": "bottom"
+                }
             ],
             "width": 150,
             "style": "NPNStyle"
@@ -54,9 +94,21 @@
         {
             "name": "PNP",
             "interfaces": [
-                {"name": "c", "direction": "inout", "side": "bottom"},
-                {"name": "b", "direction": "inout", "side": "left"},
-                {"name": "e", "direction": "inout", "side": "top"}
+                {
+                    "name": "c",
+                    "direction": "inout",
+                    "side": "bottom"
+                },
+                {
+                    "name": "b",
+                    "direction": "inout",
+                    "side": "left"
+                },
+                {
+                    "name": "e",
+                    "direction": "inout",
+                    "side": "top"
+                }
             ],
             "width": 150,
             "style": "PNPStyle"
@@ -88,15 +140,13 @@
         }
     ],
     "metadata": {
-        "editableTypes": true,
-        "toggleableEditableTypes": false,
-        "twoColumn": true,
-        "newGraphNode": false,
-        "styles":{
+        "connectionStyle": "curved",
+        "editableTypes": false,
+        "styles": {
             "AntmicroStyle": {
                 "shape": "https://raw.githubusercontent.com/antmicro/antmicro-sphinx-utils/main/logo/white.svg"
             },
-            "BoxStyle":{
+            "BoxStyle": {
                 "shape": "svgs/box.svg",
                 "positions": {
                     "a1": {
@@ -113,7 +163,7 @@
                     }
                 }
             },
-            "GNDStyle":{
+            "GNDStyle": {
                 "shape": "svgs/gnd.svg",
                 "positions": {
                     "a": {
@@ -122,7 +172,7 @@
                     }
                 }
             },
-            "ResistorStyle":{
+            "ResistorStyle": {
                 "shape": "svgs/resistor.svg",
                 "positions": {
                     "a": {
@@ -135,7 +185,7 @@
                     }
                 }
             },
-            "VoltageStyle":{
+            "VoltageStyle": {
                 "shape": "svgs/voltage.svg",
                 "positions": {
                     "a": {
@@ -148,7 +198,7 @@
                     }
                 }
             },
-            "SignalStyle":{
+            "SignalStyle": {
                 "shape": "svgs/signal.svg",
                 "positions": {
                     "a": {
@@ -161,7 +211,7 @@
                     }
                 }
             },
-            "NPNStyle":{
+            "NPNStyle": {
                 "shape": "svgs/npn.svg",
                 "hiddenNames": [
                     "c",
@@ -183,7 +233,7 @@
                     }
                 }
             },
-            "PNPStyle":{
+            "PNPStyle": {
                 "shape": "svgs/pnp.svg",
                 "hiddenNames": "all",
                 "positions": {
@@ -201,7 +251,6 @@
                     }
                 }
             }
-        },
-        "connectionStyle": "orthogonal"
+        }
     }
 }
