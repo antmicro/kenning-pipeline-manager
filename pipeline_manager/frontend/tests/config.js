@@ -567,7 +567,7 @@ export async function assertPropertyCount(node, count) {
 export async function openNodePalette(page) {
     await enableNavigationBar(page);
     const nodePalette = page.locator('.baklava-node-palette');
-    const addNodeButton = nodePalette.getByText('New Node Type').first();
+    const addNodeButton = nodePalette.getByText('Nodes').first();
     expect(addNodeButton).toBeVisible();
     // because sometimes the page shifts which makes the mouse hover over the logo,
     // breaking the test (hiding some nodes).
