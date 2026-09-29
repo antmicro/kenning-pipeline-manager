@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getNode, expectNoConsoleErrors, getUrl, loadSpecification, loadDataflow, loadVideoNodeId, closeTerminal, getContextMenu } from './config.js';
+import { expectNoConsoleErrors, getNode, getUrl, loadVideoNodeId, closeTerminal, getContextMenu, loadSpecification, loadDataflow, openNodePalette } from './config.js';
 
 test('has title', async ({ page }) => {
     await page.goto(getUrl());
@@ -99,4 +99,19 @@ test('test custom context menu visibility, with disconnected backend', async ({ 
     const nodeInfo = page.getByText("Node info");
     // When backend is disconnected it should not be visible
     expect(nodeInfo).not.toBeVisible();
+});
+test('check metadata override', async ({ page }) => {
+    // Load a website.
+    await page.goto(getUrl());
+    // Load specification first and check if New Graph Node is present
+    await loadSpecification(page, 'sample-with-shape-specification.json');
+    await openNodePalette(page);
+    const newNodeType = page.getByText("New Node Type");
+
+    expect(newNodeType).not.toBeVisible();
+
+    await loadDataflow(page, 'sample-with-shape-dataflow.json');
+    await openNodePalette(page);
+
+    expect(newNodeType).toBeVisible();
 });
