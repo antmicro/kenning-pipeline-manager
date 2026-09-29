@@ -2436,7 +2436,6 @@ export default class EditorManager {
                     }
 
                     notifyWhenChanged = dataflow.metadata.notifyWhenChanged ?? notifyWhenChanged;
-
                     this.updateMetadata(
                         { ...dataflow.metadata, notifyWhenChanged: false },
                         true,
@@ -2661,7 +2660,7 @@ export default class EditorManager {
 
         // Check if any of the object is undefined
         secondaryObject = secondaryObject ?? {};
-        if (primaryObject === undefined || Object.keys(primaryObject).length === 0) {
+        if (primaryObject === undefined) {
             return { errors, warnings };
         }
 
