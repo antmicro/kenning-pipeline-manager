@@ -316,6 +316,7 @@ class Interface(JsonConvertible):
     id: str = field(default_factory=get_uuid)
     type: List[str] = field(default_factory=list)
     bus: Optional[InterfaceBus] = None
+    hidden: Optional[bool] = None
 
     def __post_init__(self):
         if isinstance(self.direction, str):
@@ -353,6 +354,9 @@ class Interface(JsonConvertible):
                 output["bus"] = self.bus.__dict__
             else:
                 output["bus"] = self.bus
+
+        if self.hidden:
+            output["hidden"] = self.hidden
 
         return convert_output(output, as_str, minify)
 

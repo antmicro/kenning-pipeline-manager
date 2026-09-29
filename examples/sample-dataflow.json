@@ -17,7 +17,8 @@
                             "id": "c85c70e0-72b3-4e87-a24b-054a861e5fcc",
                             "direction": "output",
                             "side": "right",
-                            "sidePosition": 0
+                            "sidePosition": 0,
+                            "hidden": false
                         }
                     ],
                     "properties": [
@@ -58,7 +59,8 @@
                         {
                             "name": "sigma",
                             "id": "3319d658-e5da-41ef-b580-c94fe0db0bdf",
-                            "value": 1
+                            "value": 1,
+                            "hidden": false
                         },
                         {
                             "name": "tags",
