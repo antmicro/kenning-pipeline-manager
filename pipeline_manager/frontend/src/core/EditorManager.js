@@ -1901,7 +1901,7 @@ export default class EditorManager {
             const tempMetadata = metadata;
             metadata = JSON.parse(JSON.stringify(
                 this.specification.currentSpecification?.metadata ?? {}));
-            EditorManager.mergeObjects(metadata, tempMetadata);
+            EditorManager.mergeObjects(metadata, tempMetadata, true);
         }
 
         this.baklavaView.interfaceTypes.readInterfaceTypes(metadata);
@@ -2434,7 +2434,6 @@ export default class EditorManager {
 
                         status.warnings.push(..._errors);
                     }
-
                     notifyWhenChanged = dataflow.metadata.notifyWhenChanged ?? notifyWhenChanged;
                     this.updateMetadata(
                         { ...dataflow.metadata, notifyWhenChanged: false },
@@ -2652,9 +2651,10 @@ export default class EditorManager {
      *
      * @param primaryObject First object to merge
      * @param secondaryObject Second object to merge
+     * @param override Override all existing values in primaryObject
      * @returns Primary object with merged properties from the secondary object
      */
-    static mergeObjects(primaryObject, secondaryObject) {
+    static mergeObjects(primaryObject, secondaryObject, override = false) {
         const warnings = [];
         const errors = [];
 
@@ -2723,10 +2723,10 @@ export default class EditorManager {
                 }
                 const {
                     errors: mergeErrors, warnings: mergeWarnings,
-                } = EditorManager.mergeObjects(primaryObject[key], value);
+                } = EditorManager.mergeObjects(primaryObject[key], value, override);
                 errors.push(...mergeErrors);
                 warnings.push(...mergeWarnings);
-            } else if (primaryObject[key] === undefined) {
+            } else if (primaryObject[key] === undefined || override) {
                 primaryObject[key] = value;
             }
         });
