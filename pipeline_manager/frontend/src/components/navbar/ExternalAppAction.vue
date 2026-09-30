@@ -66,13 +66,11 @@ export default defineComponent({
         v-for="actionItem in navbarItems"
         :key="actionItem.name"
         :id="`navbar-button-${actionItem.procedureName}`"
-        :class="[
-            (
-                (activeNavbarItems.includes(actionItem.procedureName)
-                || isInProgress(actionItem.procedureName))
-                ? 'hoverbox' : 'box'
-            ),
-            mobileClasses, {
+        :class="['hoverbox', mobileClasses, {
+            // Not pressable now -- another procedure is running: drawn as a
+            // button still, dimmed, so that nothing moves.
+            'button-disabled': !(activeNavbarItems.includes(actionItem.procedureName)
+                || isInProgress(actionItem.procedureName)),
             'button-in-progress': isInProgress(actionItem.procedureName),
         }]"
         role="button"
@@ -92,7 +90,9 @@ export default defineComponent({
             v-else
             class="small_svg"
             :is="actionItem.icon"
-            :hover="isHovered(actionItem.procedureName)"
+            :hover="isHovered(actionItem.procedureName)
+                && (activeNavbarItems.includes(actionItem.procedureName)
+                    || isInProgress(actionItem.procedureName))"
             :imgURI="actionItem.iconName"
         />
         <div class="progress-bar" />

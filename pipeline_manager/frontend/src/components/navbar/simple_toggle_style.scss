@@ -103,6 +103,21 @@
         stroke: $red-dark;
     }
 }
+// A button that cannot be pressed now: dimmed, and not lit by hovering,
+// though its tooltip still shows.
+.hoverbox.button-disabled {
+    & > .small_svg {
+        filter: brightness(50%);
+    }
+
+    &:hover {
+        cursor: default;
+
+        & > .small_svg {
+            fill: $white;
+        }
+    }
+}
 :last-child > div:last-child .tooltip {
     transform: translate(-75%, 25%);
 }
