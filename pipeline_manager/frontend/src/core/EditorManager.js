@@ -323,14 +323,16 @@ export default class EditorManager {
         this.specification.includedSpecification =
             JSON.parse(JSON.stringify(includedSpecification));
 
-        // Merge included specification
-        const {
-            errors: mergeErrors, warnings: mergeWarnings,
-        } = EditorManager.mergeObjects(dataflowSpecification, includedSpecification);
-        errors.push(...mergeErrors);
-        warnings.push(...mergeWarnings);
-        if (errors.length) {
-            return { errors, warnings };
+        if (Object.keys(dataflowSpecification).length !== 0) {
+            // Merge included specification
+            const {
+                errors: mergeErrors, warnings: mergeWarnings,
+            } = EditorManager.mergeObjects(dataflowSpecification, includedSpecification);
+            errors.push(...mergeErrors);
+            warnings.push(...mergeWarnings);
+            if (errors.length) {
+                return { errors, warnings };
+            }
         }
         delete dataflowSpecification.include; // eslint-disable-line no-param-reassign
         delete dataflowSpecification.includeGraphs; // eslint-disable-line no-param-reassign
