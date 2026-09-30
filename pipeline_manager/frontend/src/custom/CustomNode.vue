@@ -315,32 +315,7 @@ const transformed = () => {
 };
 
 const externalApplicationManager = getExternalApplicationManager();
-// Watch properties
-Object.entries(props.node.inputs).forEach(([name, input]) => {
-    if (name.startsWith('property_')) {
-        let firstWatch = true;
-        watch(input, async (value) => {
-            if (!externalApplicationManager.isConnected()) {
-                firstWatch = true;
-                return;
-            }
-            if (firstWatch || !editorManager.notifyWhenChanged) {
-                firstWatch = false;
-                return;
-            }
-            const data = {
-                graph_id: props.node.graphInstance.id,
-                node_id: props.node.id,
-                properties: [],
-            };
-            data.properties.push({
-                id: value.id,
-                new_value: value.value,
-            });
-            await externalApplicationManager.notifyAboutChange('properties_on_change', data);
-        });
-    }
-});
+// Properties' edits are reported where they are made (`CustomInterface`).
 // Watch interfaces
 [...Object.entries(props.node.inputs), ...Object.entries(props.node.outputs)]
     .forEach(([name, intf]) => {

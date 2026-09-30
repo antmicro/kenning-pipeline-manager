@@ -233,6 +233,13 @@ import Arrow from '../icons/Arrow.vue';
 import doubleClick from '../core/doubleClick';
 import { ir } from '../core/interfaceRegistry.ts';
 import { useTemporaryConnection } from './temporaryConnection';
+import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
+
+/**
+ * A property's value as last reported to the external application, by the
+ * property's id: a property is reported when its value is edited to another.
+ */
+const reportedValues = new Map();
 
 export default defineComponent({
     extends: Components.NodeInterface,
@@ -509,7 +516,29 @@ export default defineComponent({
             );
         };
 
+        // A property's edit, reported to the external application
+        // (`properties_on_change`, with `notifyWhenChanged`). Here, where the
+        // edit is made, rather than by watching the property: a graph node's
+        // exposed properties are not seen by a watch, nor do they emit their
+        // `setValue` where their node does, so their edits went unreported.
+        // Once per value, the first edit too; not a value set by code.
+        if (!props.intf.port && !reportedValues.has(props.intf.id)) {
+            reportedValues.set(props.intf.id, JSON.stringify(props.intf.value));
+        }
+        const reportEdit = () => {
+            if (props.intf.port || !props.node) return;
+            const now = JSON.stringify(props.intf.value);
+            if (reportedValues.get(props.intf.id) === now) return;
+            reportedValues.set(props.intf.id, now);
+            getExternalApplicationManager().notifyAboutChange('properties_on_change', {
+                graph_id: props.node.graphInstance.id,
+                node_id: props.node.id,
+                properties: [{ id: props.intf.id, new_value: props.intf.value }],
+            });
+        };
+
         const setValue = () => {
+            reportEdit();
             if (!props.intf.value) return;
             if (!(isExposed.value || ir.isRegistered(props.intf.id))) return;
 
