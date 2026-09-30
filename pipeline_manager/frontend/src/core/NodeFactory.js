@@ -1610,6 +1610,8 @@ export function updateSubgraphProperties(nodes) {
             dtype: property.dtype,
             override: property.override,
             readonly: property.readonly,
+            hidden: property.hidden,
+            hideOnDefault: property.hideOnDefault,
         });
     });
     return newProperties;
