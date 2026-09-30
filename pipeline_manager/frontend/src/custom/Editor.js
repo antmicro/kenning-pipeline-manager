@@ -529,7 +529,7 @@ export default class PipelineManagerEditor extends Editor {
                     }
                 }
             }
-            return [...path];
+            return [];
         };
 
         // Finding a path to the defined entry and switching to it sequentially
