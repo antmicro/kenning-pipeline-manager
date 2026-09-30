@@ -4,7 +4,8 @@
         {
             "name": "LOGO",
             "width": 300,
-            "style": "AntmicroStyle"
+            "style": "AntmicroStyle",
+            "height": 100
         },
         {
             "name": "GND",
@@ -16,7 +17,8 @@
                 }
             ],
             "width": 150,
-            "style": "GNDStyle"
+            "style": "GNDStyle",
+            "height": 200
         },
         {
             "name": "Voltage",
@@ -33,7 +35,8 @@
                 }
             ],
             "width": 200,
-            "style": "VoltageStyle"
+            "style": "VoltageStyle",
+            "height": 280
         },
         {
             "name": "Signal",
@@ -50,7 +53,8 @@
                 }
             ],
             "width": 200,
-            "style": "SignalStyle"
+            "style": "SignalStyle",
+            "height": 280
         },
         {
             "name": "Resistor",
@@ -67,7 +71,8 @@
                 }
             ],
             "width": 200,
-            "style": "ResistorStyle"
+            "style": "ResistorStyle",
+            "height": 75
         },
         {
             "name": "NPN",
@@ -88,8 +93,9 @@
                     "side": "bottom"
                 }
             ],
-            "width": 150,
-            "style": "NPNStyle"
+            "width": 300,
+            "style": "NPNStyle",
+            "height": 300
         },
         {
             "name": "PNP",
@@ -110,8 +116,9 @@
                     "side": "top"
                 }
             ],
-            "width": 150,
-            "style": "PNPStyle"
+            "width": 350,
+            "style": "PNPStyle",
+            "height": 300
         },
         {
             "name": "Box",
@@ -136,7 +143,8 @@
                 }
             ],
             "width": 300,
-            "style": "BoxStyle"
+            "style": "BoxStyle",
+            "height": 300
         }
     ],
     "metadata": {
