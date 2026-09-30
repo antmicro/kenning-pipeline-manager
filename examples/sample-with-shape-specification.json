@@ -145,6 +145,13 @@
             "width": 300,
             "style": "BoxStyle",
             "height": 300
+        },
+        {
+            "name": "SmallBox",
+            "interfaces": [],
+            "width": 30,
+            "style": "BoxEmptyStyle",
+            "height": 30
         }
     ],
     "metadata": {
@@ -171,7 +178,10 @@
                     }
                 }
             },
-            "GNDStyle": {
+            "BoxEmptyStyle":{
+                "shape": "svgs/box.svg"
+            },
+            "GNDStyle":{
                 "shape": "svgs/gnd.svg",
                 "positions": {
                     "a": {
