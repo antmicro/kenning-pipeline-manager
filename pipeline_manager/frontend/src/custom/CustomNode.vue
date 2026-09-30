@@ -1080,7 +1080,7 @@ const minimalWidth = computed(() => {
 
 const width = computed(() => {
     if (props.node.width !== undefined) {
-        if (props.node.width < minimalWidth.value) {
+        if (props.node.width < minimalWidth.value && customShape.value === undefined) {
             return `${minimalWidth.value}px`;
         }
         return `${props.node.width}px`;
@@ -1101,8 +1101,8 @@ const height = computed(() => {
 const styles = computed(() => ({
     top: `${props.node.position?.y ?? 0}px`,
     left: `${props.node.position?.x ?? 0}px`,
-    'min-width': fitTitle.value ? '0' : undefined,
-    'min-height': fitTitle.value ? '0' : undefined,
+    'min-width': (fitTitle.value || customShape.value !== undefined) ? '0' : undefined,
+    'min-height': (fitTitle.value || customShape.value !== undefined) ? '0' : undefined,
     width: width.value,
     height: height.value,
     display: customShape.value === undefined ? 'inherit' : 'block',
