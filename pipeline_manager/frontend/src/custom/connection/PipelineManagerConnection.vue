@@ -100,7 +100,7 @@ export default defineComponent({
             ...Object.values(node.value?.outputs ?? {}),
             ...getBuses(Object.values(node.value?.inputs ?? {})),
             ...getBuses(Object.values(node.value?.outputs ?? {})),
-        ].map((io) => [io.side, io.sidePosition]);
+        ].map((io) => [io.side, io.sidePosition, io.hidden]);
 
         const fromNodeInterfacesSide = computed(() => getNodeSides(fromNode));
         const toNodeInterfacesSide = computed(() => getNodeSides(toNode));
