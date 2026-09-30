@@ -166,9 +166,11 @@ Interface style describes how interfaces of a given type should look like, as we
 It consists of the following properties:
 
 * `interfaceColor` - describes the color of the interface, should be a hexadecimal number representing RGB values.
+  An interface of several types takes the style of the first of them that has one.
 * `interfaceConnectionPattern` - describes how the connection line should look like.
   The possible variants are `solid`, `dashed` and `dotted`.
 * `interfaceConnectionColor` - describes the color of connection lines, should be a hexadecimal number representing RGB values.
+  A connection takes the style of the first type of its source that both its ends have and that has a style.
 * `x` - relative x position to node width, in percentages used with `shape` node style attribute.
 * `y` - relative y position to node width, in percentages used with `shape` node style attribute.
 

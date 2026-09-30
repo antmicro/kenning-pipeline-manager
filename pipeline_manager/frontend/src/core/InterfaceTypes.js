@@ -58,8 +58,8 @@ export default class BaklavaInterfaceTypes {
 
     /**
      * Returns connection style for a given from and to interfaces.
-     * It takes style of a common type of those interfaces and completes its missing values
-     * with default ones. If there are multiple common types, a default style is returned.
+     * It takes style of the first common type of those interfaces that has one, in the
+     * order of the `from` types, and completes its missing values with default ones.
      *
      * If there is no `to` interface then a style for `from` interface is returned.
      * Again with completed missing values.
@@ -82,10 +82,6 @@ export default class BaklavaInterfaceTypes {
         }
 
         const commonTypes = fromTypes.filter((t) => toTypes.includes(t));
-        if (Array.isArray(commonTypes) && commonTypes.length > 1) {
-            return this.defaultStyle;
-        }
-
         const firstType = commonTypes.find((t) => this.types[t] !== undefined);
         return { ...this.defaultStyle, ...this.types[firstType] };
     }
