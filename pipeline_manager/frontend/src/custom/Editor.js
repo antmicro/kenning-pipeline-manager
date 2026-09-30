@@ -63,6 +63,9 @@ export default class PipelineManagerEditor extends Editor {
 
     nodeColors = new Map();
 
+    // A node's own pill, by node id, over its type's: `pill` in the dataflow.
+    nodePills = new Map();
+
     defaultView = 'default';
 
     renderViews = new Map();
@@ -230,6 +233,9 @@ export default class PipelineManagerEditor extends Editor {
 
                 currentGraphState.nodes.forEach((node) => {
                     node.color = this.getNodeColor(node);
+                    if (this.nodePills.has(node.id)) {
+                        node.pill = this.nodePills.get(node.id);
+                    }
                 });
 
                 visitedGraphs.add(graph.id);
@@ -407,6 +413,7 @@ export default class PipelineManagerEditor extends Editor {
         const usedSubgraphParent = {};
 
         this.nodeColors.clear();
+        this.nodePills.clear();
         state.graphs.forEach((graph) => {
             graph.nodes.forEach((n) => {
                 this.renderViews.set(graph.id, [this.defaultView]);
@@ -442,6 +449,9 @@ export default class PipelineManagerEditor extends Editor {
                     ?.filter(({ id }) => state.graphs.find((el) => el.id === id) === undefined)
                     .forEach(({ id }) => result.errors.push([`The related graph of id ${id} is not defined`]));
                 this.setNodeColor(n.id, n.color);
+                if (n.pill?.text) {
+                    this.nodePills.set(n.id, n.pill);
+                }
             });
         });
         let graphRootLoad = entryGraph;
@@ -929,6 +939,8 @@ export default class PipelineManagerEditor extends Editor {
     getPillText(node) {
         const viewPill = this._getFromView(node, 'pill');
         if (viewPill?.text) return viewPill.text;
+        const ownPill = this.nodePills.get(node.id);
+        if (ownPill?.text) return ownPill.text;
         const nodeType = this.nodeTypes.get(node.type);
         if (nodeType?.pill !== undefined) return nodeType.pill?.text;
         if (nodeType?.style !== undefined) return this.getNodeStyle(nodeType.style)?.pill?.text;
@@ -1082,6 +1094,8 @@ export default class PipelineManagerEditor extends Editor {
     getPillColor(node) {
         const viewPill = this._getFromView(node, 'pill');
         if (viewPill?.color) return viewPill.color;
+        const ownPill = this.nodePills.get(node.id);
+        if (ownPill?.text && ownPill?.color) return ownPill.color;
         const nodeType = this.nodeTypes.get(node.type);
         const pill = nodeType?.pill !== undefined
             ? nodeType.pill

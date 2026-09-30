@@ -68,6 +68,8 @@ Each node has:
 * `color` - optional field defining a hexadecimal color that will be used as the node background in the editor.
   This overrides the node color set in the specification.
   If not provided, the color set in the specification will be used instead.
+* `pill` - optional tag displayed in the top right corner of the node, over the one its node type sets in the specification.
+  It has a `text` and, optionally, a `color` (white by default), as a node type's `pill` does.
 * `views` - optional field that can define alternative ways to display the node. Each element has to have assigned:
   * `name` - name of the alternative view
   * `position` - position of the node in alternative view

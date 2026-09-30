@@ -67,6 +67,9 @@
                     "style": {
                         "$ref": "unresolved_specification_schema.json#/$defs/style"
                     },
+                    "pill": {
+                        "$ref": "metadata_schema.json#/$defs/pill"
+                    },
                     "properties": {
                         "description": "List describing the node parameterized values",
                         "type": "array",
