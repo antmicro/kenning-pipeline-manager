@@ -335,6 +335,26 @@ test('add output interface to custom shape node', async ({ page }, testInfo) => 
     await assertOutputCount(node, 1);
 });
 
+test('small custom shape node test', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-with-shape-specification.json');
+
+    const zoomButton = page.locator('.zoom-center');
+
+    await openNodePalette(page);
+    await addNode(page, 'default', 'SmallBox', 300, 300, true);
+    await zoomButton.dispatchEvent('click');
+
+    const node = getNode(page,'SmallBox');
+    const bbox = await node.boundingBox();
+
+    const widthError = Math.abs( 30 - bbox.width);
+    const heightError = Math.abs( 30 - bbox.height);
+
+    expect(widthError <= 50).toBeTruthy();
+    expect(heightError <= 50).toBeTruthy();
+});
+
 test('hiding property', async ({ page }, testInfo) => {
     await page.goto(getUrl());
     await loadIncludeSpecification(page, testInfo);
