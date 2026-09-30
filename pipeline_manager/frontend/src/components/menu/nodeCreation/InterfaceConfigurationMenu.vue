@@ -72,6 +72,13 @@ export default defineComponent({
             maxConnectionsCount: ref(0),
         };
 
+        const mouseDownPos = {
+            x: 0,
+            y: 0,
+        };
+        // If move moved by more than the threshold during drag, interface won't be added
+        const DRAG_THRESHOLD = 5;
+
         const close = () => {
             menuState.interfaceMenu = false;
             const editorManager = EditorManager.getEditorManagerInstance();
@@ -218,6 +225,12 @@ export default defineComponent({
             return false;
         };
 
+        const onMouseDown = (event: MouseEvent) => {
+            if (event.button !== 0) return;
+            mouseDownPos.x = event.clientX;
+            mouseDownPos.y = event.clientY;
+        };
+
         const waitForMousePosition = (event: MouseEvent) => {
             // check, if mouse event occurred on graph editor
             if (!editorMouseClick(event)) {
@@ -229,6 +242,14 @@ export default defineComponent({
                 cleanAddInterface();
                 return;
             }
+
+            // mouse drag detecting
+            const deltaX = Math.abs(event.clientX - mouseDownPos.x);
+            const deltaY = Math.abs(event.clientY - mouseDownPos.y);
+            if (deltaX > DRAG_THRESHOLD || deltaY > DRAG_THRESHOLD) {
+                return;
+            }
+
             const editorManager = EditorManager.getEditorManagerInstance();
             const nodeRect = configurationState?.nodeRef?.getBoundingClientRect() ?? {
                 x: 0, y: 0, width: 1, height: 1,
@@ -280,7 +301,8 @@ export default defineComponent({
             menuState.addingPositionedInterface = false;
             menuState.previewInterface = null;
             window.removeEventListener('keydown', onKeyDown);
-            window.removeEventListener('mousedown', waitForMousePosition);
+            window.removeEventListener('mousedown', onMouseDown);
+            window.removeEventListener('mouseup', waitForMousePosition);
             window.removeEventListener('mousemove', prerenderInterface);
             window.removeEventListener('wheel', prerenderInterface);
         };
@@ -297,12 +319,13 @@ export default defineComponent({
                     }
                     NotificationHandler.showToast('info', 'Click on the node to add interface.', null, true);
                     menuState.addingPositionedInterface = true;
-                    window.addEventListener('mousedown', waitForMousePosition);
                     menuState.previewInterface = {
                         name: newInterface.name,
                         x: 0.5,
                         y: 0.5,
                     };
+                    window.addEventListener('mousedown', onMouseDown);
+                    window.addEventListener('mouseup', waitForMousePosition);
                     window.addEventListener('mousemove', prerenderInterface);
                     window.addEventListener('wheel', prerenderInterface);
                     window.addEventListener('keydown', onKeyDown);

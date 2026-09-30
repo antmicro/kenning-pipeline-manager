@@ -358,9 +358,9 @@ test('do not add output interface when node browser element clicked', async ({ p
     await assertOutputCount(node, 0);
     await addOutputInterface(page, node);
     await page.getByText('New Node Type', { exact: true }).click();
-    await assertOutputCount(node, 0);
     await page.mouse.click(370, 360);
-    await assertOutputCount(node, 1);
+    // Node configuration menu should open instead of interface placing
+    await assertOutputCount(node, 0);
 });
 
 test('small custom shape node test', async ({ page }) => {
@@ -381,6 +381,59 @@ test('small custom shape node test', async ({ page }) => {
 
     expect(widthError <= 50).toBeTruthy();
     expect(heightError <= 50).toBeTruthy();
+});
+
+test('precise interface adding after mouse drag', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-with-shape-specification.json');
+    await loadDataflow(page, 'sample-with-shape-dataflow.json');
+
+    const node = getNode(page, 'Voltage');
+    const interfaces = page.locator('.baklava-node-interface');
+    await assertOutputCount(node, 0);
+    await addOutputInterface(page, node);
+
+    const nodeBox = await node.boundingBox();
+    if (!nodeBox) {
+        throw new Error();
+    }
+    const nodeBoxOffset = 20;
+    const initialNodeCornerX = nodeBox.x;
+    const initialNodeCornerY = nodeBox.y;
+
+    const initialMouseDownPositionX = initialNodeCornerX + nodeBoxOffset;
+    const initialMouseDownPositionY = initialNodeCornerY + nodeBoxOffset;
+
+    await page.mouse.move(initialMouseDownPositionX, initialMouseDownPositionY);
+    await page.mouse.down();
+    await page.mouse.move(
+        initialMouseDownPositionX + 200,
+        initialMouseDownPositionY + 200,
+        { steps: 5 },
+    );
+    await page.mouse.up();
+
+    await assertOutputCount(node, 0);
+    const box = await node.boundingBox();
+    if (!box) {
+        throw new Error();
+    }
+    const clickX = box.x + box.width / 2;
+    const clickY = box.y + box.height / 2;
+    await page.mouse.click(clickX, clickY);
+    await assertOutputCount(node, 1);
+    const newInterfacePort = interfaces.filter({ hasText: 'New interface' }).locator('.__port');
+    await expect(newInterfacePort).toBeVisible();
+    const newInterfacePortBox = await newInterfacePort.boundingBox();
+    if (!newInterfacePortBox) {
+        throw new Error();
+    }
+
+    const interfaceCenterX = newInterfacePortBox.x + newInterfacePortBox.width / 2;
+    const interfaceCenterY = newInterfacePortBox.y + newInterfacePortBox.height / 2;
+
+    expect(Math.abs(interfaceCenterX - clickX)).toBeLessThanOrEqual(2);
+    expect(Math.abs(interfaceCenterY - clickY)).toBeLessThanOrEqual(2);
 });
 
 test('hiding property', async ({ page }, testInfo) => {
