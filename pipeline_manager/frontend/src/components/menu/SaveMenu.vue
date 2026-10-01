@@ -82,6 +82,7 @@ export default defineComponent({
         };
 
         const readonly = createCheckboxOption('Make graph read only', 'readonly');
+        const predefinedGraph = createCheckboxOption('Make graph structure read only', 'predefinedGraph');
         const hideHud = createCheckboxOption('Disable HUD', 'hideHud');
         const position = createCheckboxOption('Preserve current view location', 'position');
         const hideLayers = createCheckboxOption('Save hidden layers info', 'hideLayers');
@@ -96,7 +97,18 @@ export default defineComponent({
         })), undefined];
 
         const options = computed(() =>
-            [readonly, hideHud, position, hideLayers, graph, minify, graphName, dataflowname, save]
+            [
+                readonly,
+                predefinedGraph,
+                hideHud,
+                position,
+                hideLayers,
+                graph,
+                minify,
+                graphName,
+                dataflowname,
+                save,
+            ]
                 .filter(([option, _]) => option?.value !== undefined)
                 .map(([option, label]) => [option.value, label]));
 

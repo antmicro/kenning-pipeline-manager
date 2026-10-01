@@ -12,6 +12,7 @@ import { brokenImage } from '../../../resources/broken_image.js';
 
 interface SaveConfiguration {
     readonly?: boolean;
+    predefinedGraph?: boolean;
     hideHud?: boolean;
     position?: boolean;
     hideLayers?: boolean;
@@ -278,6 +279,7 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
 
 export type GraphSaveOptions = {
     readonly?: boolean;
+    predefinedGraph?: boolean;
     hideHud?: boolean;
     position?: boolean;
     hideLayers?: boolean;
@@ -292,6 +294,7 @@ export function serializeGraph(options: GraphSaveOptions = {}) {
     const specification = editorManager.saveSpecification();
     const dataflow = editorManager.saveDataflow({
         readonly: !!options.readonly,
+        predefinedGraph: !!options.predefinedGraph,
         hideHud: !!options.hideHud,
         position: !!options.position,
         hideLayers: !!options.hideLayers,
@@ -309,6 +312,7 @@ export function serializeGraph(options: GraphSaveOptions = {}) {
 
 export const saveGraphConfiguration: SaveConfiguration = {
     readonly: false,
+    predefinedGraph: false,
     hideHud: false,
     position: false,
     hideLayers: false,
@@ -349,6 +353,7 @@ export const saveGraphConfiguration: SaveConfiguration = {
 
     reset() {
         this.readonly = false;
+        this.predefinedGraph = false;
         this.hideHud = false;
         this.position = false;
         this.graphName = null;

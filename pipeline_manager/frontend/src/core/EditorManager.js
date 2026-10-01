@@ -2315,6 +2315,7 @@ export default class EditorManager {
      *
      * @param {Object} obj Parameters.
      * @param {Boolean} obj.readonly whether the dataflow should be saved in readonly mode
+     * @param {Boolean} obj.predefinedGraph whether the dataflow should be saved as predefined graph
      * @param {Boolean} obj.hideHud whether the dataflow should be saved in hideHud mode
      * @param {Boolean} obj.position whether the dataflow should store panning and scaling values
      * @param {Boolean} obj.hideLayers whether the dataflow should store hidden layers
@@ -2323,7 +2324,7 @@ export default class EditorManager {
      * @returns Serialized dataflow.
      */
     /* eslint-disable-next-line object-curly-newline */
-    saveDataflow({ readonly, hideHud, position, hideLayers, graphName } = {}) {
+    saveDataflow({ readonly, predefinedGraph, hideHud, position, hideLayers, graphName } = {}) {
         const save = this.baklavaView.editor.save();
         save.version = this.specificationVersion;
 
@@ -2382,6 +2383,7 @@ export default class EditorManager {
 
         [
             [readonly, 'readonly'],
+            [predefinedGraph, 'predefinedGraph'],
             [hideHud, 'hideHud'],
             [this.editor.allowLoopbacks, 'allowLoopbacks'],
             [this.baklavaView.twoColumn, 'twoColumn'],
