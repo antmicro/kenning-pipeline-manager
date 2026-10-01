@@ -51,5 +51,4 @@ async def run_rpc_client():
     await client.start_json_rpc_client()
 
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(run_rpc_client())
+asyncio.run(run_rpc_client())
