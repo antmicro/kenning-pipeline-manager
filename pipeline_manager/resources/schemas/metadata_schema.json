@@ -69,6 +69,11 @@
             "description": "Flag determining whether the editor is in readonly mode",
             "default": false
         },
+        "predefinedGraph": {
+            "type": "boolean",
+            "description": "Predefined graph mode: graph structure is read-only, settings and property changes are enabled",
+            "default": false
+        },
         "twoColumn": {
             "type": "boolean",
             "description": "Flag determining whether displaying nodes as two columns",
