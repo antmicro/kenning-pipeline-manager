@@ -1979,6 +1979,14 @@ export default class EditorManager {
         }
 
         this.baklavaView.editor.readonly = metadata?.readonly ?? this.defaultMetadata.readonly;
+        this.baklavaView.editor.predefinedGraph =
+            metadata?.predefinedGraph ?? this.defaultMetadata.predefinedGraph;
+
+        if (!this.baklavaView.editor.readonly && this.baklavaView.editor.predefinedGraph) {
+            // works the same in most cases - set here for simplicity
+            this.baklavaView.editor.readonly = true;
+        }
+
         this.baklavaView.editor.hideHud = metadata?.hideHud ?? this.defaultMetadata.hideHud;
 
         this.baklavaView.editor.nodeStyles.set(NEW_NODE_STYLE, { icon: 'NewNode' });
