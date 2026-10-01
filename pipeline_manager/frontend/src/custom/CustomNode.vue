@@ -321,7 +321,12 @@ const externalApplicationManager = getExternalApplicationManager();
     .forEach(([name, intf]) => {
         if (!name.startsWith('property_')) {
             let firstWatch = true;
-            watch(intf, async (value) => {
+            // What a change is reported as is the interface's external name
+            // (`interfaces_diff`), so that is what is watched. Watching the
+            // interface itself is deep, and reaches every member of its group
+            // through `groupSlaves`: folding a group of n woke n watchers that
+            // each walked all n, and sent n reports of nothing changed.
+            watch(() => intf.externalName, async () => {
                 if (!externalApplicationManager.isConnected()) {
                     firstWatch = true;
                     return;
@@ -336,8 +341,8 @@ const externalApplicationManager = getExternalApplicationManager();
                     interfaces: [],
                 };
                 data.interfaces.push({
-                    id: value.id,
-                    externalName: value.externalName,
+                    id: intf.id,
+                    externalName: intf.externalName,
                 });
                 await externalApplicationManager.notifyAboutChange('interfaces_on_change', data);
             });
