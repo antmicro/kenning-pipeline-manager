@@ -343,7 +343,18 @@ export default {
 
         const readonlyOptions = computed(() => {
             if (props.viewModel.editor.readonly) {
-                return [];
+                const options = [];
+                if (props.viewModel.editor.predefinedGraph) {
+                    options.push(
+                        logLevel.value,
+                        connectionStyleOption.value,
+                        backgroundGridSize.value,
+                    );
+                }
+                if (viewsPresent.value) {
+                    options.push(viewSelected.value);
+                }
+                return options;
             }
             const options = [
                 logLevel.value,
@@ -354,6 +365,11 @@ export default {
                 hideUnconnectedButton.value,
                 showHiddenInterfacesButton.value,
                 backgroundGridSize.value,
+            ];
+            if (viewsPresent.value) {
+                options.push(viewSelected.value);
+            }
+            options.push(
                 clearEditor.value,
                 movementStep.value,
                 hideAnchors.value,
@@ -361,10 +377,7 @@ export default {
                 showIds.value,
                 showHiddenProperties.value,
                 removeEmptySubgraphs.value,
-            ];
-            if (viewsPresent.value) {
-                options.push(viewSelected.value);
-            }
+            );
             if (props.viewModel.settings.toggleableEditableTypes) {
                 options.push(editableNodeTypes.value);
             }

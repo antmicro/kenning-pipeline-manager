@@ -161,7 +161,10 @@ export default defineComponent({
 
         props.intf.events.beforeSetValue.unsubscribe(props.intf);
         props.intf.events.beforeSetValue.subscribe(props.intf, (value, prevent) => {
-            if (viewModel.value.editor.readonly) {
+            if (viewModel.value.editor.readonly && !viewModel.value.editor.predefinedGraph) {
+                prevent();
+            }
+            if (props.intf.dynamicCounter && viewModel.value.editor.predefinedGraph) {
                 prevent();
             }
 
