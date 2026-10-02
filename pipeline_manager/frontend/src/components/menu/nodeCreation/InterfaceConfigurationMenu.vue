@@ -208,15 +208,12 @@ export default defineComponent({
                 return;
             }
             const editorManager = EditorManager.getEditorManagerInstance();
+            const nodeRect = configurationState?.nodeRef?.getBoundingClientRect() ?? {
+                x: 0, y: 0, width: 1, height: 1,
+            };
 
-            const x = event.clientX;
-            const y = event.clientY;
-
-            const infX = x - (configurationState?.nodeRect?.x ?? 0);
-            const infY = y - (configurationState?.nodeRect?.y ?? 0);
-
-            const nodeWidth = configurationState?.nodeRect?.width ?? 1;
-            const nodeHeight = configurationState?.nodeRect?.height ?? 1;
+            const infX = event.clientX - nodeRect.x;
+            const infY = event.clientY - nodeRect.y;
 
             const nodeName = configurationState.nodeData.name;
 
@@ -231,8 +228,8 @@ export default defineComponent({
                 }
                 // Add a style for new interface
                 nodeStyle.positions[newInterface.name] = {
-                    x: Math.max(Math.min((infX / nodeWidth) * 100.0, 100.0), 0),
-                    y: Math.max(Math.min((infY / nodeHeight) * 100.0, 100.0), 0),
+                    x: Math.max(Math.min((infX / nodeRect.width) * 100.0, 100.0), 0),
+                    y: Math.max(Math.min((infY / nodeRect.height) * 100.0, 100.0), 0),
                 };
                 editorManager.updateNodeStyle(nodeTypeStyle, nodeStyle);
             }

@@ -53,7 +53,7 @@ export type ConfigurationState = {
     nodeData: NodeDataConfiguration,
     properties: PropertyConfiguration[],
     interfaces: InterfaceConfiguration[],
-    nodeRect?: NodeRect
+    nodeRef?: HTMLElement,
     success?: boolean,
     pill?: object,
     extends?: any,

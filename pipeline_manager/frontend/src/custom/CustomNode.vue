@@ -588,7 +588,6 @@ const onContextMenuTitleClick = async (action) => {
     }
 
     if (action !== 'delete' && action !== 'disconnect') {
-        const nodeRect = nodeRef.value.getBoundingClientRect();
         const nodeData = {
             name: props.node.type,
             category: nodeCategory,
@@ -601,12 +600,7 @@ const onContextMenuTitleClick = async (action) => {
 
         configurationState.editedType = nodeData.name;
         configurationState.nodeData = nodeData;
-        configurationState.nodeRect = {
-            x: nodeRect.x,
-            y: nodeRect.y,
-            width: nodeRect.width,
-            height: nodeRect.height,
-        };
+        configurationState.nodeRef = nodeRef;
 
         let nodeInterfaces = [...displayedInputs.value, ...displayedOutputs.value];
         nodeInterfaces = nodeInterfaces.filter((intf) => intf.direction !== undefined);
