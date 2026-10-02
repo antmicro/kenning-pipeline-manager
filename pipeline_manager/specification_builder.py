@@ -1329,6 +1329,19 @@ class SpecificationBuilder(object):
         """
         self._nodes[name]["color"] = color
 
+    def add_node_type_two_column(self, name: str, twoColumn: bool):
+        """
+        Sets node's twoColumn property.
+
+        Parameters
+        ----------
+        name: str
+            Name of the node
+        twoColumn: bool
+            Enables or disables two column mode.
+        """
+        self._nodes[name]["twoColumn"] = twoColumn
+
     def add_node_type_pill(
         self, name: str, text: str, color: Optional[str] = None
     ):
@@ -1457,6 +1470,8 @@ class SpecificationBuilder(object):
             )
         if "description" in node:
             self.add_node_description(nodename, node["description"])
+        if "twoColumn" in node:
+            self.add_node_type_two_column(nodename, node["twoColumn"])
         if "color" in node:
             self.add_node_type_color(nodename, node["color"])
         if "pill" in node:
