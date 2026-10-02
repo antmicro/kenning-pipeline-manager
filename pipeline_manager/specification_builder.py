@@ -1329,6 +1329,27 @@ class SpecificationBuilder(object):
         """
         self._nodes[name]["color"] = color
 
+    def add_node_type_pill(
+        self, name: str, text: str, color: Optional[str] = None
+    ):
+        """
+        Sets node's pill.
+
+        Parameters
+        ----------
+        name: str
+            Name of the node
+        text: str
+            Content of the pill
+        color: Optional[str]
+            Background color. The default is white
+        """
+        if "pill" not in self._nodes[name]:
+            self._nodes[name]["pill"] = {}
+
+        self._nodes[name]["pill"]["text"] = text
+        self._nodes[name]["pill"]["color"] = color
+
     def add_node_type_size(
         self, name: str, width: int, height: Optional[int] = None
     ):
@@ -1438,6 +1459,12 @@ class SpecificationBuilder(object):
             self.add_node_description(nodename, node["description"])
         if "color" in node:
             self.add_node_type_color(nodename, node["color"])
+        if "pill" in node:
+            pill = node["pill"]
+            text = pill.get("text", None)
+            color = pill.get("color", None)
+            if text is not None:
+                self.add_node_type_pill(nodename, text, color)
         if "width" in node or "height" in node:
             width = node.get("width", None)
             height = node.get("height", None)
