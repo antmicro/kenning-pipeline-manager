@@ -292,7 +292,7 @@
             },
             {
                 "name": "Both",
-                "nodeLayers": ["processing"],
+                "nodeLayers": ["filesystem"],
                 "nodeInterfaces": ["BinaryImage"]
             }
         ],
