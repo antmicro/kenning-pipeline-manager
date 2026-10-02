@@ -1363,6 +1363,19 @@ class SpecificationBuilder(object):
         self._nodes[name]["pill"]["text"] = text
         self._nodes[name]["pill"]["color"] = color
 
+    def add_node_type_tag(self, name: str, tag: str):
+        """
+        Sets node's tag.
+
+        Parameters
+        ----------
+        name: str
+            Name of the node
+        tag: str
+            Tag assigned to the node.
+        """
+        self._nodes[name]["tag"] = tag
+
     def add_node_type_size(
         self, name: str, width: int, height: Optional[int] = None
     ):
@@ -1472,6 +1485,8 @@ class SpecificationBuilder(object):
             self.add_node_description(nodename, node["description"])
         if "twoColumn" in node:
             self.add_node_type_two_column(nodename, node["twoColumn"])
+        if "tag" in node:
+            self.add_node_type_tag(nodename, node["tag"])
         if "color" in node:
             self.add_node_type_color(nodename, node["color"])
         if "pill" in node:
