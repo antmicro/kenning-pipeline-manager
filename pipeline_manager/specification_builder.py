@@ -1329,6 +1329,28 @@ class SpecificationBuilder(object):
         """
         self._nodes[name]["color"] = color
 
+    def add_node_type_size(
+        self, name: str, width: int, height: Optional[int] = None
+    ):
+        """
+        Sets node's width and height.
+
+        Parameters
+        ----------
+        name: str
+            Name of the node
+        width: int
+            Width of the node
+        height: Optional[int]
+            Height of the node
+        """
+        self._nodes[name]["width"] = width
+
+        if height is not None:
+            self._nodes[name]["height"] = height
+        elif "height" in self._nodes:
+            del self._nodes[name]["height"]
+
     def add_node_type_style(self, name: str, style: Style):
         """
         Sets style for the node.
@@ -1416,6 +1438,11 @@ class SpecificationBuilder(object):
             self.add_node_description(nodename, node["description"])
         if "color" in node:
             self.add_node_type_color(nodename, node["color"])
+        if "width" in node or "height" in node:
+            width = node.get("width", None)
+            height = node.get("height", None)
+
+            self.add_node_type_size(nodename, width, height)
         if "subgraphId" in node:
             self.add_node_type_subgraph_id(nodename, node["subgraphId"])
         for interface in node.get("interfaces", []):
