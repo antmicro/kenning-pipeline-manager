@@ -62,6 +62,12 @@ def create_backend(argv):  # noqa: D103
         type=Path,
     )
     parser.add_argument(
+        "--assets-directory",
+        help="Additional assets location directory; "
+        "it will be mounted to /assets",
+        type=Path,
+    )
+    parser.add_argument(
         "--relative-pm-url",
         help="Path in URL where Pipeline Manager should be served",
         type=Path,
@@ -114,7 +120,10 @@ def create_backend(argv):  # noqa: D103
     app = None
     if not args.skip_frontend:
         app = create_app(
-            args.frontend_directory, args.relative_pm_url, args.follow_symlink
+            args.frontend_directory,
+            args.relative_pm_url,
+            args.follow_symlink,
+            args.assets_directory,
         )
 
     return sio, app, args

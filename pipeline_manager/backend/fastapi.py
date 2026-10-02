@@ -6,6 +6,7 @@
 Provides function for creating FastAPI application.
 """
 
+import logging
 import shutil
 from pathlib import Path
 from typing import Optional
@@ -42,6 +43,7 @@ def create_app(
     frontend_dir: Optional[Path] = None,
     relative_pm_url: Optional[Path] = None,
     follow_symlink: bool = False,
+    assets_dir: Optional[Path] = None,
 ) -> FastAPI:
     """
     Hosts frontend application.
@@ -56,6 +58,8 @@ def create_app(
         Whether StaticFiles should follow symlinks when resolving files
         under frontend_dir. Needed when frontend_dir, or files within it,
         are only reachable through symlinks.
+    assets_dir : Optional[Path]
+        Path where with additional assets; it will be mounted to /assets.
 
     Returns
     -------
@@ -85,6 +89,29 @@ def create_app(
             frontend_dir / relative_pm_url,
             dirs_exist_ok=True,
         )
+    if assets_dir:
+        if not assets_dir.exists():
+            raise ValueError(
+                f"Provided asset directory: {assets_dir} does not exist."
+            )
+
+        frontend_assets_dir = frontend_dir / "assets"
+        if (frontend_assets_dir).exists():
+            frontend_assets_dir = frontend_assets_dir.resolve()
+            logging.log(
+                logging.WARNING,
+                "Custom asset directory shadows assets "
+                f"from frontend directory ({frontend_assets_dir}). "
+                "The frontend assets will not be reachable.",
+            )
+
+        assets_dir = assets_dir.absolute()
+        app.mount(
+            "/assets",
+            StaticFiles(directory=assets_dir, follow_symlink=follow_symlink),
+            name="static",
+        )
+
     app.mount(
         "/",
         StaticFiles(
