@@ -42,6 +42,10 @@ This object specifies additional editor options and contains the following optio
   Modification of any properties is also disabled.
   The user is only allowed to load existing dataflows.
   Default value is `false`.
+* `predefinedGraph` - boolean value determining whether the editor is in predefined-graph mode.
+  This is a partial read-only mode where the user cannot create or remove nodes and connections.
+  Modification of property values and editor settings is enabled.
+  Default value is `false`.
 * `twoColumn` - boolean value determining the layout of the nodes.
   If set to `true`, then input and output sockets are both rendered in the top part of the node and properties are displayed below.
   Default value is `false`.
