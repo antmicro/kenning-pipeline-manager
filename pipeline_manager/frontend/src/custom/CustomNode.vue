@@ -481,18 +481,15 @@ const contextMenuTitleItems = computed(() => {
         items.at(-1).endSection = true;
     }
     if (!viewModel.value.editor.readonly) {
-        items.push(
-            { value: 'rename', label: 'Rename', icon: icons.Pencil });
-    }
-    if (hiddenInterfacesPresent) {
-        items.push({ value: 'show-hidden-interfaces', label: 'Show hidden interfaces', icon: icons.Visible });
-    }
-    if (shownUnconnected) {
-        items.push({ value: 'hide-unconnected-interfaces', label: 'Hide unconnected interfaces', icon: icons.Hide });
-    }
+        if (hiddenInterfacesPresent) {
+            items.push({ value: 'show-hidden-interfaces', label: 'Show hidden interfaces', icon: icons.Visible });
+        }
+        if (shownUnconnected) {
+            items.push({ value: 'hide-unconnected-interfaces', label: 'Hide unconnected interfaces', icon: icons.Hide });
+        }
 
-    if (!viewModel.value.editor.readonly) {
         items.push(
+            { value: 'rename', label: 'Rename', icon: icons.Pencil },
             { value: 'disconnect', label: 'Disconnect', icon: icons.Disconnect },
             { value: 'delete', label: 'Delete', icon: icons.Bin },
         );
