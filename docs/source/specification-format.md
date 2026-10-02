@@ -451,6 +451,7 @@ This object specifies a single node.
 * `pill` - a dictionary that defines an additional node tag displayed in the top right corner of the node. It has the following entries:
   * `text` - content of the pill,
   * `color` (optional) - background color. The default color is white.
+* `height` - a default height, in pixels, of a node in the editor. Most relevant with [Custom shape nodes](./custom-shaped-node.md).
 
 Some or all of the properties above (except for `name`) can be derived from existing node types using the `extends` list - check [Node type inheritance](#node-type-inheritance).
 
