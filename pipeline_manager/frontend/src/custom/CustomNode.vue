@@ -448,25 +448,27 @@ const contextMenuTitleItems = computed(() => {
 
     items.push(...nodeURLs);
 
-    const customContextMenuActions = [
-        ...(viewModel.value.contextMenuActions ?? []),
-        ...viewModel.value.editor.getNodeContextMenuActions(node.value.type),
-        // Add subgraph node actions if the node is a subgraph node
-        ...(isGraphNode.value
-            ? (viewModel.value.subgraphContextMenuActions ?? [])
-            : []),
-    ];
-    if (customContextMenuActions.length > 0) {
-        if (items.length > 0) {
-            items.at(-1).endSection = true;
-        }
-        customContextMenuActions.forEach((customAction) => {
-            items.push({
-                value: `custom:${customAction.procedureName}`,
-                label: customAction.name,
-                icon: customAction.iconName ? icons[customAction.iconName] : undefined,
+    if (externalApplicationManager.isConnected() && !viewModel.value.editor.readonly) {
+        const customContextMenuActions = [
+            ...(viewModel.value.contextMenuActions ?? []),
+            ...viewModel.value.editor.getNodeContextMenuActions(node.value.type),
+            // Add subgraph node actions if the node is a subgraph node
+            ...(isGraphNode.value
+                ? (viewModel.value.subgraphContextMenuActions ?? [])
+                : []),
+        ];
+        if (customContextMenuActions.length > 0) {
+            if (items.length > 0) {
+                items.at(-1).endSection = true;
+            }
+            customContextMenuActions.forEach((customAction) => {
+                items.push({
+                    value: `custom:${customAction.procedureName}`,
+                    label: customAction.name,
+                    icon: customAction.iconName ? icons[customAction.iconName] : undefined,
+                });
             });
-        });
+        }
     }
 
     if (items.length > 1) {
