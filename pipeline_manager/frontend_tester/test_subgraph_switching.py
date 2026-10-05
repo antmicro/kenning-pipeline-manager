@@ -87,14 +87,6 @@ def build_server_app(request: pytest.FixtureRequest):
             process.kill()
 
 
-@pytest.fixture(scope="session")
-def install_playwright_browser():
-    """
-    Fixture installing Firefox required for tests with Playwright.
-    """
-    os.system("playwright install firefox --with-deps")
-
-
 def upload_dataflow_file(
     page: Page,
 ):
@@ -149,7 +141,6 @@ def execute_enter_subgraph_scenario(context: BrowserContext):
 def test_subgraph_switching(
     request: pytest.FixtureRequest,
     rpc_server,
-    install_playwright_browser,
 ):
     """
     Test if switching to a subgraph while utilizing RPC communication
