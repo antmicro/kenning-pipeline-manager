@@ -565,6 +565,7 @@ export default {
                         ref="graphDetails"
                     />
                     <SettingsButton
+                        v-if="!editorManager.baklavaView.settings.hideSettings"
                         :mobileClasses="mobileClasses"
                         :hover="isHovered('settings')"
                         @onClicked="() => togglePanel(panels.settings)"
