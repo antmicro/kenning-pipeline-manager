@@ -239,11 +239,14 @@ export default defineComponent({
         const prerenderInterface = (event: MouseEvent) => {
             const x = event.clientX;
             const y = event.clientY;
-            const infX = x - (configurationState?.nodeRect?.x ?? 0);
-            const infY = y - (configurationState?.nodeRect?.y ?? 0);
+            const nodeRect = configurationState?.nodeRef?.getBoundingClientRect() ?? {
+                x: 0, y: 0, width: 1, height: 1,
+            };
+            const infX = x - (nodeRect?.x ?? 0);
+            const infY = y - (nodeRect?.y ?? 0);
 
-            const nodeWidth = configurationState?.nodeRect?.width ?? 1;
-            const nodeHeight = configurationState?.nodeRect?.height ?? 1;
+            const nodeWidth = nodeRect?.width ?? 1;
+            const nodeHeight = nodeRect?.height ?? 1;
             menuState.previewInterface = {
                 name: newInterface.name,
                 x: Math.max(Math.min((infX / nodeWidth) * 100.0, 100.0), 0),
@@ -257,6 +260,7 @@ export default defineComponent({
             window.removeEventListener('keydown', onKeyDown);
             window.removeEventListener('mousedown', waitForMousePosition);
             window.removeEventListener('mousemove', prerenderInterface);
+            window.removeEventListener('wheel', prerenderInterface);
         };
 
         const addInterfaceMenu = computed(() => {
@@ -278,6 +282,7 @@ export default defineComponent({
                         y: 0.5,
                     };
                     window.addEventListener('mousemove', prerenderInterface);
+                    window.addEventListener('wheel', prerenderInterface);
                     window.addEventListener('keydown', onKeyDown);
                     return;
                 }
