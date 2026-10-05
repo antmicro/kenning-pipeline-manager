@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getUrl, loadVideoNodeId, closeTerminal, getContextMenu } from './config.js';
+import { expectNoConsoleErrors, getUrl, loadSpecification, loadDataflow, loadVideoNodeId, closeTerminal, getContextMenu } from './config.js';
 
 test('has title', async ({ page }) => {
     await page.goto(getUrl());
@@ -64,4 +64,26 @@ test('show menu by right-clicking on interface', async ({ page }) => {
     const menu = getContextMenu(page);
     await menu.waitFor();
     expect(await menu.filter({ hasText: 'Space Up' }).count()).toBeGreaterThan(0);
+});
+
+test('show context menu with URLs button and click it', async ({ page }) => {
+    // Do not allow errors in console, apart from Failed to load resource
+    expectNoConsoleErrors(page, ["Failed to load resource: net::ERR_FILE_NOT_FOUND"]);
+    // Load a website and wait until nodes are loaded.
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-specification-urls.json');
+    await loadDataflow(page, 'sample-dataflow.json');
+    const saveVideoNodeId = 'fc7d1706-6240-41e2-a8da-91c8577e09f9';
+    await page.waitForSelector(`#${saveVideoNodeId}`);
+    const node = page.locator(`#${saveVideoNodeId}`);
+
+    // Right-click on the node's title.
+    const nodeTitle = node.locator('.__title');
+    await nodeTitle.click({ button: 'right' });
+    const menu = getContextMenu(page);
+    await menu.waitFor();
+    // Check if button with custom link is present
+    expect(await menu.filter({ hasText: 'Open Hardware Portal' }).count()).toBeGreaterThan(0);
+    // Click custom link and make sure no error is raised
+    await menu.getByText('Renodepedia').click();
 });

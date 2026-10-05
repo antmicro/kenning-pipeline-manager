@@ -712,3 +712,25 @@ export async function closeTerminal(page) {
     }
     await expect(page.locator('#hterm-terminal')).not.toBeVisible();
 }
+
+/**
+ * Adds watcher on console ensuring that no errors (apart from favicon) are thrown.
+ *
+ * @param {import('playwright').Page} page - Playwright Page to perform actions on.
+ * @param {string[]} allowedErrors - Error messages that are expected to
+ */
+export function expectNoConsoleErrors(page, allowedErrors = []) {
+    page.on('console', msg => {
+        if (msg.type() !== "error") return;
+        let expectedError = false;
+        for (let i = 0; i < allowedErrors.length; ++i) {
+            if (msg.text() === allowedErrors[i] || msg.text().includes(allowedErrors[i])) {
+                expectedError = true;
+                break;
+            }
+        }
+
+        // Allow only favicon-related error in the console
+        expect(expectedError).toBeTruthy();
+    });
+}
