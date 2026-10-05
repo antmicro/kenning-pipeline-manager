@@ -877,12 +877,13 @@ export class CustomNode extends Node {
     }
 
     updateInterfaceKey(type, intf, oldKey, newKey) {
-        const afterEvent = type === 'output' ? this.events.addOutput : this.events.addInput;
-        const ioObject = type === 'output' ? this.outputs[oldKey] : this.inputs[oldKey];
+        const container = type === 'output' ? 'output' : 'input';
+        const afterEvent = container === 'output' ? this.events.addOutput : this.events.addInput;
+        const ioObject = container === 'output' ? this.outputs[oldKey] : this.inputs[oldKey];
 
         // remove old key
         ioObject.events.setValue.unsubscribe(this);
-        if (type === 'output') {
+        if (container === 'output') {
             delete this.outputs[oldKey];
         } else {
             delete this.inputs[oldKey];
@@ -890,12 +891,12 @@ export class CustomNode extends Node {
         afterEvent.emit(ioObject);
 
         // add a new key
-        if (type === 'output') {
+        if (container === 'output') {
             this.outputs[newKey] = intf;
         } else {
             this.inputs[newKey] = intf;
         }
-        this.initializeIntf(type, newKey, intf);
+        this.initializeIntf(container, newKey, intf);
         afterEvent.emit(intf);
     }
 

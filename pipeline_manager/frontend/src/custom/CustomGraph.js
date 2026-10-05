@@ -299,7 +299,10 @@ export default function createPipelineManagerGraph(graph) {
                     if (intf.direction === undefined) {
                         newNodeInstance.addInput(name, intf);
                     } else {
-                        newNodeInstance.addInterface(intf.direction, name, intf);
+                        // Make sure inout interfaces are marked as inputs
+                        newNodeInstance.addInterface(
+                            intf.direction === 'output' ? 'output' : 'input', name, intf,
+                        );
                     }
                 }
             });
