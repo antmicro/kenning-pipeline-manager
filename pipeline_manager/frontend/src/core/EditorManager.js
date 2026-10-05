@@ -199,6 +199,7 @@ export default class EditorManager {
         this.baklavaView.settings.disableInterfaceExpose = this.defaultMetadata
             .disableInterfaceExpose;
         this.baklavaView.settings.removeEmptySubgraphs = this.defaultMetadata.removeEmptySubgraphs;
+        this.baklavaView.settings.hideSettings = false;
 
         this.specificationVersion = unresolvedSpecificationSchema.version;
         this.baklavaView.commandHandler = useCommandHandler();
