@@ -418,6 +418,7 @@ export async function addInterface(page, node) {
     await (await getNodeTitle(node)).click({ button: 'right', force: true });
     await getContextMenu(page).getByText('Add interface').click();
     await page.getByRole('button', { name: 'Add interface' }).click({ force: true });
+    await expect(page.locator('.blur-panel:visible')).toHaveCount(0);
 }
 
 /**
@@ -435,6 +436,7 @@ export async function addOutputInterface(page, node) {
     await select.click();
     await select.locator('.__dropdown').getByText('output').click();
     await page.getByRole('button', { name: 'Add interface' }).click({ force: true });
+    await expect(page.locator('.blur-panel:visible')).toHaveCount(0);
 }
 
 /**
@@ -452,6 +454,7 @@ export async function addInputInterface(page, node) {
     await select.click();
     await select.locator('.__dropdown').getByText('input').click();
     await page.getByRole('button', { name: 'Add interface' }).click({ force: true });
+    await expect(page.locator('.blur-panel:visible')).toHaveCount(0);
 }
 
 

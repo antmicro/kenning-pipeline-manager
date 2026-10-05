@@ -201,7 +201,29 @@ export default defineComponent({
             }
         };
 
+        // returns true when clicked on every baklava element except node paletter or zoom
+        // returns false otherwise
+        const editorMouseClick = (event: MouseEvent) => {
+            const { target } = event;
+            if (!(target instanceof Element)) return false;
+
+            if (target.matches('.inner-editor') || target.closest(
+                '.inner-editor > .grouping-container, ' +
+                '.inner-editor > .node-container, ' +
+                '.inner-editor > .custom-connections-container, ' +
+                '.inner-editor > .selection-container',
+            ) !== null) {
+                return true;
+            }
+            return false;
+        };
+
         const waitForMousePosition = (event: MouseEvent) => {
+            // check, if mouse event occurred on graph editor
+            if (!editorMouseClick(event)) {
+                return;
+            }
+
             // right or middle button click cancel it
             if (event.button !== 0) {
                 cleanAddInterface();

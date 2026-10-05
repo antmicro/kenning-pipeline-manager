@@ -299,39 +299,67 @@ test('check custom shape node hidden interface name', async ({ page }) => {
     await expect(eInterface.locator('.__port-name')).not.toBeVisible();
 });
 
-test('add inout interface to custom shape node', async ({ page }, testInfo) => {
+test('add inout interface to custom shape node', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-with-shape-specification.json');
     await loadDataflow(page, 'sample-with-shape-dataflow.json');
 
-    const node = getNode(page,'Voltage');
+    const node = getNode(page, 'Voltage');
     await assertInoutCount(node, 2);
     await addInterface(page, node);
-    await page.mouse.click(370,360);
+    await page.mouse.click(370, 360);
     await assertInoutCount(node, 3);
 });
 
-test('add input interface to custom shape node', async ({ page }, testInfo) => {
+test('add input interface to custom shape node', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-with-shape-specification.json');
     await loadDataflow(page, 'sample-with-shape-dataflow.json');
 
-    const node = getNode(page,'Voltage');
+    const node = getNode(page, 'Voltage');
     await assertInputCount(node, 0);
     await addInputInterface(page, node);
-    await page.mouse.click(370,360);
+    await page.mouse.click(370, 360);
     await assertInputCount(node, 1);
 });
 
-test('add output interface to custom shape node', async ({ page }, testInfo) => {
+test('add output interface to custom shape node', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-with-shape-specification.json');
     await loadDataflow(page, 'sample-with-shape-dataflow.json');
 
-    const node = getNode(page,'Voltage');
+    const node = getNode(page, 'Voltage');
     await assertOutputCount(node, 0);
     await addOutputInterface(page, node);
-    await page.mouse.click(370,360);
+    await page.mouse.click(370, 360);
+    await assertOutputCount(node, 1);
+});
+
+test('do not add output interface when navbar element clicked', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-with-shape-specification.json');
+    await loadDataflow(page, 'sample-with-shape-dataflow.json');
+
+    const node = getNode(page, 'Voltage');
+    await assertOutputCount(node, 0);
+    await addOutputInterface(page, node);
+    await page.locator('.search-section').click();
+    await assertOutputCount(node, 0);
+    await page.mouse.click(370, 360);
+    await assertOutputCount(node, 1);
+});
+
+test('do not add output interface when node browser element clicked', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-with-shape-specification.json');
+    await loadDataflow(page, 'sample-with-shape-dataflow.json');
+
+    const node = getNode(page, 'Voltage');
+    await assertOutputCount(node, 0);
+    await addOutputInterface(page, node);
+    await page.getByText('New Node Type', { exact: true }).click();
+    await assertOutputCount(node, 0);
+    await page.mouse.click(370, 360);
     await assertOutputCount(node, 1);
 });
 
