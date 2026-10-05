@@ -1,15 +1,14 @@
 import { test, expect, Page, Locator } from '@playwright/test';
 import {
-    waitForNodeSubgraph,disableNavigationBar,closeTerminal,addSubgraph,dragAndDrop,
+    waitForNodeSubgraph,disableNavigationBar,addSubgraph,dragAndDrop,
     loadSpecification,loadDataflow,verifyNodeCount,getPathToJsonFile,checkForSubgraph,
-    waitForSubgraph,setYAML,getYAML,deleteProperty,addProperty,addInterface,enterSubgraph,
+    waitForSubgraph,getYAML,deleteProperty,addProperty,addInterface,enterSubgraph,
     leaveSubgraph,getNode,deleteNode, getUrl, openFileChooser, enableEditingNodes,
-    enableNavigationBar, addNode, getContextMenu,
+    enableNavigationBar, addNode, getContextMenu, AddConnection,
 } from './config.js';
 
 import os from 'os';
-import fs from 'fs';
-import YAML from 'yaml';
+import fs from 'fs/promises';
 import path from 'path';
 
 const countOfInitiallyExposedInterface = 3;
@@ -457,7 +456,7 @@ test('test inherited subgraph from specification', async ({ page }) => {
     const parentProps = await getNode(page, 'Test subgraph #2').locator('.__properties').locator('[id]').count();
 
     const specificationPath = getPathToJsonFile('sample-subgraph-specification.json');
-    const raw = fs.readFileSync(specificationPath, 'utf-8');
+    const raw = await fs.readFile(specificationPath, 'utf-8');
     const json = JSON.parse(raw);
     json.nodes.push({
         name: 'InheritedSubgraph',
@@ -472,7 +471,7 @@ test('test inherited subgraph from specification', async ({ page }) => {
         extends: ['Test subgraph #2'],
     });
     const outputPath = path.join(temporaryDir, 'modified-specification.json');
-    fs.writeFileSync(outputPath, JSON.stringify(json, null, 2), 'utf-8');
+    await fs.writeFile(outputPath, JSON.stringify(json, null, 2), 'utf-8');
 
     // load the specification with inherited subgraph
     const fileChooserSpec = await openFileChooser(page, 'specification');
@@ -551,4 +550,71 @@ test('test exposing bus type interface', async ({ page }) => {
     await leaveSubgraph(page);
 
     expect(await subgraphNode.locator('.__port').count()).toBe(0);
+});
+
+function interfacePort(page: Page, nodeName: string, interfaceName: string): Locator {
+    return getNode(page, nodeName)
+        .locator('.baklava-node-interface')
+        .filter({ has: page.locator('.__port-name').getByText(interfaceName, { exact: true }) })
+        .locator('.__port');
+}
+
+test('test connecting to an inout interface of a graph node with its graph in the dataflow', async ({ page }) => {
+    // The dataflow is built dynamically from sample-subgraph-dataflow.json:
+    // the subgraph definition of the "Test subgraph #1" node type (from
+    // sample-subgraph-specification.json) is embedded in the dataflow and the
+    // graph node is pointed at it with its `subgraph` field.
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-subgraph-specification.json');
+
+    const specification = JSON.parse(
+        await fs.readFile(getPathToJsonFile('sample-subgraph-specification.json'), 'utf-8'),
+    );
+    const dataflow = JSON.parse(
+        await fs.readFile(getPathToJsonFile('sample-subgraph-dataflow.json'), 'utf-8'),
+    );
+
+    const graphNode = dataflow.graphs[0].nodes.find((n) => n.name === 'Test subgraph #1');
+    const nodeSpecification = specification.nodes.find((n) => n.name === 'Test subgraph #1');
+    const subgraph = JSON.parse(JSON.stringify(
+        specification.graphs.find((g) => g.id === nodeSpecification.subgraphId),
+    ));
+
+    const exposedInterfaceIds = new Map();
+    subgraph.nodes.forEach((n) => n.interfaces.forEach((intf) => {
+        if (intf.externalName !== undefined) {
+            exposedInterfaceIds.set(intf.externalName, intf.id);
+        }
+    }));
+    graphNode.interfaces.forEach((intf) => {
+        if (exposedInterfaceIds.has(intf.name)) {
+            const oldId = intf.id;
+            intf.id = exposedInterfaceIds.get(intf.name);
+            const source = dataflow.graphs[0].connections.find((conn) => conn.from === oldId);
+            if (source) source.from = intf.id;
+            const target = dataflow.graphs[0].connections.find((conn) => conn.to === oldId);
+            if (target) target.to = intf.id;
+        }
+    });
+
+    dataflow.graphs.push(subgraph);
+    graphNode.subgraph = subgraph.id;
+
+    const outputPath = path.join(temporaryDir, 'sample-subgraph-embedded-dataflow.json');
+    await fs.writeFile(outputPath, JSON.stringify(dataflow, null, 2), 'utf-8');
+
+    const fileChooser = await openFileChooser(page, 'dataflow');
+    await fileChooser.setFiles(outputPath);
+    await verifyNodeCount(page, 4);
+
+    const connections = page.locator('.custom-connections-container > g');
+    await expect(connections).toHaveCount(3);
+    await AddConnection(
+        page,
+        interfacePort(page, 'Test node #1', 'Output'),
+        interfacePort(page, 'Test subgraph #1', 'Subgraph Inout 1'),
+    );
+    await expect(connections, {
+        message: 'Connecting to an inout interface of a graph node failed.',
+    }).toHaveCount(4);
 });
