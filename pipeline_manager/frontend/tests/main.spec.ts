@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { expectNoConsoleErrors, getUrl, loadSpecification, loadDataflow, loadVideoNodeId, closeTerminal, getContextMenu } from './config.js';
+import { getNode, expectNoConsoleErrors, getUrl, loadSpecification, loadDataflow, loadVideoNodeId, closeTerminal, getContextMenu } from './config.js';
 
 test('has title', async ({ page }) => {
     await page.goto(getUrl());
@@ -86,4 +86,17 @@ test('show context menu with URLs button and click it', async ({ page }) => {
     expect(await menu.filter({ hasText: 'Open Hardware Portal' }).count()).toBeGreaterThan(0);
     // Click custom link and make sure no error is raised
     await menu.getByText('Renodepedia').click();
+});
+test('test custom context menu visibility, with disconnected backend', async ({ page }) => {
+    // Load a website.
+    await page.goto(getUrl());
+    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
+    await page.waitForSelector(`#${loadVideoNodeId}`);
+
+    const filter2D = getNode(page, "Filter2D");
+    await filter2D.click({ button: "right" });
+
+    const nodeInfo = page.getByText("Node info");
+    // When backend is disconnected it should not be visible
+    expect(nodeInfo).not.toBeVisible();
 });
