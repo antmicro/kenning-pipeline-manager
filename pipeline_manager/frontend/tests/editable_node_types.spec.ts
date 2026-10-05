@@ -464,7 +464,8 @@ test('editing properties', async ({ page }, testInfo) => {
     }
     addInterface(page, node);
     // takes some time for the interface to show up, otherwise fails
-    await page.waitForTimeout(250);
+    const inf = node.getByText('New interface', { exact: true });
+    await inf.waitFor({'state': 'visible', timeout: 2_000});
     await assertInputCount(node, 1);
 });
 test('editing bus node', async ({ page }) => {
