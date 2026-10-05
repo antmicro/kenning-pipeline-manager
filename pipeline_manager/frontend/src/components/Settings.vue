@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
 import { LOG_LEVEL } from '../core/notifications';
 
@@ -366,6 +366,16 @@ export default {
             }
             return options;
         });
+
+        watch(() => [readonlyOptions, disableLayersOptions], () => {
+            // update settings set
+            if (disableLayersOptions.value.length > 0 || readonlyOptions.value.length > 0) {
+                props.viewModel.settings.hideSettings = false; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                return;
+            }
+
+            props.viewModel.settings.hideSettings = true; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+        }, { deep: true });
 
         return { settingOptions: readonlyOptions, disableLayersOptions };
     },
