@@ -4,8 +4,7 @@ Pipeline Manager provides [Sphinx](https://github.com/sphinx-doc/sphinx) extensi
 
 To use it, first include `pipeline_manager` in your installed packages, with following extra dependencies:
 
-* `docs` - optional, brings Sphinx and basic dependencies (can be skipped if Sphinx is in requirements)
-* `to-image` - optional, allows converting Pipeline Manager graphs to images automatically for documentation types other than HTML (e.g. PDF)
+* `docs` - optional, brings Sphinx and dependencies that allows converting Pipeline Manager graphs to images automatically for documentation types other than HTML (e.g. PDF).
 
 Secondly, add `pipeline_manager.sphinxext` to `extensions` in Sphinx's `conf.py` file:
 
@@ -70,5 +69,5 @@ So for example this is a valid directive usage:
 ```
 
 ```{eval-rst}
-.. autofunction:: pipeline_manager.sphinxext.draw_graph.build_pipeline_manager
+.. autofunction:: pipeline_manager.sphinxext.draw_graph.build_pipeline_manager_once
 ```
