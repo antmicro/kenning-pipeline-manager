@@ -9,7 +9,6 @@ Defines the editor context menu, the menu for saving/opening/exporting current g
 -->
 <script>
 import { watch } from 'vue';
-import jsonlint from 'jsonlint';
 import { toSvg } from 'html-to-image';
 import { useViewModel } from 'baklavajs';
 import DropdownItem from '../DropdownItem.vue';
@@ -17,6 +16,7 @@ import Logo from '../../icons/Logo.vue';
 import NotificationHandler from '../../core/notifications';
 import { brokenImage } from '../../../../resources/broken_image.js';
 import { loadingScreen } from '../../core/utils';
+import { parseJSON } from '../../core/validate-json';
 import { GraphFactory } from '../../core/NodeFactory.js';
 import { menuState, configurationState } from '../../core/nodeCreation/ConfigurationState.ts';
 import EditorManager from '../../core/EditorManager';
@@ -133,7 +133,7 @@ export default {
             await loadingScreen(async () => {
                 let dataflow = null;
                 try {
-                    dataflow = jsonlint.parse(await file.text());
+                    dataflow = parseJSON(await file.text());
                 } catch (exception) {
                     if (exception instanceof SyntaxError) {
                         NotificationHandler.terminalLog(
@@ -206,7 +206,7 @@ export default {
             if (!file) return;
 
             await loadingScreen(async () => {
-                const content = jsonlint.parse(await file.text());
+                const content = parseJSON(await file.text());
                 const { viewModel } = useViewModel();
                 const { editor } = viewModel.value;
                 const errors = EditorManager.importGraphLayout(

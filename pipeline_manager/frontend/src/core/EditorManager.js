@@ -7,10 +7,11 @@
 /* eslint-disable max-classes-per-file */
 
 import Ajv2019 from 'ajv/dist/2019.js';
-import jsonlint from 'jsonlint-webpack';
 
 import { useBaklava, useCommandHandler, useViewModel } from '@baklavajs/renderer-vue';
-import { toRaw, ref, reactive } from 'vue';
+import {
+    toRaw, ref, reactive,
+} from 'vue';
 import { Graph } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { useHistory } from './History.ts';
@@ -31,7 +32,7 @@ import graphSchema from '../../../resources/schemas/graph_schema.json' with {typ
 import messageSchema from '../../../resources/schemas/message_schema.json' with {type: 'json'};
 import ConnectionRenderer from './ConnectionRenderer.js';
 import Specification from './Specification.js';
-import validateJSON from './validate-json.js';
+import validateJSON, { parseJSON } from './validate-json.js';
 import { updateInterfacePosition } from '../custom/CustomNode.js';
 
 import globalProperties from '../globalProperties.ts';
@@ -465,7 +466,7 @@ export default class EditorManager {
 
         if (typeof dataflowSpecification === 'string' || dataflowSpecification instanceof String) {
             try {
-                dataflowSpecification = jsonlint.parse(dataflowSpecification);
+                dataflowSpecification = parseJSON(dataflowSpecification);
             } catch (error) {
                 return { errors: [error], warnings: [] };
             }
@@ -2419,7 +2420,7 @@ export default class EditorManager {
 
             try {
                 if (typeof dataflow === 'string' || dataflow instanceof String) {
-                    dataflow = jsonlint.parse(dataflow);
+                    dataflow = parseJSON(dataflow);
                 }
 
                 const specificationVersion = dataflow.version;

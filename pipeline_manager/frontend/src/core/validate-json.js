@@ -8,6 +8,19 @@ import { stringify } from 'ajv';
 import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
 
+export const parseJSON = (json) => {
+    let result;
+    try {
+        result = JSON.parse(json);
+    } catch (error) {
+        if (process.env.NODE_ENV !== 'development') {
+            throw error;
+        }
+        result = jsonlint.parse(json);
+    }
+    return result;
+};
+
 /**
  * Validates JSON according to a given schema.
  *
@@ -28,7 +41,7 @@ export default function validateJSON(ajv, schema, data, reference = '') {
     let dataJSON;
 
     try {
-        dataJSON = isTextFormat ? jsonlint.parse(data) : data;
+        dataJSON = isTextFormat ? parseJSON(data) : data;
     } catch (exception) {
         return [`Not a proper JSON file: ${exception.toString()}`];
     }
