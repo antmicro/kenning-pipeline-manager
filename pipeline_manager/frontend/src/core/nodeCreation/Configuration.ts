@@ -11,12 +11,10 @@
 */
 
 import { useViewModel } from '@baklavajs/renderer-vue';
-import { NodeInterface } from '@baklavajs/core';
-import { toRaw } from 'vue';
-import { v4 as uuidv4 } from 'uuid';
 import EditorManager, { NEW_NODE_STYLE, EDITED_NODE_STYLE } from '../EditorManager.js';
 import { parseInterfaces } from '../interfaceParser.js';
 import notifyEvents from '../../custom/notifyEvents.js';
+import { CustomNodeInterface } from '../../custom/CustomNodeInterface.js';
 import {
     menuState, configurationState, PropertyConfiguration, InterfaceConfiguration,
 } from './ConfigurationState.ts';
@@ -28,7 +26,7 @@ import NotificationHandler from '../notifications.js';
 import { suppressHistoryLogging } from '../History.ts';
 
 type CreatedInterfaces = {
-    [key: string]: () => NodeInterface
+    [key: string]: () => (CustomNodeInterface)
 }
 
 /**

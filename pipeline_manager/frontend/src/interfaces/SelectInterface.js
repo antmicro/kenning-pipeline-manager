@@ -5,9 +5,10 @@
  */
 
 import { SelectInterface as BaklavaSelectInterface } from '@baklavajs/renderer-vue';
+import { withCustomNodeFunctions } from '../custom/CustomNodeInterface.js';
 import DefaultComponentMixin from './DefaultComponentMixin.js';
 
-export default class SelectInterface extends BaklavaSelectInterface {
+export default class SelectInterface extends withCustomNodeFunctions(BaklavaSelectInterface) {
     // eslint-disable-next-line class-methods-use-this
     lazyComponent = () => import(/* webpackMode: "eager" */ './SelectInterface.vue');
 

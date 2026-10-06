@@ -5,7 +5,8 @@
  */
 
 import { TextInterface as BaklavaTextInterface } from '@baklavajs/renderer-vue';
+import { withCustomNodeFunctions } from '../custom/CustomNodeInterface.js';
 
-export default class TextInterface extends BaklavaTextInterface {
+export default class TextInterface extends withCustomNodeFunctions(BaklavaTextInterface) {
     componentName = 'TextInterface';
 }

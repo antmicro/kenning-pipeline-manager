@@ -142,6 +142,7 @@ from moving or deleting the nodes.
                         :intf="input"
                         :toggleGroup="toggleGroup"
                         :updateDynamicInterfaces="updateDynamicInterfaces"
+                        :switchSides="switchSides"
                         @pointerdown.right.exact="openContextMenuProperty(input, $event)"
                     />
                 </div>
@@ -209,6 +210,12 @@ import icons from '../icons/index';
 import doubleClick from '../core/doubleClick.js';
 import NotificationHandler from '../core/notifications.js';
 import { updateInterfacePosition, removeNode, hideUnconnectedInterfaces, showHiddenInterfaces } from './CustomNode.js';
+import {
+    isBigBus,
+    isBusEmpty,
+    isBusInterface,
+    isInterfaceHidable,
+} from './CustomNodeInterface.js';
 import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
@@ -295,7 +302,6 @@ const hiddenInputs = computed(() => Object.values(props.node.inputs).filter((ni)
 const hiddenOutputs = computed(() =>
     Object.values(props.node.outputs).filter((ni) => ni.hidden),
 );
-const isBigBus = (intf) => (intf.port && intf.bus?.type === 'twoSided');
 const bigBuses = computed(() =>
     [...Object.values(displayedInputs.value)
         .filter((intf) => isBigBus(intf)),
@@ -403,12 +409,11 @@ const contextMenuTitleItems = computed(() => {
         );
     });
     hiddenInterfacesPresent = interfaces.some((i) => (i.hidden === true
-        && (i.port === true || i?.bus?.type !== undefined)));
+        && (i.port === true || isBusInterface(i))));
 
     shownUnconnected = interfaces.some((i) => !i.hidden &&
-        ((i.connectionCount === 0 && i.port === true && i?.bus?.type === undefined)
-        || (i?.bus?.type !== undefined && i?.bus?.stubs === undefined)
-        || (i?.bus?.type !== undefined && i?.bus?.stubs?.length === 0)));
+        ((i.connectionCount === 0 && i.port === true && !isBusInterface(i))
+        || isBusEmpty(i)));
 
     if (editorManager.baklavaView.settings.editableNodeTypes &&
         !viewModel.value.editor.readonly &&
@@ -1476,9 +1481,7 @@ const createContextMenuInterfaceItems = () => {
         );
         items.push(intfMode);
     }
-    if ((chosenInterface.value.connectionCount === 0 && typeof chosenInterface.value.bus === 'undefined')
-        || (typeof chosenInterface.value.bus !== 'undefined' && typeof chosenInterface.value.bus.stubs === 'undefined')
-        || (typeof chosenInterface.value.bus !== 'undefined' && chosenInterface.value.bus.stubs.length === 0)) {
+    if (isInterfaceHidable(chosenInterface.value)) {
         items.push({ value: 'HideInterface', label: 'Hide interface', icon: icons.Hide });
     }
     if (!posMap.has(chosenInterface.value.name)) {
@@ -1665,7 +1668,7 @@ const createContextMenuPropertyItems = () => {
         if (!chosenProperty.groupProperty && !isBigBus(chosenProperty)) {
             items.push({ value: 'Hide', label: 'Hide', icon: icons.Hide });
         }
-        if (((typeof chosenProperty.bus !== 'undefined' && chosenProperty.bus.stubs === undefined) || (typeof chosenProperty.bus !== 'undefined' && chosenProperty.bus.stubs.length === 0)) && isBigBus(chosenProperty)) {
+        if (isBusEmpty(chosenProperty) && isBigBus(chosenProperty)) {
             items.push({ value: 'HideInterface', label: 'Hide interface', icon: icons.Hide });
         }
     }

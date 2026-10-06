@@ -5,9 +5,10 @@
  */
 
 import { CheckboxInterface as BaklavaCheckboxInterface } from '@baklavajs/renderer-vue';
+import { withCustomNodeFunctions } from '../custom/CustomNodeInterface.js';
 import DefaultComponentMixin from './DefaultComponentMixin.js';
 
-export default class CheckboxInterface extends BaklavaCheckboxInterface {
+export default class CheckboxInterface extends withCustomNodeFunctions(BaklavaCheckboxInterface) {
     // eslint-disable-next-line class-methods-use-this
     lazyComponent = () => import(/* webpackMode: "eager" */ './CheckboxInterface.vue');
 

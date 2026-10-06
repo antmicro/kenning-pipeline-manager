@@ -240,6 +240,7 @@ import getExternalApplicationManager from '../core/communication/ExternalApplica
  * property's id: a property is reported when its value is edited to another.
  */
 const reportedValues = new Map();
+import { findBusStub, isTwoSidedBus } from './CustomNodeInterface.js';
 
 export default defineComponent({
     extends: Components.NodeInterface,
@@ -286,7 +287,7 @@ export default defineComponent({
                 prevent();
             }
         });
-        const isBigBus = (intf) => intf.bus?.type === 'twoSided';
+        const isBigBus = isTwoSidedBus;
 
         if (props.intf.group) {
             props.toggleGroup(props.intf);
@@ -324,7 +325,7 @@ export default defineComponent({
         const movedStubOffset = ref(undefined);
         const onStubMove = (ev) => {
             if (!viewModel.value.editor.readonly) {
-                const stub = props.intf.bus?.stubs.find((s) => s.id === movedStubId.value);
+                const stub = findBusStub(props.intf, movedStubId.value);
                 const curY = ev.clientY;
                 // no recalculations on each pan since this is used in callaback
                 const dv = (curY - mousePosStubDragStart.value) / graph.value.scaling;
@@ -343,12 +344,8 @@ export default defineComponent({
         };
         const stubSideSwitch = doubleClick(700, (id) => {
             if (isBigBus(props.intf)) {
-                const stub = props.intf.bus?.stubs.find((s) => s.id === id);
-                if (stub.side === 'left') {
-                    stub.side = 'right';
-                } else {
-                    stub.side = 'left';
-                }
+                const stub = findBusStub(props.intf, id);
+                props.switchSides(stub);
             }
         });
 

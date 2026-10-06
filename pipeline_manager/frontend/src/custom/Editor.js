@@ -19,6 +19,12 @@ import { toRaw, nextTick, reactive } from 'vue';
 import { useGraph, useViewModel } from '@baklavajs/renderer-vue';
 
 import createPipelineManagerGraph from './CustomGraph.js';
+import {
+    getBusStubs,
+    hasBusStub,
+    isOneSidedBus,
+    isTwoSidedBus,
+} from './CustomNodeInterface.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
 import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGraphNode.js';
@@ -1451,19 +1457,16 @@ export default class PipelineManagerEditor extends Editor {
                 const positionedInterfaces = Object.keys(nodeStyle?.positions || {});
 
                 const twoSidedStubs = node.interfaces.filter((i) =>
-                    i.bus?.type === 'twoSided').flatMap((i) => i.bus.stubs ?? []);
+                    isTwoSidedBus(i)).flatMap((i) => getBusStubs(i));
                 const movableInterfaces = node.interfaces.filter((i) =>
                     !positionedInterfaces?.includes(i.name)).concat(twoSidedStubs);
                 movableInterfaces.forEach((intf) => {
                     let connections = state.connections.filter(
                         (conn) => conn?.from === intf.id || conn?.to === intf.id,
                     );
-                    const busHasId = (i, id) =>
-                        i.bus?.type !== undefined &&
-                        i.bus.stubs?.find((s) => s.id === id) !== undefined;
-                    if (intf.bus?.type === 'oneSided') {
+                    if (isOneSidedBus(intf)) {
                         const stubConnections = state.connections.filter(
-                            (conn) => busHasId(intf, conn?.from) || busHasId(intf, conn?.to),
+                            (conn) => intf.hasBusStub(conn?.from) || intf.hasBusStub(conn?.to),
                         );
                         connections = connections.concat(stubConnections);
                     }
@@ -1472,11 +1475,11 @@ export default class PipelineManagerEditor extends Editor {
                     let lefts = 0;
                     let rights = 0;
                     connections.forEach((connection) => {
-                        const key = (connection.from === intf.id || busHasId(intf, connection.from)) ? 'from' : 'to';
+                        const key = (connection.from === intf.id || intf.hasBusStub(connection.from)) ? 'from' : 'to';
                         const nextIntfId = key === 'from' ? connection.to : connection.from;
                         const nextNode = state.nodes.find(
                             (n) => n.interfaces.some((el) => el.id === nextIntfId
-                                || busHasId(el, nextIntfId)),
+                                || el.hasBusStub(nextIntfId)),
                         );
                         if (nextNode) {
                             if (nextNode.position.x + nextNode.width > node.position.x) {

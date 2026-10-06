@@ -5,10 +5,11 @@
  *
  */
 
-import { NodeInterface, Graph } from '@baklavajs/core';
+import { Graph } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 import { parseInterfaces, generateProperties } from '../core/interfaceParser.js';
 import { updateInterfacePosition } from './CustomNode.js';
+import { CustomNodeInterface } from './CustomNodeInterface.js';
 import {
     CustomNode,
     newProperty,
@@ -432,7 +433,7 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
                 );
 
                 if (foundIntf === undefined) {
-                    const ni = new NodeInterface(nodeIntf.name);
+                    const ni = new CustomNodeInterface(nodeIntf.name);
                     Object.assign(ni, nodeIntf);
                     ir.pushGraphIdToRegistry(ni.id, this.subgraph.id);
                     ir.createSharedInterface(ni);

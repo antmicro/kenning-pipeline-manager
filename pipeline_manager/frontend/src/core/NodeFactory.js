@@ -6,11 +6,17 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { NodeInterface, Node } from '@baklavajs/core';
+import { Node } from '@baklavajs/core';
 import { BaklavaEvent } from '@baklavajs/events';
 
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { updateInterfacePosition } from '../custom/CustomNode.js';
+import {
+    CustomNodeInterface,
+    createStub,
+    getBusStubs,
+    isTwoSidedBus,
+} from '../custom/CustomNodeInterface.js';
 import {
     applySidePositions,
     parseInterfaces,
@@ -761,7 +767,7 @@ export class CustomNode extends Node {
                 return;
             }
 
-            const baklavaIntf = new NodeInterface(key);
+            const baklavaIntf = new CustomNodeInterface(key);
             Object.assign(baklavaIntf, intf);
             if (direction === 'output') {
                 this.addOutput(key, baklavaIntf);
@@ -769,13 +775,6 @@ export class CustomNode extends Node {
                 this.addInput(key, baklavaIntf);
             }
         });
-
-        // Finding a reactive reference of `this` and using it to bind
-        // the function to the node instance, so that the changes are
-        // reflected in the editor
-        const node = this.graph.nodes.find((n) => n.id === this.id);
-        const reactiveUpdate = this.updateInterfaces.bind(node);
-        reactiveUpdate(newInputs, newOutputs, false, [`${direction}_${interfaceName}`]);
     }
 
     toggleInterfaceGroup(intf, visible) {
@@ -818,10 +817,10 @@ export class CustomNode extends Node {
                     }
                 }
                 if (!ioName.startsWith('property')) {
-                    const busStubs = ioState.bus?.stubs?.map((stub) => ({
+                    const busStubs = getBusStubs(ioState).map((stub) => ({
                         id: stub.id,
                         offset: Math.floor(stub.offset),
-                        ...(ioState.bus?.type === 'twoSided' && { side: stub.side }),
+                        ...(isTwoSidedBus(ioState) && { side: stub.side }),
                     }));
                     const bus = {
                         size: ioState.bus?.size,
@@ -829,7 +828,7 @@ export class CustomNode extends Node {
                         stubs: busStubs,
                     };
                     const isBusEmpty = (!bus.size || !bus.type
-                        || (busStubs?.length ?? 0) === 0);
+                        || busStubs.length === 0);
 
                     newInterfaces.push({
                         name: ioName.slice(ioState.direction.length + 1),
@@ -905,128 +904,6 @@ export class CustomNode extends Node {
         afterEvent.emit(intf);
     }
 
-    /**
-     * Function used to update interfaces of a node when loading a dataflow
-     * in a development mode.
-     *
-     * @param {object} stateInputs newInputs of the node
-     * @param {object} stateOutputs newOutputs of the node
-     * @param {boolean} updateInterfaces determines what to do if an interface in either
-     * @param {string[]} include prefixes of names of interfaces that are to be removed. Other
-     * interfaces are left untouched. If set to undefined then all interfaces are updated.
-     * `stateInputs` or `stateOutputs` already exists in the node. If set to `true`, the
-     * interface will be updated with the new values, otherwise it will be left untouched.
-     */
-    updateInterfaces(stateInputs, stateOutputs, updateInterfaces = true, include = undefined) {
-        const errors = [];
-        // Updating interfaces of a graph node
-        Object.entries(this.inputs).forEach(([k, intf]) => {
-            // Process only interfaces, not properties
-            if (intf.direction === undefined) return;
-            if (
-                !Object.keys(stateInputs).includes(k) &&
-                (include === undefined || include.some((prefix) => k.startsWith(prefix)))
-            ) {
-                errors.push(
-                    `Interface '${intf.name}' of direction '${intf.direction}' ` +
-                    `removed as it was not found in the dataflow.`,
-                );
-
-                // The interface might have to be privatzed
-                this.graph.editor.privatizeInterface(this.graph.id, intf);
-
-                this.removeInput(k);
-            }
-        });
-        Object.entries(stateInputs).forEach(([idA, intfA]) => {
-            if (intfA.direction === undefined) return;
-            const foundIntf = Object.entries(this.inputs).find(
-                ([idB, intfB]) => idB === idA && intfB.direction === intfA.direction,
-            );
-            if (foundIntf === undefined) {
-                const baklavaIntf = new NodeInterface(idA);
-                errors.push(
-                    `Interface '${intfA.name}' of direction '${intfA.direction}' ` +
-                    `created as it was not found in the specification.`,
-                );
-                Object.assign(baklavaIntf, intfA);
-                this.addInterface(baklavaIntf.direction, idA, baklavaIntf);
-            } else if (updateInterfaces) {
-                Object.assign(foundIntf[1], intfA);
-            }
-        });
-
-        Object.entries(this.outputs).forEach(([k, intf]) => {
-            // Process only interfaces, not properties
-            if (intf.direction === undefined) return;
-            if (!Object.keys(stateOutputs).includes(k) &&
-                (include === undefined || include.some((prefix) => k.startsWith(prefix)))
-            ) {
-                errors.push(
-                    `Interface '${intf.name}' of direction '${intf.direction}' ` +
-                    `removed as it was not found in the dataflow.`,
-                );
-
-                // The interface might have to be privatzed
-                this.graph.editor.privatizeInterface(this.graph.id, intf);
-
-                this.removeOutput(k);
-            }
-        });
-        Object.entries(stateOutputs).forEach(([idA, intfA]) => {
-            const foundIntf = Object.entries(this.outputs).find(
-                ([idB, intfB]) => idB === idA && intfB.direction === intfA.direction,
-            );
-            if (foundIntf === undefined) {
-                const baklavaIntf = new NodeInterface(idA);
-                errors.push(
-                    `Interface '${intfA.name}' of direction '${intfA.direction}' ` +
-                    `created as it was not found in the specification.`,
-                );
-                Object.assign(baklavaIntf, intfA);
-                this.addInterface(baklavaIntf.direction, idA, baklavaIntf);
-            } else if (updateInterfaces) {
-                Object.assign(foundIntf[1], intfA);
-            }
-        });
-        return errors;
-    }
-
-    updateProperties(stateProperties) {
-        const errors = [];
-        // Updating properties of a graph node
-        Object.entries(this.inputs).forEach(([k, prop]) => {
-            // Process only properties, not interfaces
-            if (prop.direction !== undefined) return;
-            if (!Object.keys(stateProperties).includes(k)) {
-                errors.push(
-                    `Property '${prop.name}' ` +
-                    `removed as it was not found in the dataflow.`,
-                );
-                this.removeInput(k);
-            }
-        });
-        Object.entries(stateProperties).forEach(([idA, propA]) => {
-            if (propA.direction !== undefined) return;
-            const foundProp = Object.entries(this.inputs).find(
-                ([idB]) => idB === idA,
-            );
-            if (foundProp === undefined) {
-                const baklavaProp = new InputInterface(
-                    propA.name,
-                    propA.value,
-                );
-                errors.push(
-                    `Property '${propA.name}' ` +
-                    `created as it was not found in the specification.`,
-                );
-                Object.assign(baklavaProp, propA);
-                this.addInput(idA, baklavaProp);
-            }
-        });
-        return errors;
-    }
-
     load(state) {
         let parsedState;
 
@@ -1095,13 +972,12 @@ export class CustomNode extends Node {
         };
 
         const stateios = { ...parsedState.inputs, ...parsedState.outputs };
-
         // Assigning sides and sides Positions to interfaces
         Object.entries(stateios).forEach(([ioName, ioState]) => {
             let intf;
             if (ioState.direction === 'input' || ioState.direction === 'inout') {
                 if (!(ioName in this.inputs)) {
-                    const baklavaIntf = new NodeInterface(ioName);
+                    const baklavaIntf = new CustomNodeInterface(ioName);
                     Object.assign(baklavaIntf, ioState);
                     this.addInput(ioName, baklavaIntf);
                 }
@@ -1113,7 +989,7 @@ export class CustomNode extends Node {
                 occupied[ioState.side].push(ioState.sidePosition);
             } else if (ioState.direction === 'output') {
                 if (!(ioName in this.outputs)) {
-                    const baklavaIntf = new NodeInterface(ioName);
+                    const baklavaIntf = new CustomNodeInterface(ioName);
                     Object.assign(baklavaIntf, ioState);
                     this.addOutput(ioName, baklavaIntf);
                 }
@@ -1125,7 +1001,7 @@ export class CustomNode extends Node {
                 occupied[ioState.side].push(ioState.sidePosition);
             } else if (ioState.direction === undefined) {
                 if (!(ioName in this.inputs)) {
-                    const baklavaIntf = new NodeInterface(ioName);
+                    const baklavaIntf = new CustomNodeInterface(ioName);
                     Object.assign(baklavaIntf, ioState);
                     this.addOutput(ioName, baklavaIntf);
                 }
@@ -1133,22 +1009,10 @@ export class CustomNode extends Node {
                 intf.externalName = ioState.externalName;
                 if (ioState.hidden !== undefined) this.inputs[ioName].hidden = ioState.hidden;
             }
-            if (intf?.bus?.type) {
+            if (ioState.bus?.stubs && intf) {
                 intf.bus = intf.bus ?? {};
-                intf.bus.stubs = ioState?.bus?.stubs ?? [];
-                // eslint-disable-next-line no-restricted-syntax, guard-for-in
-                for (const stubId in intf.bus.stubs) {
-                    const stub = intf.bus.stubs[stubId];
-                    const side = intf.bus.type === 'twoSided' ? stub.side : intf.side;
-                    stub.nodeId = intf.nodeId;
-                    stub.direction = intf.direction;
-                    stub.maxConnectionsCount = 1;
-                    stub.type = intf.type;
-                    stub.sidePosition = 0;
-                    stub.side = side ?? intf.side;
-                    stub.parent = intf;
-                    stub.isInput = intf.isInput;
-                }
+                intf.bus.stubs = ioState.bus.stubs.map((stub) =>
+                    createStub(intf, stub.offset, stub.id, stub.side));
             }
         });
 
@@ -1342,7 +1206,7 @@ const createViewInterface = (newInf) => {
 export const createBaklavaInterfaces = (parsedInterfaces) => {
     function createBaklavaInterface(intf) {
         return () => {
-            const baklavaIntf = new NodeInterface(intf.name);
+            const baklavaIntf = new CustomNodeInterface(intf.name);
             Object.assign(baklavaIntf, intf);
 
             baklavaIntf.sidePositionDef = intf.sidePosition;

@@ -12,6 +12,7 @@ import { useViewModel, useGraph } from '@baklavajs/renderer-vue';
 import { nextTick } from 'vue';
 
 import notifyEvents from './notifyEvents.js';
+import { isBusEmpty, isBusInterface } from './CustomNodeInterface.js';
 
 /**
  * Hides unconnected interfaces from the list
@@ -19,14 +20,18 @@ import notifyEvents from './notifyEvents.js';
  * @param interfaces list of interfaces to search for unconnected.
  */
 export function hideUnconnectedInterfaces(interfaces) {
-    const buses = interfaces.filter((intf) => (typeof intf?.bus !== 'undefined' && intf.bus.stubs !== undefined));
+    const buses = interfaces.filter(
+        (intf) => (isBusInterface(intf) && intf.bus.stubs !== undefined),
+    );
     buses.forEach((bus) => {
-        if (bus.bus.stubs !== undefined && bus.bus.stubs.length === 0) {
+        if (bus.bus.stubs.length === 0) {
             bus.hidden = true; // eslint-disable-line no-param-reassign
         }
     });
-    interfaces = interfaces.filter((intf) => (typeof intf?.bus) === 'undefined' || !(typeof intf?.bus !== 'undefined' && intf.bus.stubs !== undefined)); // eslint-disable-line no-param-reassign
-    interfaces.forEach(
+    const filtered = interfaces.filter((intf) =>
+        (intf.bus === undefined || intf.bus.stubs === undefined)
+        && intf.group === undefined);
+    filtered.forEach(
         (i) => {
             if (i.connectionCount === 0 && i.port === true) {
                 i.hidden = true; // eslint-disable-line no-param-reassign
@@ -46,7 +51,7 @@ export function showHiddenInterfaces(interfaces) {
         (i) => {
             if (i.port === true) {
                 i.hidden = false; // eslint-disable-line no-param-reassign
-            } else if (i?.bus?.type !== undefined && i?.bus?.stubs.length === 0) {
+            } else if (isBusEmpty(i)) {
                 i.hidden = false; // eslint-disable-line no-param-reassign
             }
         },

@@ -16,6 +16,7 @@ import {
     ICommandHandler, ICommand,
 } from '@baklavajs/renderer-vue';
 import notifyEvents from '../custom/notifyEvents.js';
+import { resolveConnectionEndpoints } from '../custom/CustomNodeInterface.js';
 
 export const suppressingHistory: Ref<boolean> = ref(false);
 const transactionId: Ref<string> = ref('');
@@ -136,10 +137,8 @@ class NodeStep extends Step {
                 ...Object.values(this.nodeTuple[0].outputs),
             ];
             const connections = graph.value.connections.filter(
-                (c) => interfaces.includes(c.from) || interfaces.includes(c.to) ||
-                    interfaces.some((i: any) =>
-                        i.bus?.stubs?.some((s: any) => [c.to, c.from].includes(s),
-                        )));
+                (c) => interfaces.some((i: any) => i.isInConnection(c)),
+            );
 
             const save = this.nodeTuple[0].save();
             // remove the current version of the node
@@ -160,12 +159,9 @@ class NodeStep extends Step {
             // restore connections
             connections.forEach((conn) => {
                 // if it was a stub, connect to parent
-                const to = (<any>conn.to).parent ?? conn.to;
-                const from = (<any>conn.from).parent ?? conn.from;
-                const offset = (<any>conn.to).offset ?? (<any>conn.from).offset;
-                const stubId = (<any>conn.to).offset ? conn.to.id : conn.from.id;
-                const stubSide = (<any>conn.to).offset ?
-                    (<any>conn.to).side : (<any>conn.from).side;
+                const {
+                    from, to, offset, stubID: stubId, stubSide,
+                } = resolveConnectionEndpoints(<any>conn);
                 // eslint-disable-next-line max-len
                 const locc = (<any>graph.value).addConnection(from, to, offset, stubId, stubSide);
                 let pos = 0;
@@ -265,10 +261,10 @@ class ConnectionStep extends Step {
             const toNode = graph.value.findNodeById(this.conn.to.nodeId);
             if (!fromNode || !toNode) return;
 
-            let fromIntf = this.conn.from;
-            if (fromIntf.offset) {
-                fromIntf = this.conn.from.parent;
-            }
+            const {
+                from: fromIntf, to: toIntf, offset: stubPos,
+                stubID: stubId, stubSide,
+            } = resolveConnectionEndpoints(this.conn);
             const from = [
                 ...Object.values(fromNode.inputs),
                 ...Object.values(fromNode.outputs),
@@ -276,10 +272,6 @@ class ConnectionStep extends Step {
                 (iface) => iface.port,
             ).find((iface) => iface.id === fromIntf.id);
 
-            let toIntf = this.conn.to;
-            if (toIntf.offset) {
-                toIntf = this.conn.to.parent;
-            }
             const to = [
                 ...Object.values(toNode.inputs),
                 ...Object.values(toNode.outputs),
@@ -288,9 +280,6 @@ class ConnectionStep extends Step {
             ).find((iface) => iface.id === toIntf.id);
 
             if (!from || !to) return;
-            const stubPos = this.conn.to.offset ?? this.conn.from.offset;
-            const stubId = this.conn.to.offset ? this.conn.to.id : this.conn.from.id;
-            const stubSide = this.conn.to.offset ? this.conn.to.side : this.conn.from.side;
 
             const connAdded = (<any>graph).value.addConnection(from, to, stubPos, stubId, stubSide);
             if (connAdded === undefined) {

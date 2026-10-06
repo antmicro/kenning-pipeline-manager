@@ -5,9 +5,10 @@
  */
 
 import { IntegerInterface as BaklavaIntegerInterface } from '@baklavajs/renderer-vue';
+import { withCustomNodeFunctions } from '../custom/CustomNodeInterface.js';
 import DefaultComponentMixin from './DefaultComponentMixin.js';
 
-export default class IntegerInterface extends BaklavaIntegerInterface {
+export default class IntegerInterface extends withCustomNodeFunctions(BaklavaIntegerInterface) {
     // eslint-disable-next-line class-methods-use-this
     lazyComponent = () => import(/* webpackMode: "eager" */ './IntegerInterface.vue');
 

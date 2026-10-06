@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { NodeInterface } from '@baklavajs/core';
+import { CustomNodeInterface } from '../custom/CustomNodeInterface.js';
 import DefaultComponentMixin from './DefaultComponentMixin.js';
 
-export default class HexInterface extends NodeInterface {
+export default class HexInterface extends CustomNodeInterface {
     // eslint-disable-next-line class-methods-use-this
     lazyComponent = () => import(/* webpackMode: "eager" */ './HexInterface.vue');
 
