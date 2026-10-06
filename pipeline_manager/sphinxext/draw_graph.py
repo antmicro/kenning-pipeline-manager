@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -133,49 +133,52 @@ class KPMDirective(SphinxDirective):
     def run(self) -> list[nodes.Node]:
         """
         Creates nodes for the directive.
+        This method is called for each graph encountered.
         """
-        if self.env.app.builder.name in ["html", "linkcheck"]:
-            if (
-                "preview" in self.options
-            ):  # by default None is returned if flag is correct
-                self.options["preview"] = True
-            if (
-                "center_at_top" in self.options
-            ):  # by default None is returned if flag is correct
-                self.options["center_at_top"] = True
+        workspace_dir = (
+            Path(self.env.app.builder.outdir).parent / "pm-workspace"
+        )
+        build_pipeline_manager_once(self.env.app, workspace_dir)
 
-            build_pipeline_manager(self.env.app)
+        # For these builders create interactive preview
+        if self.env.app.builder.name in {"html", "linkcheck"}:
+            # by default None is returned if flag is correct
+            for option in ("preview", "center_at_top"):
+                if option in self.options:
+                    self.options[option] = True
 
             return [KPMNode(depth=self.env.docname.count("/"), **self.options)]
 
+        # For other builders create image instead
+        return [self.build_image_node(workspace_dir)]
+
+    def build_image_node(self, workspace_dir: Path) -> nodes.Node:
+        """
+        Build a PNG image of the graph and return a node
+        for the current builder.
+        """
         from tempfile import NamedTemporaryFile
 
         from pipeline_manager.frontend_builder import build_frontend
         from pipeline_manager.html_to_img import html_to_png
 
-        workspace_dir = (
-            Path(self.env.app.builder.outdir).parent / "pm-workspace"
-        )
-        pm_graphs_dir = Path(self.env.app.builder.outdir) / "_static/pm-graphs"
-
-        pm_graphs_dir.mkdir(parents=True, exist_ok=True)
-
+        # Build HTML
         curr_file_path = Path(self.env.doc2path(self.env.docname)).resolve()
-        out_html = (workspace_dir / "frontend/dist/index.html").resolve()
         spec_path = (
             curr_file_path.parent / self.options["spec"]
             if "spec" in self.options
             else None
         )
-        graph_path = (
+        dataflow_path = (
             curr_file_path.parent / self.options["graph"]
             if "graph" in self.options
             else None
         )
+
         status = build_frontend(
             build_type="static-html",
             specification=spec_path,
-            dataflow=graph_path,
+            dataflow=dataflow_path,
             workspace_directory=workspace_dir,
             skip_install_deps=True,
             skip_frontend_copying=True,
@@ -185,13 +188,19 @@ class KPMDirective(SphinxDirective):
                 f"Failed to build frontend for Pipeline Manager in ({status})"
             )
 
+        # Create a unique path for the rendered graph image
+        pm_graphs_dir = Path(self.env.app.builder.outdir) / "_static/pm-graphs"
+        pm_graphs_dir.mkdir(parents=True, exist_ok=True)
         with NamedTemporaryFile(
             prefix="pipeline-manager-",
             suffix=".png",
             delete=False,
             dir=pm_graphs_dir,
-        ) as f:
-            graph_path = Path(f.name).resolve()
+        ) as file:
+            graph_path = Path(file.name).resolve()
+
+        # Render image
+        out_html = (workspace_dir / "frontend/dist/index.html").resolve()
         try:
             html_to_png(out_html, graph_path)
         except ImportError:
@@ -199,14 +208,19 @@ class KPMDirective(SphinxDirective):
                 "html2image module is missing for converting HTML graphs to "
                 "images, please install it."
             )
+
         uri = os.path.relpath(graph_path, curr_file_path.parent)
-        return [nodes.image(uri=uri, alt="Graph")]
+        return nodes.image(uri=uri, alt=f"{uri}")
 
 
-def build_pipeline_manager(app):
+def build_pipeline_manager_once(app, workspace_dir: Path) -> None:
     """
-    Builds Pipeline Manager frontend on builder's initialization.
+    Builds Pipeline Manager frontend on builder's initialization only once.
     """
+    # Build the frontend only once
+    if app._pipeline_manager_built:
+        return
+
     from pipeline_manager.frontend_builder import (
         build_frontend,
         copy_frontend_to_workspace,
@@ -215,7 +229,6 @@ def build_pipeline_manager(app):
     assets_dir = None
     if app.config.pipeline_manager_assets_directory:
         assets_dir = Path(app.config.pipeline_manager_assets_directory)
-    workspace_dir = Path(app.builder.outdir).parent / "pm-workspace"
     static_dir = Path(app.builder.outdir) / "_static"
 
     static_dir.mkdir(parents=True, exist_ok=True)
@@ -246,6 +259,7 @@ def build_pipeline_manager(app):
             raise ExtensionError(
                 f"Failed to build frontend for Pipeline Manager in {static_dir} ({status})"  # noqa: E501
             )
+    app._pipeline_manager_built = True
 
 
 def setup(app: Sphinx):
@@ -260,6 +274,8 @@ def setup(app: Sphinx):
         html=(KPMNode.visit_html, KPMNode.depart_node),
     )
     app.add_directive("pipeline_manager", KPMDirective)
+
+    app._pipeline_manager_built = False
 
     return {
         "version": "0.1",
