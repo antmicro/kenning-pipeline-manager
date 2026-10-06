@@ -385,30 +385,27 @@ class ExternalApplicationManager {
             }
             NotificationHandler.showToast('info', 'Running dataflow');
         }
-        if (requireResponse) {
-            runProcedureInfo.inProgress = true;
-
-            let data;
-            try {
+        runProcedureInfo.inProgress = true;
+        try {
+            if (requireResponse) {
+                let data;
                 if (validatedProcedureName.startsWith('dataflow_')) {
                     data = await this.request(procedureName, { dataflow });
                 } else {
                     data = await this.request(validatedProcedureName);
                 }
-            } catch (error) {
-                // The connection was closed
-                RPCTerminalLog('error', error, 'Cannot create a request');
-                runProcedureInfo.inProgress = false;
-                return;
-            }
 
-            handleExternalAppResponse(data);
-            runProcedureInfo.inProgress = false;
-        } else if (validatedProcedureName.startsWith('dataflow_')) {
-            this.request(procedureName, { dataflow });
-        } else {
-            this.request(validatedProcedureName);
+                handleExternalAppResponse(data);
+            } else if (validatedProcedureName.startsWith('dataflow_')) {
+                await this.request(procedureName, { dataflow });
+            } else {
+                await this.request(validatedProcedureName);
+            }
+        } catch (error) {
+            // The connection was closed
+            RPCTerminalLog('error', error, 'Cannot create a request');
         }
+        runProcedureInfo.inProgress = false;
     }
 
     /**
