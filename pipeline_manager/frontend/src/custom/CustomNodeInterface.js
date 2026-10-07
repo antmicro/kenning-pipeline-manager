@@ -1,100 +1,12 @@
-// eslint-disable-next-line max-classes-per-file
-import { NodeInterface } from '@baklavajs/core';
-import { v4 as uuidv4 } from 'uuid';
-
-/**
- * Checks whether the interface is a bus interface, i.e. it has a bus with a type.
- *
- * @param {Object} intf - The interface to check.
- * @returns {boolean} True if the interface is a bus interface.
- */
-export function isBusInterface(intf) {
-    return intf?.bus?.type !== undefined;
-}
-
-/**
- * Checks whether the interface is a one-sided bus, i.e. all of its stubs
- * share the side of the bus itself.
- *
- * @param {Object} intf - The interface to check.
- * @returns {boolean} True if the interface is a one-sided bus.
- */
-export function isOneSidedBus(intf) {
-    return intf?.bus?.type === 'oneSided';
-}
-
-/**
- * Checks whether the interface is a two-sided bus, i.e. each of its stubs
- * can be placed on either side of the node.
- *
- * @param {Object} intf - The interface to check.
- * @returns {boolean} True if the interface is a two-sided bus.
- */
-export function isTwoSidedBus(intf) {
-    return intf?.bus?.type === 'twoSided';
-}
-
-/**
- * Checks whether the interface is a displayed two-sided bus, i.e. a port
- * carrying a two-sided bus.
- *
- * @param {Object} intf - The interface to check.
- * @returns {boolean} True if the interface is a port of a two-sided bus.
- */
-export function isBigBus(intf) {
-    return intf.port && isTwoSidedBus(intf);
-}
-
-/**
- * Returns the list of bus stubs of the interface.
- *
- * @param {Object} intf - The interface to get the stubs of.
- * @returns {Array} The list of bus stubs, empty if the interface has none.
- */
-export function getBusStubs(intf) {
-    return intf?.bus?.stubs ?? [];
-}
-
-/**
- * Finds a bus stub of the interface by its id.
+/*
+ * Copyright (c) 2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-export function findBusStub(intf, id) {
-    return getBusStubs(intf).find((stub) => stub.id === id);
-}
 
 // eslint-disable-next-line max-classes-per-file
 import { NodeInterface } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
-
-/**
- * Checks whether the bus interface has no stubs and therefore no connections.
- *
- * @param {Object} intf - The interface to check.
- * @returns {boolean} True if the interface is a bus without any stubs.
- */
-export function isBusEmpty(intf) {
-    return isBusInterface(intf) && getBusStubs(intf).length === 0;
-}
-
-/**
- * Checks whether the interface holds no connections and can therefore be hidden.
- *
- * A regular interface holds no connections when its connection count is zero.
- * An interface carrying a `bus` object holds no connections when the bus has
- * no stubs (whether the stubs list is missing or empty), since the stubs
- * (not the bus itself) are what hold the connections.
- *
- * @param {Object} intf - The interface to check.
- * @returns {boolean} True if the interface holds no connections.
- */
-export function isInterfaceHidable(intf) {
-    if (intf.bus === undefined) {
-        return intf.connectionCount === 0;
-    }
-    return intf.bus.stubs === undefined || intf.bus.stubs.length === 0;
-}
 
 /**
  * The parent interfaces of a connection's endpoints together with the bus
@@ -166,7 +78,7 @@ export function resolveConnectionEndpoints(connection) {
  */
 export function createStub(intf, offset = undefined, stubID = undefined, stubSide = undefined) {
     let ss = stubSide;
-    if (!isTwoSidedBus(intf)) {
+    if (!intf.isTwoSidedBus()) {
         ss = undefined;
     }
     const maxConnReached = (intf.maxConnectionsCount &&
@@ -189,68 +101,16 @@ export function createStub(intf, offset = undefined, stubID = undefined, stubSid
 }
 
 /**
- * Builds a property descriptor for the `side` property of an interface.
- *
- * @param {Object} intf - The interface the descriptor is created for.
- * @returns {Object} A property descriptor with `get`, `set`, `enumerable` and
- * `configurable` fields suitable for `Object.defineProperty`.
- */
-function interfaceSideGetterSetter(intf) {
-    // for twoSided, each stub can have its' own side
-    if (isOneSidedBus(intf)) {
-        return {
-            get() {
-                // eslint-disable-next-line no-underscore-dangle
-                return this._side;
-            },
-            set(val) {
-                // eslint-disable-next-line no-underscore-dangle
-                this._side = val;
-                this.bus?.stubs?.forEach((s) => {
-                    // eslint-disable-next-line no-param-reassign
-                    s.side = val;
-                });
-            },
-            enumerable: true,
-            configurable: true,
-        };
-    }
-    if (intf.group) {
-        return {
-            get() {
-                // eslint-disable-next-line no-underscore-dangle
-                return this._side;
-            },
-            set(_) {
-                // TODO implement since right now this is very much buggy
-                // if the interfaces that should be part of a group get separated
-                // weird things happen.
-            },
-            enumerable: true,
-            configurable: true,
-        };
-    }
-    return {
-        get() {
-            // eslint-disable-next-line no-underscore-dangle
-            return this._side;
-        },
-        set(val) {
-            // eslint-disable-next-line no-underscore-dangle
-            this._side = val;
-        },
-        enumerable: true,
-        configurable: true,
-    };
-}
-
-/**
- * The members that {@link withCustomNodeFunctions} adds on top of the base
- * class: a reactive `side` property plus the bus/group connection-check and
- * lifecycle methods.
- *
  * @typedef {Object} CustomNodeFunctions
  * @property {string} side
+ * @property {() => boolean} isBusInterface
+ * @property {() => boolean} isOneSidedBus
+ * @property {() => boolean} isTwoSidedBus
+ * @property {() => boolean} isBigBus
+ * @property {() => Array} getBusStubs
+ * @property {() => boolean} isBusEmpty
+ * @property {() => boolean} isInterfaceHidable
+ * @property {() => Object} interfaceSideGetterSetter
  * @property {(*) => any} preConnectionCheck
  * @property {() => void} postConnectionCheck
  * @property {(stub: any, orphan?: boolean) => void} removeStub
@@ -282,7 +142,134 @@ export function withCustomNodeFunctions(Base) {
          */
         constructor(...args) {
             super(...args);
-            Object.defineProperty(this, 'side', interfaceSideGetterSetter(this));
+            Object.defineProperty(this, 'side', this.interfaceSideGetterSetter());
+        }
+
+        /**
+         * Checks whether this interface is a bus interface, i.e. it has a bus
+         * with a type.
+         *
+         * @returns {boolean} True if the interface is a bus interface.
+         */
+        isBusInterface() {
+            return this.bus?.type !== undefined;
+        }
+
+        /**
+         * Checks whether this interface is a one-sided bus, i.e. all of its
+         * stubs share the side of the bus itself.
+         *
+         * @returns {boolean} True if the interface is a one-sided bus.
+         */
+        isOneSidedBus() {
+            return this.bus?.type === 'oneSided';
+        }
+
+        /**
+         * Checks whether this interface is a two-sided bus, i.e. each of its
+         * stubs can be placed on either side of the node.
+         *
+         * @returns {boolean} True if the interface is a two-sided bus.
+         */
+        isTwoSidedBus() {
+            return this.bus?.type === 'twoSided';
+        }
+
+        /**
+         * Checks whether this interface is a displayed two-sided bus, i.e. a
+         * port carrying a two-sided bus.
+         *
+         * @returns {boolean} True if the interface is a port of a two-sided bus.
+         */
+        isBigBus() {
+            return this.port && this.isTwoSidedBus();
+        }
+
+        /**
+         * Returns the list of bus stubs of this interface.
+         *
+         * @returns {Array} The list of bus stubs, empty if the interface has none.
+         */
+        getBusStubs() {
+            return this.bus?.stubs ?? [];
+        }
+
+        /**
+         * Checks whether this bus interface has no stubs and therefore no
+         * connections.
+         *
+         * @returns {boolean} True if the interface is a bus without any stubs.
+         */
+        isBusEmpty() {
+            return this.isBusInterface() && this.getBusStubs().length === 0;
+        }
+
+        /**
+         * Checks whether this interface holds no connections and can therefore
+         * be hidden.
+         *
+         * @returns {boolean} True if the interface holds no connections.
+         */
+        isInterfaceHidable() {
+            if (this.bus === undefined) {
+                return this.connectionCount === 0;
+            }
+            return this.bus.stubs === undefined || this.bus.stubs.length === 0;
+        }
+
+        /**
+         * Builds a property descriptor for the `side` property of this
+         * interface.
+         *
+         * @returns {Object} A property descriptor with `get`, `set`.
+         */
+        interfaceSideGetterSetter() {
+            // for twoSided, each stub can have its' own side
+            if (this.isOneSidedBus()) {
+                return {
+                    get() {
+                        // eslint-disable-next-line no-underscore-dangle
+                        return this._side;
+                    },
+                    set(val) {
+                        // eslint-disable-next-line no-underscore-dangle
+                        this._side = val;
+                        this.bus?.stubs?.forEach((s) => {
+                            // eslint-disable-next-line no-param-reassign
+                            s.side = val;
+                        });
+                    },
+                    enumerable: true,
+                    configurable: true,
+                };
+            }
+            if (this.group) {
+                return {
+                    get() {
+                        // eslint-disable-next-line no-underscore-dangle
+                        return this._side;
+                    },
+                    set(_) {
+                        // TODO implement since right now this is very much buggy
+                        // if the interfaces that should be part of a group get separated
+                        // weird things happen.
+                    },
+                    enumerable: true,
+                    configurable: true,
+                };
+            }
+            return {
+                get() {
+                    // eslint-disable-next-line no-underscore-dangle
+                    return this._side;
+                },
+                set(val) {
+                    // eslint-disable-next-line no-underscore-dangle
+                    this._side = val;
+                },
+                enumerable: true,
+                configurable: true,
+            };
         }
 
         /**
@@ -320,7 +307,7 @@ export function withCustomNodeFunctions(Base) {
                     });
                 return allowed?.[1] ?? this;
             }
-            if (isBusInterface(this)) {
+            if (this.isBusInterface()) {
                 if (this.bus.stubs === undefined) {
                     // eslint-disable-next-line no-param-reassign
                     this.bus.stubs = [];
@@ -383,7 +370,7 @@ export function withCustomNodeFunctions(Base) {
          * endpoint of the connection.
          */
         isInConnection(connection) {
-            if (isBusInterface(this)) {
+            if (this.isBusInterface()) {
                 return this.bus?.stubs?.some((stub) =>
                     [connection.to, connection.from].includes(stub));
             }

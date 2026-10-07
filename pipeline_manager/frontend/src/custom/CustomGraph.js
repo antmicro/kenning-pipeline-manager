@@ -15,7 +15,7 @@ import { toRaw } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { startTransaction, commitTransaction } from '../core/History.ts';
 import { updateInterfacePosition } from './CustomNode.js';
-import { createStub, findBusStub, getBusStubs } from './CustomNodeInterface.js';
+import { createStub } from './CustomNodeInterface.js';
 import GraphTemplate from './CustomGraphTemplate.js';
 
 /* eslint-disable no-param-reassign */
@@ -398,7 +398,7 @@ export default function createPipelineManagerGraph(graph) {
                         checkAndReadd(intf, arr[name]);
                         if (intf.bus?.size && intf.bus?.stubs) {
                             arr[name].bus.stubs = arr[name].bus.stubs ?? [];
-                            getBusStubs(intf).forEach((stub) => {
+                            intf.getBusStubs().forEach((stub) => {
                                 const scopy =
                                     createStub(arr[name], stub.offset, stub.id, stub.side);
                                 arr[name].bus.stubs.push(scopy);
@@ -686,7 +686,7 @@ export default function createPipelineManagerGraph(graph) {
                 }
                 // check for bus stubs not connected to anything
                 n.interfaces?.filter((i) => i.bus).forEach((intf) => {
-                    getBusStubs(intf).forEach((stub) => {
+                    (intf.bus?.stubs ?? []).forEach((stub) => {
                         if (!connectedIds.includes(stub.id)) {
                             errors.push(`Interface bus stub ${stub.id} in interface ${intf.id} is not connected to anything`);
                         }

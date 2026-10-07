@@ -211,12 +211,6 @@ import doubleClick from '../core/doubleClick.js';
 import NotificationHandler from '../core/notifications.js';
 import { updateInterfacePosition, removeNode, hideUnconnectedInterfaces, showHiddenInterfaces } from './CustomNode.js';
 import {
-    isBigBus,
-    isBusEmpty,
-    isBusInterface,
-    isInterfaceHidable,
-} from './CustomNodeInterface.js';
-import {
     startTransaction, commitTransaction,
 } from '../core/History.ts';
 
@@ -304,9 +298,9 @@ const hiddenOutputs = computed(() =>
 );
 const bigBuses = computed(() =>
     [...Object.values(displayedInputs.value)
-        .filter((intf) => isBigBus(intf)),
+        .filter((intf) => intf.isBigBus()),
     ...Object.values(displayedOutputs.value)
-        .filter((intf) => isBigBus(intf))]);
+        .filter((intf) => intf.isBigBus())]);
 const sidebarProperties = computed(() => [...Object.values((props.node.inputs))
     .filter((intf) => !intf.port),
 ...bigBuses.value],
@@ -409,11 +403,11 @@ const contextMenuTitleItems = computed(() => {
         );
     });
     hiddenInterfacesPresent = interfaces.some((i) => (i.hidden === true
-        && (i.port === true || isBusInterface(i))));
+        && (i.port === true || i.isBusInterface())));
 
     shownUnconnected = interfaces.some((i) => !i.hidden &&
-        ((i.connectionCount === 0 && i.port === true && !isBusInterface(i))
-        || isBusEmpty(i)));
+        ((i.connectionCount === 0 && i.port === true && !i.isBusInterface())
+        || i.isBusEmpty()));
 
     if (editorManager.baklavaView.settings.editableNodeTypes &&
         !viewModel.value.editor.readonly &&
@@ -628,7 +622,7 @@ const onContextMenuTitleClick = async (action) => {
         }));
 
         /* eslint-disable no-underscore-dangle */
-        const properties = sidebarProperties.value.filter((prop) => !isBigBus(prop));
+        const properties = sidebarProperties.value.filter((prop) => !prop.isBigBus());
         const configuredProperties = properties?.map((prop) => ({
             name: prop?.name,
             type: prop?.type,
@@ -999,7 +993,7 @@ const filterIntfs = (intfs, side) =>
     intfs.filter((intf) => intf.side === side && intf.port)
         .filter((intf) => !interfacePositions.value.has(intf.name))
         .filter((intf) => !intf.type?.some((t) => props.ignoredInterfacesType?.includes(t)))
-        .filter((intf) => !isBigBus(intf))
+        .filter((intf) => !intf.isBigBus())
         .sort((intf1, intf2) => intf1.sidePosition - intf2.sidePosition);
 
 const displayedLeftSockets = computed(() =>
@@ -1481,7 +1475,7 @@ const createContextMenuInterfaceItems = () => {
         );
         items.push(intfMode);
     }
-    if (isInterfaceHidable(chosenInterface.value)) {
+    if (chosenInterface.value.isInterfaceHidable()) {
         items.push({ value: 'HideInterface', label: 'Hide interface', icon: icons.Hide });
     }
     if (!posMap.has(chosenInterface.value.name)) {
@@ -1659,16 +1653,16 @@ const createContextMenuPropertyItems = () => {
     const items = [];
 
     if (chosenProperty !== undefined) {
-        const labels = (isBigBus(chosenProperty) ? ['Expose Interface', 'Privatize Interface'] : ['Expose Property', 'Privatize Property']);
+        const labels = (chosenProperty.isBigBus() ? ['Expose Interface', 'Privatize Interface'] : ['Expose Property', 'Privatize Property']);
         const propertyMode = (chosenProperty.externalName === undefined ?
             { value: 'SetExternalName', label: labels[0], icon: icons.Subgraph } :
             { value: 'UnsetExternalName', label: labels[1], icon: icons.Subgraph }
         );
         items.push(propertyMode);
-        if (!chosenProperty.groupProperty && !isBigBus(chosenProperty)) {
+        if (!chosenProperty.groupProperty && !chosenProperty.isBigBus()) {
             items.push({ value: 'Hide', label: 'Hide', icon: icons.Hide });
         }
-        if (isBusEmpty(chosenProperty) && isBigBus(chosenProperty)) {
+        if (chosenProperty.isBusEmpty() && chosenProperty.isBigBus()) {
             items.push({ value: 'HideInterface', label: 'Hide interface', icon: icons.Hide });
         }
     }

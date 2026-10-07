@@ -19,12 +19,6 @@ import { toRaw, nextTick, reactive } from 'vue';
 import { useGraph, useViewModel } from '@baklavajs/renderer-vue';
 
 import createPipelineManagerGraph from './CustomGraph.js';
-import {
-    getBusStubs,
-    hasBusStub,
-    isOneSidedBus,
-    isTwoSidedBus,
-} from './CustomNodeInterface.js';
 import LayoutManager from '../core/LayoutManager.js';
 import { suppressHistoryLogging } from '../core/History.ts';
 import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGraphNode.js';
@@ -1456,15 +1450,16 @@ export default class PipelineManagerEditor extends Editor {
                 const nodeStyle = this.getNodeStyle(nodeType?.style);
                 const positionedInterfaces = Object.keys(nodeStyle?.positions || {});
 
+                // node.interfaces are plain saved-state objects, not interface instances
                 const twoSidedStubs = node.interfaces.filter((i) =>
-                    isTwoSidedBus(i)).flatMap((i) => getBusStubs(i));
+                    i?.bus?.type === 'twoSided').flatMap((i) => i?.bus?.stubs ?? []);
                 const movableInterfaces = node.interfaces.filter((i) =>
                     !positionedInterfaces?.includes(i.name)).concat(twoSidedStubs);
                 movableInterfaces.forEach((intf) => {
                     let connections = state.connections.filter(
                         (conn) => conn?.from === intf.id || conn?.to === intf.id,
                     );
-                    if (isOneSidedBus(intf)) {
+                    if (intf?.bus?.type === 'oneSided') {
                         const stubConnections = state.connections.filter(
                             (conn) => intf.hasBusStub(conn?.from) || intf.hasBusStub(conn?.to),
                         );

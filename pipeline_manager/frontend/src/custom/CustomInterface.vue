@@ -21,7 +21,7 @@ from creating and deleting connections or altering nodes' values if the editor i
         <div
             class="__port-bus"
             :class="{
-                '__big-bus': isBigBus(intf),
+                '__big-bus': intf.isTwoSidedBus(),
                 greyedout_arrow: highlighted,
             }"
             v-if="intf.port && intf.bus?.type"
@@ -240,7 +240,6 @@ import getExternalApplicationManager from '../core/communication/ExternalApplica
  * property's id: a property is reported when its value is edited to another.
  */
 const reportedValues = new Map();
-import { findBusStub, isTwoSidedBus } from './CustomNodeInterface.js';
 
 export default defineComponent({
     extends: Components.NodeInterface,
@@ -287,8 +286,6 @@ export default defineComponent({
                 prevent();
             }
         });
-        const isBigBus = isTwoSidedBus;
-
         if (props.intf.group) {
             props.toggleGroup(props.intf);
             props.intf.events.setValue.unsubscribe(props.intf);
@@ -309,7 +306,7 @@ export default defineComponent({
                 tempBusIntfOffset.value = ev.offsetY;
 
                 const bus = props.intf;
-                if (isBigBus(props.intf)) {
+                if (props.intf.isTwoSidedBus()) {
                     if (ev.offsetX > width.value / 2) {
                         bus.side = 'right';
                     } else {
@@ -343,7 +340,7 @@ export default defineComponent({
             }
         };
         const stubSideSwitch = doubleClick(700, (id) => {
-            if (isBigBus(props.intf)) {
+            if (props.intf.isTwoSidedBus()) {
                 const stub = findBusStub(props.intf, id);
                 props.switchSides(stub);
             }
@@ -391,7 +388,8 @@ export default defineComponent({
 
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
         const onMouseDown = doubleClick(700, () => {
-            if (!viewModel.value.editor.readonly && !isBigBus(props.intf) && !props.positioned) {
+            const isNotBigBus = !props.intf.isTwoSidedBus();
+            if (!viewModel.value.editor.readonly && isNotBigBus && !props.positioned) {
                 props.switchSides(props.intf);
                 hoveredOver(undefined);
             }
@@ -431,8 +429,9 @@ export default defineComponent({
         });
 
         const newClasses = (intf) => ({
-            '--input': intf.side === 'left' && !isBigBus(intf) && !props.positioned,
-            '--output': intf.side === 'right' && !isBigBus(intf) && !props.positioned,
+            // intf may be a plain bus stub, which never carries a two-sided bus
+            '--input': intf.side === 'left' && intf.bus?.type !== 'twoSided' && !props.positioned,
+            '--output': intf.side === 'right' && intf.bus?.type !== 'twoSided' && !props.positioned,
             '--connected': intf.connectionCount > 0,
             '--positioned': props.positioned,
         });
@@ -579,7 +578,6 @@ export default defineComponent({
             tempBusIntfOffset,
             onStubMouseUp,
             onStubMouseDown,
-            isBigBus,
         };
     },
 });

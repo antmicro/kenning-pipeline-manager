@@ -14,8 +14,6 @@ import { updateInterfacePosition } from '../custom/CustomNode.js';
 import {
     CustomNodeInterface,
     createStub,
-    getBusStubs,
-    isTwoSidedBus,
 } from '../custom/CustomNodeInterface.js';
 import {
     applySidePositions,
@@ -817,10 +815,10 @@ export class CustomNode extends Node {
                     }
                 }
                 if (!ioName.startsWith('property')) {
-                    const busStubs = getBusStubs(ioState).map((stub) => ({
+                    const busStubs = ioState.getBusStubs().map((stub) => ({
                         id: stub.id,
                         offset: Math.floor(stub.offset),
-                        ...(isTwoSidedBus(ioState) && { side: stub.side }),
+                        ...(ioState.isTwoSidedBus() && { side: stub.side }),
                     }));
                     const bus = {
                         size: ioState.bus?.size,

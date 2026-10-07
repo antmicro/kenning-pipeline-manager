@@ -33,7 +33,6 @@ import ConnectionView from './ConnectionView.vue';
 import getDomElements from './domResolver';
 import getPortCoordinates from './portCoordinates';
 import { TemporaryConnectionState } from '../temporaryConnection.js';
-import { getBusStubs } from '../CustomNodeInterface.js';
 
 export default defineComponent({
     extends: Components.ConnectionWrapper,
@@ -95,7 +94,7 @@ export default defineComponent({
         const fromNode = computed(() => graph.value.findNodeById(props.connection.from.nodeId));
         const toNode = computed(() => graph.value.findNodeById(props.connection.to.nodeId));
 
-        const getBuses = (intfs) => intfs.flatMap((i) => getBusStubs(i));
+        const getBuses = (intfs) => intfs.flatMap((i) => i.getBusStubs());
         const getNodeSides = (node) => [
             ...Object.values(node.value?.inputs ?? {}),
             ...Object.values(node.value?.outputs ?? {}),
