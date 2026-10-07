@@ -944,7 +944,7 @@ export class CustomNode extends Node {
         if (Object.keys(parsedState.enabledInterfaceGroups).length) {
             Object.entries({ ...this.inputs, ...this.outputs }).forEach(([, intf]) => {
                 // If this is an interfaces group
-                if (intf.interfaces !== undefined) {
+                if (intf.isInterfaceGroup()) {
                     intf.hidden = true; // eslint-disable-line no-param-reassign
                 }
             });

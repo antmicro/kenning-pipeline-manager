@@ -271,7 +271,7 @@ export default defineComponent({
         const { hoveredOver, temporaryConnection } = props.sidebar ?
             { hoveredOver: null, temporaryConnection: null } : useTemporaryConnection();
 
-        const isPositionedInterface = props.intf?.x !== undefined && props.intf?.y !== undefined;
+        const isPositionedInterface = props.intf.isPositioned();
 
         props.intf.events.beforeSetValue.unsubscribe(props.intf);
         props.intf.events.beforeSetValue.subscribe(props.intf, (value, prevent) => {
@@ -286,7 +286,7 @@ export default defineComponent({
                 prevent();
             }
         });
-        if (props.intf.group) {
+        if (props.intf.isGrouped()) {
             props.toggleGroup(props.intf);
             props.intf.events.setValue.unsubscribe(props.intf);
             props.intf.events.setValue.subscribe(props.intf, () => props.toggleGroup(props.intf));
@@ -322,7 +322,7 @@ export default defineComponent({
         const movedStubOffset = ref(undefined);
         const onStubMove = (ev) => {
             if (!viewModel.value.editor.readonly) {
-                const stub = findBusStub(props.intf, movedStubId.value);
+                const stub = props.intf.findBusStub(movedStubId.value);
                 const curY = ev.clientY;
                 // no recalculations on each pan since this is used in callaback
                 const dv = (curY - mousePosStubDragStart.value) / graph.value.scaling;
@@ -341,7 +341,7 @@ export default defineComponent({
         };
         const stubSideSwitch = doubleClick(700, (id) => {
             if (props.intf.isTwoSidedBus()) {
-                const stub = findBusStub(props.intf, id);
+                const stub = props.intf.findBusStub(id);
                 props.switchSides(stub);
             }
         });

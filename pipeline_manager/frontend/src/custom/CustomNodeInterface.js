@@ -9,29 +9,11 @@ import { NodeInterface } from '@baklavajs/core';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
- * The parent interfaces of a connection's endpoints together with the bus
- * stub parameters of the connection.
- *
- * @typedef {Object} ConnectionEndpointResolution
- * @property {any} from - The interface (or parent bus) of the connection's `from` endpoint.
- * @property {any} to - The interface (or parent bus) of the connection's `to` endpoint.
- * @property {number|undefined} offset - Position offset of the stub along the bus.
- * @property {string|undefined} stubID - The id of the stub.
- * @property {string|undefined} stubSide - The side of the stub.
- */
-
-/**
  * Resolves the parameters needed to (re)create a connection through
  * `addConnection`.
  *
- * Bus connections are held by stubs, but `addConnection` expects the parent
- * bus interfaces (it recreates the stubs through `preConnectionCheck`). This
- * helper maps the connection endpoints to their parent buses (when they are
- * stubs) and extracts the stub's offset, id and side, so the stub can be
- * recreated at the same position.
- *
  * @param {Object} connection - The connection with `from` and `to` endpoints.
- * @returns {ConnectionEndpointResolution} The parent interfaces of the
+ * @returns The parent interfaces of the
  * connection endpoints together with the bus stub parameters of the connection.
  */
 export function resolveConnectionEndpoints(connection) {
@@ -102,21 +84,6 @@ export function createStub(intf, offset = undefined, stubID = undefined, stubSid
 
 /**
  * @typedef {Object} CustomNodeFunctions
- * @property {string} side
- * @property {() => boolean} isBusInterface
- * @property {() => boolean} isOneSidedBus
- * @property {() => boolean} isTwoSidedBus
- * @property {() => boolean} isBigBus
- * @property {() => Array} getBusStubs
- * @property {() => boolean} isBusEmpty
- * @property {() => boolean} isInterfaceHidable
- * @property {() => Object} interfaceSideGetterSetter
- * @property {(*) => any} preConnectionCheck
- * @property {() => void} postConnectionCheck
- * @property {(stub: any, orphan?: boolean) => void} removeStub
- * @property {(connection: any) => boolean} isInConnection
- * @property {(node: any) => void} onCreate
- * @property {(node: any) => void} onDestroy
  */
 
 /**
@@ -146,8 +113,7 @@ export function withCustomNodeFunctions(Base) {
         }
 
         /**
-         * Checks whether this interface is a bus interface, i.e. it has a bus
-         * with a type.
+         * Checks whether this interface is a bus interface.
          *
          * @returns {boolean} True if the interface is a bus interface.
          */
@@ -156,8 +122,7 @@ export function withCustomNodeFunctions(Base) {
         }
 
         /**
-         * Checks whether this interface is a one-sided bus, i.e. all of its
-         * stubs share the side of the bus itself.
+         * Checks whether this interface is a one-sided bus.
          *
          * @returns {boolean} True if the interface is a one-sided bus.
          */
@@ -166,8 +131,7 @@ export function withCustomNodeFunctions(Base) {
         }
 
         /**
-         * Checks whether this interface is a two-sided bus, i.e. each of its
-         * stubs can be placed on either side of the node.
+         * Checks whether this interface is a two-sided bus.
          *
          * @returns {boolean} True if the interface is a two-sided bus.
          */
@@ -176,8 +140,7 @@ export function withCustomNodeFunctions(Base) {
         }
 
         /**
-         * Checks whether this interface is a displayed two-sided bus, i.e. a
-         * port carrying a two-sided bus.
+         * Checks whether this interface is a displayed two-sided bus.
          *
          * @returns {boolean} True if the interface is a port of a two-sided bus.
          */
@@ -195,8 +158,7 @@ export function withCustomNodeFunctions(Base) {
         }
 
         /**
-         * Checks whether this bus interface has no stubs and therefore no
-         * connections.
+         * Checks whether this bus interface has no stubs and therefore no connections.
          *
          * @returns {boolean} True if the interface is a bus without any stubs.
          */
@@ -205,8 +167,7 @@ export function withCustomNodeFunctions(Base) {
         }
 
         /**
-         * Checks whether this interface holds no connections and can therefore
-         * be hidden.
+         * Checks whether this interface holds no connections and can therefore be hidden.
          *
          * @returns {boolean} True if the interface holds no connections.
          */
@@ -215,6 +176,71 @@ export function withCustomNodeFunctions(Base) {
                 return this.connectionCount === 0;
             }
             return this.bus.stubs === undefined || this.bus.stubs.length === 0;
+        }
+
+        /**
+         * Checks whether this interface is a positioned (custom shape) interface.
+         *
+         * @returns {boolean} True if the interface has a custom position.
+         */
+        isPositioned() {
+            return this.x !== undefined && this.y !== undefined;
+        }
+
+        /**
+         * Checks whether this interface is an interface group.
+         *
+         * @returns {boolean} True if the interface is an interface group.
+         */
+        isInterfaceGroup() {
+            return this.interfaces !== undefined;
+        }
+
+        /**
+         * Checks whether this interface (or property) belongs to a group.
+         *
+         * @returns {boolean} True if the interface (or property) is grouped.
+         */
+        isGrouped() {
+            return this.group !== undefined;
+        }
+
+        /**
+         * Checks whether this property is a member of a group property.
+         *
+         * @returns {boolean} True if the property is part of a group property.
+         */
+        isGroupProperty() {
+            return this.groupProperty !== undefined;
+        }
+
+        /**
+         * Finds a bus stub of this interface by its id.
+         *
+         * @param {string} id - The id of the stub to find.
+         * @returns {Object|undefined} The stub with the given id, if found.
+         */
+        findBusStub(id) {
+            return (this.bus?.stubs ?? []).find((stub) => stub.id === id);
+        }
+
+        /**
+         * Checks whether this interface has a bus stub of the given id.
+         *
+         * @param {string} id - The id of the stub to look for.
+         * @returns {boolean} True if the interface has a bus stub of the given id.
+         */
+        hasBusStub(id) {
+            return this.findBusStub(id) !== undefined;
+        }
+
+        /**
+         * Clears all bus stubs of this interface.
+         */
+        clearBusStubs() {
+            if (this.bus && Array.isArray(this.bus.stubs)) {
+                this.bus.stubs = [];
+            }
         }
 
         /**
@@ -238,21 +264,6 @@ export function withCustomNodeFunctions(Base) {
                             // eslint-disable-next-line no-param-reassign
                             s.side = val;
                         });
-                    },
-                    enumerable: true,
-                    configurable: true,
-                };
-            }
-            if (this.group) {
-                return {
-                    get() {
-                        // eslint-disable-next-line no-underscore-dangle
-                        return this._side;
-                    },
-                    set(_) {
-                        // TODO implement since right now this is very much buggy
-                        // if the interfaces that should be part of a group get separated
-                        // weird things happen.
                     },
                     enumerable: true,
                     configurable: true,
@@ -283,30 +294,8 @@ export function withCustomNodeFunctions(Base) {
          * @param {string|undefined} stubSide - Optional side override for the created stub.
          * @returns {Object} The interface or stub to use for the connection.
          */
+        // eslint-disable-next-line no-unused-vars
         preConnectionCheck(other, node, offset, stubID, stubSide) {
-            if (this.group) {
-                if (!this.groupSlaves) {
-                    return this;
-                }
-                if (!this.isCollapsed) {
-                    return this;
-                }
-                const allowedTypes = other.type;
-                const intfs = { ...node.inputs, ...node.outputs };
-                const allowed = Object.entries(intfs)
-                    .find(([_, intf]) => {
-                        if (!this.groupSlaves.includes(intf)) {
-                            return false;
-                        }
-                        const typesOverlap =
-                            intf.type.filter((type) => allowedTypes.includes(type));
-                        const legalCount =
-                        // eslint-disable-next-line no-underscore-dangle
-                            (intf._connectionCount ?? 0) < (intf.maxConnectionCount ?? 1);
-                        return typesOverlap.length && legalCount;
-                    });
-                return allowed?.[1] ?? this;
-            }
             if (this.isBusInterface()) {
                 if (this.bus.stubs === undefined) {
                     // eslint-disable-next-line no-param-reassign
@@ -336,10 +325,6 @@ export function withCustomNodeFunctions(Base) {
         /**
          * Removes a connection stub from this interface's bus.
          *
-         * Called when a connection held by one of the bus stubs is removed. By
-         * default the stub is dropped from the `bus.stubs` list; when `orphan`
-         * is true the stub is kept and only marked as orphaned.
-         *
          * @param {Object} stub - The stub to remove from the bus.
          * @param {boolean} [orphan] - When true the stub is kept and marked as orphaned.
          */
@@ -361,9 +346,6 @@ export function withCustomNodeFunctions(Base) {
 
         /**
          * Checks whether this interface participates in the given connection.
-         *
-         * For buses the check is performed against all of the bus's stubs, since a
-         * stub (not the bus itself) is what actually holds the connection.
          *
          * @param {Object} connection - The connection to check, with `from` and `to` endpoints.
          * @returns {boolean} True if the interface (or one of its bus stubs) is an
@@ -388,49 +370,15 @@ export function withCustomNodeFunctions(Base) {
         /**
          * Hook invoked when the owning node is destroyed.
          *
-         * If this interface belongs to an interface group, the group's master and
-         * slaves are recomputed so the remaining interfaces stay correctly linked
-         * after this one is removed.
-         *
          * @param {Object} node - The node that is being destroyed.
          */
-        onDestroy(node) {
-            if (this.group) {
-                const curGroup = this.group;
-                let ports = Object.values({ ...node.inputs, ...node.outputs });
-                ports = ports.filter((i) => i.port).filter((i) => i.group === curGroup);
-                ports.forEach((p) => {
-                    // eslint-disable-next-line no-param-reassign
-                    delete p?.groupMaster;
-                    // eslint-disable-next-line no-param-reassign
-                    delete p?.groupSlaves;
-                });
-                ports = ports.filter((i) => i.name !== this.name);
-                const newMaster = ports[0];
-                const newSlaves = ports.slice(1);
-                newMaster.groupSlaves = newSlaves;
-                newSlaves.forEach((s) => {
-                    // eslint-disable-next-line no-param-reassign
-                    s.groupMaster = newMaster;
-                });
-            }
-        }
+        // eslint-disable-next-line class-methods-use-this, no-unused-vars
+        onDestroy(node) { }
     }
     return Custom;
 }
 
 /**
  * A custom node interface that extends baklava's `NodeInterface`.
- *
- * It adds a reactive `side` property and custom connection handling for
- * interface buses (which are split into stubs) and interface groups (which
- * share a single master with several slaves).
- *
- * Declared as a class (rather than a bare `const`) so that it exposes both a
- * value (the constructor, for `new` / `extends`) and a type (the instance
- * type, for TypeScript annotations). It adds no behavior of its own; it simply
- * is {@link withCustomNodeFunctions} applied to baklava's `NodeInterface`, so
- * every instance still carries the reactive `side` property and the
- * connection-check / lifecycle methods.
  */
 export class CustomNodeInterface extends withCustomNodeFunctions(NodeInterface) { }

@@ -1659,7 +1659,7 @@ const createContextMenuPropertyItems = () => {
             { value: 'UnsetExternalName', label: labels[1], icon: icons.Subgraph }
         );
         items.push(propertyMode);
-        if (!chosenProperty.groupProperty && !chosenProperty.isBigBus()) {
+        if (!chosenProperty.isGroupProperty() && !chosenProperty.isBigBus()) {
             items.push({ value: 'Hide', label: 'Hide', icon: icons.Hide });
         }
         if (chosenProperty.isBusEmpty() && chosenProperty.isBigBus()) {
@@ -1674,7 +1674,7 @@ const createContextMenuPropertyItems = () => {
 const onContextMenuPropertyClick = (action) => {
     switch (action) {
         case 'Hide':
-            if (chosenProperty !== undefined && !chosenProperty.group) {
+            if (chosenProperty !== undefined && !chosenProperty.isGrouped()) {
                 chosenProperty.hidden = true;
             }
             break;

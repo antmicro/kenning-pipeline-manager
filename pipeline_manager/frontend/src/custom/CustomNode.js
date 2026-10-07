@@ -20,16 +20,16 @@ import notifyEvents from './notifyEvents.js';
  */
 export function hideUnconnectedInterfaces(interfaces) {
     const buses = interfaces.filter(
-        (intf) => (intf.isBusInterface() && intf.bus.stubs !== undefined),
+        (intf) => intf.isBusInterface(),
     );
     buses.forEach((bus) => {
-        if (bus.bus.stubs.length === 0) {
+        if (bus.getBusStubs().length === 0) {
             bus.hidden = true; // eslint-disable-line no-param-reassign
         }
     });
     const filtered = interfaces.filter((intf) =>
-        (intf.bus === undefined || intf.bus.stubs === undefined)
-        && intf.group === undefined);
+        (!intf.isBusInterface() || intf.getBusStubs().length === 0)
+        && !intf.isGrouped());
     filtered.forEach(
         (i) => {
             if (i.connectionCount === 0 && i.port === true) {

@@ -357,8 +357,8 @@ export default defineComponent({
             .map((intf) => {
                 if (viewModel.value.editor.readonly ||
                     !intf.hidden ||
-                    intf.group ||
-                    intf.groupProperty) return [intf, undefined];
+                    intf.isGrouped() ||
+                    intf.isGroupProperty()) return [intf, undefined];
 
                 // eslint-disable-next-line no-param-reassign
                 const onHide = () => { intf.hidden = false; };
@@ -395,7 +395,7 @@ export default defineComponent({
 
         const interfaceGroups = computed(() =>
             Object.values({ ...node.value.inputs, ...node.value.outputs }).filter(
-                (ni) => ni.interfaces !== undefined,
+                (ni) => ni.isInterfaceGroup(),
             ),
         );
 

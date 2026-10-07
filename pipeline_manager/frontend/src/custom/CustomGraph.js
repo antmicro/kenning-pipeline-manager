@@ -396,7 +396,7 @@ export default function createPipelineManagerGraph(graph) {
                             return false;
                         };
                         checkAndReadd(intf, arr[name]);
-                        if (intf.bus?.size && intf.bus?.stubs) {
+                        if (intf.isBusInterface() && intf.getBusStubs().length > 0) {
                             arr[name].bus.stubs = arr[name].bus.stubs ?? [];
                             intf.getBusStubs().forEach((stub) => {
                                 const scopy =
@@ -594,7 +594,7 @@ export default function createPipelineManagerGraph(graph) {
             if (nodeInput.id === id) {
                 result = nodeInput;
             } else {
-                const s = findBusStub(nodeInput, id);
+                const s = nodeInput.findBusStub(id);
                 if (s) {
                     result = s;
                 }
@@ -685,7 +685,7 @@ export default function createPipelineManagerGraph(graph) {
                     nodesErrors.push(`Node '${node.type}' with id ${specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, n.id)} is invalid:`, ...nodeErrors.map((e) => `    ${e}`));
                 }
                 // check for bus stubs not connected to anything
-                n.interfaces?.filter((i) => i.bus).forEach((intf) => {
+                n.interfaces?.filter((i) => i.bus?.type !== undefined).forEach((intf) => {
                     (intf.bus?.stubs ?? []).forEach((stub) => {
                         if (!connectedIds.includes(stub.id)) {
                             errors.push(`Interface bus stub ${stub.id} in interface ${intf.id} is not connected to anything`);

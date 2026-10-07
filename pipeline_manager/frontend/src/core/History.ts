@@ -150,11 +150,14 @@ class NodeStep extends Step {
             this.nodeTuple = [this.nodeTuple[0], save];
 
             // don't save bus interface stubs
+            // eslint-disable-next-line no-param-reassign
             [
                 ...Object.values(n.inputs),
                 ...Object.values(n.outputs),
-            // eslint-disable-next-line no-param-reassign
-            ].filter((intf: any) => intf.bus).forEach((intf: any) => delete intf.bus.stubs);
+            ].filter((intf: any) => intf.isBusInterface?.()).forEach((intf: any) => {
+                // eslint-disable-next-line no-param-reassign
+                intf.clearBusStubs();
+            });
 
             // restore connections
             connections.forEach((conn) => {
