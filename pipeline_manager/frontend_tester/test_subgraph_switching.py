@@ -146,7 +146,11 @@ def test_subgraph_switching(
     Test if switching to a subgraph while utilizing RPC communication
     works.
     """
-    args = ["python3", "pipeline_manager/frontend_tester/rpc_client.py"]
+    args = [
+        "python3",
+        "pipeline_manager/frontend_tester/clients/"
+        "subgraph_switching_client.py",
+    ]
     client_process = None
 
     trace_name: Optional[str] = None
