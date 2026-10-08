@@ -49,12 +49,12 @@ class RPCMethodsBase:
 
     def specification_get(self) -> Dict:
         """
-        RPC method that responses to Specification request.
+        RPC method that responds to Specification request.
 
         Returns
         -------
         Dict
-            Method's response
+            Method's response.
         """
         logging.log(logging.INFO, "Sending specification.")
         return {
@@ -64,7 +64,7 @@ class RPCMethodsBase:
 
     async def dataflow_validate(self, dataflow: Dict) -> Dict:
         """
-        RPC method that responses to Validate request.
+        RPC method that responds to Validate request.
 
         It gets Dataflows from both Pipeline Managers and checks
         if they are the same.
@@ -113,7 +113,7 @@ class RPCMethodsBase:
 
     async def frontend_on_connect(self) -> Dict:
         """
-        RPC method that responses to frontend_on_connect request.
+        RPC method that responds to frontend_on_connect request.
 
         Send current Dataflow from original Pipeline Manager to its copy.
 
@@ -171,7 +171,7 @@ class RPCMethodsCopy(RPCMethodsBase):
 
     def specification_get(self) -> Dict:
         """
-        RPC method that responses to Specification request.
+        RPC method that responds to Specification request.
 
         Set `notifyWhenChanged` metadata to prevent frontend from sending
         requests with information about changed values.
@@ -196,7 +196,7 @@ class RPCMethodsOriginal(RPCMethodsBase):
 
     def specification_get(self) -> Dict:
         """
-        RPC method that responses to Specification request.
+        RPC method that responds to Specification request.
 
         Set `notifyWhenChanged` metadata to ensure frontend sends
         requests with information about changed values.
