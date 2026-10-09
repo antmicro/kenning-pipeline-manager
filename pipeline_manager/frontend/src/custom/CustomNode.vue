@@ -354,20 +354,18 @@ const externalApplicationManager = getExternalApplicationManager();
     });
 
 // Send message about changed position
-const notifyPositionChanged = (position) => {
+const notifyPositionChanged = ([x, y]) => {
     nextTick(() => transformed());
+    if (x === undefined || y === undefined) return;
     if (!externalApplicationManager.isConnected()) return;
     externalApplicationManager.notifyAboutChange('position_on_change', {
         graph_id: props.node.graphInstance.id,
         node_id: props.node.id,
-        position: {
-            x: position.x,
-            y: position.y,
-        },
+        position: { x, y },
     });
 };
 // Create watcher for position
-watch(() => props.node.position, notifyPositionChanged);
+watch(() => [props.node.position?.x, props.node.position?.y], notifyPositionChanged);
 watch(() => props.node.title, async (value) => {
     const data = {
         graph_id: props.node.graphInstance.id,
