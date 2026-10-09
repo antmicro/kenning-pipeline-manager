@@ -46,6 +46,7 @@ test = [
     "pytest-httpserver==1.0.10",
     "pytest-retry==1.7.0",
     "playwright==1.64.0",
+    "pipeline_manager[mirror]"
 ]
 docs = [
     "antmicro-sphinx-utils @ git+https://github.com/antmicro/antmicro-sphinx-utils.git",
