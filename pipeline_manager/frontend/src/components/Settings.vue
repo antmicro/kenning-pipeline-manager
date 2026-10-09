@@ -423,6 +423,12 @@ export default {
     z-index: 4;
     overflow-y: auto;
 
+    // Dropdowns have `position: absolute` by default, which gets them clipped
+    // if they overflow. Making it static makes the panel grows instead.
+    .baklava-select > .__dropdown {
+        position: static;
+    }
+
     & > .setting-header {
         display: flex;
         align-items: center;
