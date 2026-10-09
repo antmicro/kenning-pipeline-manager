@@ -6,6 +6,7 @@
 
 import json
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -63,6 +64,26 @@ def mirror_server(build_server_app: str):
             os.killpg(process_group_id, signal.SIGKILL)
 
 
+@pytest.fixture
+def mirrored_pages(mirror_server):
+    """
+    Fixture providing the original Pipeline Manager and its copy,
+    both with the dataflow loaded.
+    """
+    with sync_playwright() as playwright:
+        browser = playwright.firefox.launch()
+        context = browser.new_context(viewport={"width": 1920, "height": 1080})
+        copy = context.new_page()
+        open_pipeline_manager(copy, COPY_PORT)
+        original = context.new_page()
+        open_pipeline_manager(original, ORIGINAL_PORT)
+
+        upload_dataflow_file(original)
+        expect_position(get_node(original), NODE_POSITION)
+        expect_position(get_node(copy), NODE_POSITION)
+        yield original, copy
+
+
 def open_pipeline_manager(page: Page, port: int):
     """Open Pipeline Manager and wait for the specification from backend."""
     page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{port}")
@@ -101,38 +122,67 @@ def drag_node(page: Page, node: Locator, dx: int, dy: int):
     page.mouse.up()
 
 
-def test_node_move_is_mirrored(mirror_server):
+def test_node_move_is_mirrored(mirrored_pages: tuple[Page, Page]):
     """
     Test if moving a node, and undoing the move, in the original
     Pipeline Manager moves the node in its copy.
     """
-    with sync_playwright() as playwright:
-        browser = playwright.firefox.launch()
-        try:
-            context = browser.new_context(
-                viewport={"width": 1920, "height": 1080}
-            )
-            copy = context.new_page()
-            open_pipeline_manager(copy, COPY_PORT)
-            original = context.new_page()
-            open_pipeline_manager(original, ORIGINAL_PORT)
+    original, copy = mirrored_pages
+    original_node = get_node(original)
+    copy_node = get_node(copy)
 
-            upload_dataflow_file(original)
-            original_node = get_node(original)
-            copy_node = get_node(copy)
-            expect_position(original_node, NODE_POSITION)
-            expect_position(copy_node, NODE_POSITION)
+    drag_node(original, original_node, 200, 100)
+    expect(original_node).not_to_have_css("left", NODE_POSITION[0])
+    moved = (
+        original_node.evaluate("(e) => e.style.left"),
+        original_node.evaluate("(e) => e.style.top"),
+    )
+    expect_position(copy_node, moved)
 
-            drag_node(original, original_node, 200, 100)
-            expect(original_node).not_to_have_css("left", NODE_POSITION[0])
-            moved = (
-                original_node.evaluate("(e) => e.style.left"),
-                original_node.evaluate("(e) => e.style.top"),
-            )
-            expect_position(copy_node, moved)
+    original.keyboard.press("Control+KeyZ")
+    expect_position(original_node, NODE_POSITION)
+    expect_position(copy_node, NODE_POSITION)
 
-            original.keyboard.press("Control+KeyZ")
-            expect_position(original_node, NODE_POSITION)
-            expect_position(copy_node, NODE_POSITION)
-        finally:
-            browser.close()
+
+def test_select_change_is_mirrored(mirrored_pages: tuple[Page, Page]):
+    """
+    Test if choosing a value from a dropdown in the original
+    Pipeline Manager changes the value in its copy.
+    """
+    original, copy = mirrored_pages
+    original_select = get_node(original).locator(
+        '.baklava-select[title="MessageType"]'
+    )
+    copy_select = get_node(copy).locator(
+        '.baklava-select[title="MessageType"]'
+    )
+    expect(copy_select.locator(".__selected")).to_have_text("OK")
+
+    original_select.click()
+    original_select.locator(".__dropdown .item").get_by_text(
+        "ERROR", exact=True
+    ).click()
+
+    expect(original_select.locator(".__selected")).to_have_text("ERROR")
+    expect(copy_select.locator(".__selected")).to_have_text("ERROR")
+
+
+def test_checkbox_change_is_mirrored(mirrored_pages: tuple[Page, Page]):
+    """
+    Test if ticking a checkbox in the original Pipeline Manager
+    ticks it in its copy.
+    """
+    original, copy = mirrored_pages
+    original_checkbox = get_node(original).locator(
+        '.baklava-checkbox[title="Disconnect"]'
+    )
+    copy_checkbox = get_node(copy).locator(
+        '.baklava-checkbox[title="Disconnect"]'
+    )
+    checked = re.compile(r"(^|\s)--checked(\s|$)")
+    expect(copy_checkbox).not_to_have_class(checked)
+
+    original_checkbox.click()
+
+    expect(original_checkbox).to_have_class(checked)
+    expect(copy_checkbox).to_have_class(checked)
