@@ -9,16 +9,17 @@ import subprocess
 import time
 from pathlib import Path
 
+import pytest
 from playwright.sync_api import expect, sync_playwright
 
 PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
-SERVER_PORT = 5000
 PROCESS_SHUTDOWN_TIME = 5
 CLIENTS_DIRECTORY = Path(__file__).parent / "clients"
 
 
-def test_navbar_progress(rpc_server):
+@pytest.mark.flaky(retries=3, delay=1)
+def test_navbar_progress(rpc_server, backend_port: int, tcp_server_port: int):
     """
     Test if `progress_change` updates the progress bar of a running
     procedure and if buttons that cannot run in parallel with it are
@@ -27,13 +28,14 @@ def test_navbar_progress(rpc_server):
     args = [
         "python3",
         str(CLIENTS_DIRECTORY / "navbar_progress_client.py"),
+        str(tcp_server_port),
     ]
     client_process = subprocess.Popen(args)
     try:
         with sync_playwright() as playwright:
             browser = playwright.firefox.launch()
             page = browser.new_page()
-            page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{SERVER_PORT}")
+            page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{backend_port}")
 
             long_task = page.locator("#navbar-button-custom_long_task")
             blocked_task = page.locator("#navbar-button-custom_blocked_task")

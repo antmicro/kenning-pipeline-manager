@@ -16,10 +16,10 @@ from pathlib import Path
 import pytest
 from playwright.sync_api import Locator, Page, expect, sync_playwright
 
+from pipeline_manager.utils.ports import get_free_port
+
 PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
-ORIGINAL_PORT = 5000
-COPY_PORT = 5001
 PROCESS_SHUTDOWN_TIME = 5
 
 DATAFLOW_PATH = Path(__file__).parent / "frontend_tester_dataflow.json"
@@ -33,7 +33,17 @@ NODE_POSITION = (f"{NODE['position']['x']}px", f"{NODE['position']['y']}px")
 
 
 @pytest.fixture
-def mirror_server(build_server_app: str):
+def mirror_ports(backend_port: int) -> tuple[int, int]:
+    """Backend ports of the original Pipeline Manager and its copy."""
+    return backend_port, get_free_port(SERVER_ADDRESS)
+
+
+@pytest.fixture
+def mirror_server(
+    build_server_app: str,
+    mirror_ports: tuple[int, int],
+    tcp_server_port: int,
+):
     """Fixture running both Pipeline Managers and the mirroring application."""
     startup_time = 5
     process = None
@@ -47,9 +57,13 @@ def mirror_server(build_server_app: str):
             "--host",
             SERVER_ADDRESS,
             "--backend-port",
-            str(ORIGINAL_PORT),
+            str(mirror_ports[0]),
             "--backend-port-second",
-            str(COPY_PORT),
+            str(mirror_ports[1]),
+            "--port",
+            str(tcp_server_port),
+            "--port-second",
+            str(get_free_port(SERVER_ADDRESS)),
         ]
         process = subprocess.Popen(args, preexec_fn=os.setsid)
         time.sleep(startup_time)
@@ -65,7 +79,7 @@ def mirror_server(build_server_app: str):
 
 
 @pytest.fixture
-def mirrored_pages(mirror_server):
+def mirrored_pages(mirror_server, mirror_ports: tuple[int, int]):
     """
     Fixture providing the original Pipeline Manager and its copy,
     both with the dataflow loaded.
@@ -74,9 +88,9 @@ def mirrored_pages(mirror_server):
         browser = playwright.firefox.launch()
         context = browser.new_context(viewport={"width": 1920, "height": 1080})
         copy = context.new_page()
-        open_pipeline_manager(copy, COPY_PORT)
+        open_pipeline_manager(copy, mirror_ports[1])
         original = context.new_page()
-        open_pipeline_manager(original, ORIGINAL_PORT)
+        open_pipeline_manager(original, mirror_ports[0])
 
         upload_dataflow_file(original)
         expect_position(get_node(original), NODE_POSITION)

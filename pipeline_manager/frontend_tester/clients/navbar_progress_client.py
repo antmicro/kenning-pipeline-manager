@@ -8,6 +8,7 @@ Module with a RPC client providing navbar buttons for progress tests.
 
 import asyncio
 import json
+import sys
 from pathlib import Path
 
 from pipeline_manager_backend_communication.communication_backend import (
@@ -16,7 +17,7 @@ from pipeline_manager_backend_communication.communication_backend import (
 from pipeline_manager_backend_communication.misc_structures import MessageType
 
 host = "127.0.0.1"
-port = 9876
+port = int(sys.argv[1]) if len(sys.argv) > 1 else 9876
 EXAMPLES_DIRECTORY = Path(__file__).parents[3] / "examples"
 
 

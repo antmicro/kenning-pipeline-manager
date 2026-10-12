@@ -13,8 +13,9 @@ from pathlib import Path
 
 import pytest
 
+from pipeline_manager.utils.ports import get_free_port
+
 SERVER_ADDRESS = "127.0.0.1"
-SERVER_PORT = 5000
 PROCESS_SHUTDOWN_TIME = 5
 
 REPOSITORY_ROOT = Path(__file__).parents[2]
@@ -35,7 +36,19 @@ def pytest_addoption(parser: pytest.Parser):
 
 
 @pytest.fixture
-def rpc_server(build_server_app: str):
+def backend_port() -> int:
+    """Free port for the Pipeline Manager backend."""
+    return get_free_port(SERVER_ADDRESS)
+
+
+@pytest.fixture
+def tcp_server_port() -> int:
+    """Free port for the Pipeline Manager TCP server."""
+    return get_free_port(SERVER_ADDRESS)
+
+
+@pytest.fixture
+def rpc_server(build_server_app: str, backend_port: int, tcp_server_port: int):
     """Fixture to provide a backend server."""
     startup_time = 5
     process = None
@@ -47,7 +60,9 @@ def rpc_server(build_server_app: str):
             "--backend-host",
             SERVER_ADDRESS,
             "--backend-port",
-            str(SERVER_PORT),
+            str(backend_port),
+            "--tcp-server-port",
+            str(tcp_server_port),
         ]
         process = subprocess.Popen(
             args,

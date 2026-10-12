@@ -25,15 +25,26 @@ from pipeline_manager.backend.state_manager import global_state_manager
 
 # noqa: E501
 from pipeline_manager.utils.mock_application import MockApplicationClient
+from pipeline_manager.utils.ports import get_free_port
 
 
 @pytest.fixture
-def app_client():
+def backend_port():
+    return get_free_port()
+
+
+@pytest.fixture
+def tcp_server_port():
+    return get_free_port()
+
+
+@pytest.fixture
+def app_client(backend_port, tcp_server_port):
     sio, app, _ = create_backend(
         [
             "",
             "--tcp-server-port",
-            "12312",
+            str(tcp_server_port),
             "--skip-frontend",
             "--skip-connecting",
             "--lazy-server-init",
@@ -41,7 +52,15 @@ def app_client():
     )
     server = multiprocessing.Process(
         target=run_uvicorn,
-        args=(app, sio, "127.0.0.1", 32123, "127.0.0.1", 12312, True),
+        args=(
+            app,
+            sio,
+            "127.0.0.1",
+            backend_port,
+            "127.0.0.1",
+            tcp_server_port,
+            True,
+        ),
     )
     server.start()
     time.sleep(1)
@@ -51,9 +70,15 @@ def app_client():
 
 
 @pytest_asyncio.fixture
-async def application_client(sample_specification, sample_dataflow):
+async def application_client(
+    backend_port, tcp_server_port, sample_specification, sample_dataflow
+):
     application_client = MockApplicationClient(
-        "127.0.0.1", 32123, 12312, sample_specification, sample_dataflow
+        "127.0.0.1",
+        backend_port,
+        tcp_server_port,
+        sample_specification,
+        sample_dataflow,
     )
     await application_client.connect_socketio()
     yield application_client

@@ -11,7 +11,6 @@ from playwright.sync_api import BrowserContext, Page, expect, sync_playwright
 
 PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
-SERVER_PORT = 5000
 PROCESS_SHUTDOWN_TIME = 5
 CLIENTS_DIRECTORY = Path(__file__).parent / "clients"
 EXAMPLES_DIRECTORY = Path(__file__).parents[2] / "examples"
@@ -43,7 +42,7 @@ def enter_subgraph_node(page: Page):
     contextMenuOption.click()
 
 
-def execute_enter_subgraph_scenario(context: BrowserContext):
+def execute_enter_subgraph_scenario(context: BrowserContext, port: int):
     """
     Execute a Playwright scenario, when an agents enters a subgraph,
     utilizing the frontend.
@@ -53,10 +52,12 @@ def execute_enter_subgraph_scenario(context: BrowserContext):
     context : BrowserContext
         An instance of Playwright context,
         on which the scenario will be performed.
+    port : int
+        Port of the Pipeline Manager backend.
     """
     page = context.new_page()
     page.set_viewport_size({"width": 1920, "height": 1080})
-    page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{SERVER_PORT}")
+    page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{port}")
     upload_dataflow_file(page)
 
     nodes = page.locator(".node-container > div")
@@ -71,6 +72,8 @@ def execute_enter_subgraph_scenario(context: BrowserContext):
 def test_subgraph_switching(
     request: pytest.FixtureRequest,
     rpc_server,
+    backend_port: int,
+    tcp_server_port: int,
 ):
     """
     Test if switching to a subgraph while utilizing RPC communication
@@ -79,6 +82,7 @@ def test_subgraph_switching(
     args = [
         "python3",
         str(CLIENTS_DIRECTORY / "subgraph_switching_client.py"),
+        str(tcp_server_port),
     ]
     client_process = None
 
@@ -104,7 +108,7 @@ def test_subgraph_switching(
                     sources=True,
                 )
             try:
-                execute_enter_subgraph_scenario(context)
+                execute_enter_subgraph_scenario(context, backend_port)
             finally:
                 if trace_name:
                     ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
