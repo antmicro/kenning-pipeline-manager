@@ -8,6 +8,7 @@ Sphinx extension for drawing graphs using Pipeline Manager.
 
 from __future__ import annotations
 
+import errno
 import os
 from pathlib import Path
 from typing import Optional
@@ -159,7 +160,10 @@ class KPMDirective(SphinxDirective):
         """
         from tempfile import NamedTemporaryFile
 
-        from pipeline_manager.frontend_builder import build_frontend
+        from pipeline_manager.frontend_builder import (
+            build_frontend,
+            copy_frontend_to_workspace,
+        )
         from pipeline_manager.html_to_img import html_to_png
 
         # Build HTML
@@ -174,15 +178,23 @@ class KPMDirective(SphinxDirective):
             if "graph" in self.options
             else None
         )
-
-        status = build_frontend(
-            build_type="static-html",
-            specification=spec_path,
-            dataflow=dataflow_path,
-            workspace_directory=workspace_dir,
-            skip_install_deps=True,
-            skip_frontend_copying=True,
-        )
+        if spec_path:
+            spec_path = spec_path.resolve()
+        if dataflow_path:
+            dataflow_path = dataflow_path.resolve()
+        frontend_changed = True
+        if workspace_dir.exists():
+            frontend_changed = copy_frontend_to_workspace(
+                workspace_directory=workspace_dir,
+            )
+        status = 0
+        if frontend_changed:
+            status = build_frontend(
+                build_type="static-html",
+                workspace_directory=workspace_dir,
+                skip_install_deps=True,
+                skip_frontend_copying=True,
+            )
         if status != 0:
             raise ExtensionError(
                 f"Failed to build frontend for Pipeline Manager in ({status})"
@@ -202,7 +214,48 @@ class KPMDirective(SphinxDirective):
         # Render image
         out_html = (workspace_dir / "frontend/dist/index.html").resolve()
         try:
-            html_to_png(out_html, graph_path)
+            from http.server import HTTPServer, SimpleHTTPRequestHandler
+            from threading import Thread
+
+            class Handler(SimpleHTTPRequestHandler):
+                def __init__(self, *args, **kwargs):
+                    super().__init__(
+                        *args, directory=out_html.parent, **kwargs
+                    )
+
+            httpd = HTTPServer(("localhost", 8080), Handler)
+
+            def serve_forever(httpd):
+                with httpd:  # to make sure httpd.server_close is called
+                    try:
+                        httpd.serve_forever()
+                    except Exception:
+                        return
+
+            thread = Thread(target=serve_forever, args=(httpd,))
+            thread.setDaemon(True)
+            thread.start()
+
+            def symlink_force(target, link_name):
+                try:
+                    os.symlink(target, link_name)
+                except OSError as e:
+                    if e.errno == errno.EEXIST:
+                        os.remove(link_name)
+                        os.symlink(target, link_name)
+
+            symlink_force(spec_path, out_html.parent / spec_path.name)
+            symlink_force(dataflow_path, out_html.parent / dataflow_path.name)
+
+            html_to_png(
+                "localhost:8080",
+                graph_path,
+                spec_path.name,
+                dataflow_path.name,
+            )
+
+            httpd.shutdown()
+
         except ImportError:
             raise ExtensionError(
                 "html2image module is missing for converting HTML graphs to "

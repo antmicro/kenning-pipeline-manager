@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2022-2023 Antmicro <www.antmicro.com>
+# Copyright (c) 2022-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -14,7 +14,9 @@ import logging
 from pathlib import Path
 
 
-def html_to_png(input_html: Path, output_png: Path):
+def html_to_png(
+    input_html: Path, output_png: Path, spec_name: str, dataflow_name: str
+):
     """
     Creates a png file from input HTML file.
 
@@ -24,9 +26,17 @@ def html_to_png(input_html: Path, output_png: Path):
         Path to the input HTML file
     output_png: Path
         Path to the output png file
+    spec_name: str
+        Name of the specification file
+    dataflow_name: str
+        Name of the dataflow file
     """
     from html2image import Html2Image
 
+    params = {}
+    params["spec"] = "relative://" + spec_name
+    params["graph"] = "relative://" + dataflow_name
+    params["preview"] = "true"
     out_dir = output_png.parent
 
     hti = Html2Image(
@@ -40,9 +50,11 @@ def html_to_png(input_html: Path, output_png: Path):
         output_path=out_dir,
     )
 
+    from urllib.parse import urlencode
+
     hti.browser.use_new_headless = True
     hti.screenshot(
-        url=f"file://{input_html}?preview=true",
+        url=f"http://{input_html}/?{urlencode(params)}",
         save_as=str(output_png.name),
     )
 
