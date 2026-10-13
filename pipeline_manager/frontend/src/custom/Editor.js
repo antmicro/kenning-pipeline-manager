@@ -20,7 +20,7 @@ import { useGraph, useViewModel } from '@baklavajs/renderer-vue';
 
 import createPipelineManagerGraph from './CustomGraph.js';
 import LayoutManager from '../core/LayoutManager.js';
-import { suppressHistoryLogging } from '../core/History.ts';
+import { suppressHistoryLogging, startTransaction, commitTransaction } from '../core/History.ts';
 import CreateCustomGraphNodeType, { prepareSubgraphInstance } from './CustomGraphNode.js';
 import { ir } from '../core/interfaceRegistry.ts';
 import { hexToRGB } from '../core/nodeCreation/nodeColors.js';
@@ -275,13 +275,19 @@ export default class PipelineManagerEditor extends Editor {
     }
 
     /**
-     *  Adds a new empty graph to the editor.
+     * Adds a new empty graph to the editor.
+     *
+     * @param {string} name Name of the new graph.
+     * @returns {string} ID of the created graph.
      */
-    addNewGraph() {
+    addNewGraph(name = 'New Graph') {
+        startTransaction();
         const graph = new Graph(this);
-        graph.name = 'New Graph';
+        graph.name = name;
         this.registerGraph(graph);
         this.editorManager.baklavaView.editor.switchToRelatedGraph(graph.id, false);
+        commitTransaction();
+        return graph.id;
     }
 
     /**

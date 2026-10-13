@@ -919,6 +919,38 @@
             "returns": {
                "$ref": "common_types#/$defs/null_or_empty"
             }
+        },
+        "graph_add": {
+            "description": "Adds a new empty graph to the editor",
+            "params": {
+                "description": "Parameters for request",
+                "type": [
+                    "object",
+                    "null"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Name of the new graph",
+                        "type": "string",
+                        "default": "New Graph"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "returns": {
+                "description": "Information about the created graph",
+                "type": "object",
+                "properties": {
+                    "graph_id": {
+                        "description": "ID of the created graph",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "graph_id"
+                ],
+                "additionalProperties": false
+            }
         }
     },
     "backend_endpoints": {

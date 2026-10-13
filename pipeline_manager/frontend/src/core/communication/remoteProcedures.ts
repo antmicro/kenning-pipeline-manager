@@ -917,3 +917,13 @@ export async function search_get_query(): Promise<{ query: string | null }> {
 export function search_set_query(params: { query: string | null }) {
     editorManager.baklavaView.editor.searchQuery = params.query ?? undefined;
 }
+
+/**
+ * Adds a new empty graph to the editor and displays it.
+ *
+ * @returns ID of the created graph
+ */
+export function graph_add(params: { name?: string }) {
+    const graphId = editorManager.baklavaView.editor.addNewGraph(params?.name);
+    return { graph_id: graphId };
+}

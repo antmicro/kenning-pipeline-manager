@@ -22,9 +22,6 @@ import { menuState, configurationState } from '../../core/nodeCreation/Configura
 import EditorManager from '../../core/EditorManager';
 import { saveGraphConfiguration, saveLayoutConfiguration } from '../saveConfiguration.ts';
 import getExternalApplicationManager from '../../core/communication/ExternalApplicationManager';
-import {
-    startTransaction, commitTransaction,
-} from '../../core/History.ts';
 
 export default {
     components: {
@@ -330,9 +327,7 @@ export default {
                 });
         },
         createNewGraphCallback() {
-            startTransaction();
             this.editorManager.editor.addNewGraph();
-            commitTransaction();
         },
     },
     data() {
