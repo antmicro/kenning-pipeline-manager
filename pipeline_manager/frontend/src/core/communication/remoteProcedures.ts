@@ -927,3 +927,15 @@ export function graph_add(params: { name?: string }) {
     const graphId = editorManager.baklavaView.editor.addNewGraph(params?.name);
     return { graph_id: graphId };
 }
+
+/**
+ * Renames a graph.
+ */
+export function graph_set_name(params: { name: string, graph_id?: string }) {
+    const { editor } = editorManager.baklavaView;
+    if (params.graph_id === undefined || params.graph_id === editor.graph.id) {
+        editor.updateCurrentSubgraphName(params.name);
+        return;
+    }
+    getGraph(params.graph_id).name = params.name;
+}

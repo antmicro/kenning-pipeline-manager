@@ -1598,7 +1598,13 @@ export default class PipelineManagerEditor extends Editor {
             });
     }
 
+    /**
+     * Renames the currently displayed graph and updates the rendered editor title.
+     *
+     * @param {string} name New name of the graph.
+     */
     updateCurrentSubgraphName(name) {
         this._graph.name = name;
+        this.graphName = name;
     }
 }

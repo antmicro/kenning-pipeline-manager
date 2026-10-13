@@ -951,6 +951,30 @@
                 ],
                 "additionalProperties": false
             }
+        },
+        "graph_set_name": {
+            "description": "Renames a graph",
+            "params": {
+                "description": "Parameters for request",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "New name of the graph",
+                        "type": "string"
+                    },
+                    "graph_id": {
+                        "description": "ID of the graph to rename, defaults to the currently displayed graph",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "additionalProperties": false
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/null_or_empty"
+            }
         }
     },
     "backend_endpoints": {

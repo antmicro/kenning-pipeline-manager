@@ -47,3 +47,15 @@ test('test graph_add endpoint', async ({ page }) => {
     expect(after.entryGraph).toBe(graphId);
     expect(after.graphs.find((g: any) => g.id === graphId).name).toBe('Added graph');
 });
+
+test('test graph_set_name endpoint', async ({ page }) => {
+    await prepareEditor(page);
+
+    const response = await callFrontendRPC(page, 'graph_set_name', { name: 'Renamed graph' });
+    expect(response.error).toBeUndefined();
+
+    await expect(page.locator('.editorTitle').getByText('Renamed graph')).toBeVisible();
+    const { dataflow } = (await callFrontendRPC(page, 'graph_get')).result;
+    expect(dataflow.graphs.find((g: any) => g.id === dataflow.entryGraph).name)
+        .toBe('Renamed graph');
+});
