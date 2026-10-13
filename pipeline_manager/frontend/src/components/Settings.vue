@@ -225,7 +225,7 @@ export default {
         });
 
         const hideUnconnectedButton = computed(() => {
-            const button = new ButtonInterface('Hide unocnnected interfaces', async () => {
+            const button = new ButtonInterface('Hide unconnected interfaces', async () => {
                 const apply = async () => {
                     let interfaces = [];
                     props.viewModel.editor.graph.nodes.forEach((n) => {
