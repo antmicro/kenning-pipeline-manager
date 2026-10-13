@@ -579,6 +579,60 @@
                 "additionalProperties": false
             },
             "default": []
+        },
+        "graph_layout": {
+            "description": "Layout of the currently displayed graph.",
+            "type": "object",
+            "properties": {
+                "layout": {
+                    "description": "Mapping from node IDs to their layout",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "position": {
+                                "description": "Position of the node",
+                                "type": "object",
+                                "properties": {
+                                    "x": {
+                                        "description": "X coordinate",
+                                        "type": "number"
+                                    },
+                                    "y": {
+                                        "description": "Y coordinate",
+                                        "type": "number"
+                                    }
+                                },
+                                "required": ["x", "y"]
+                            },
+                            "style": {
+                                "description": "A style defined by 'styles' in metadata",
+                                "type": ["string", "array"]
+                            },
+                            "interfaces": {
+                                "description": "Mapping from interface names to their placement",
+                                "type": "object",
+                                "additionalProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "side": {
+                                            "description": "Side of the node on which the interface is rendered",
+                                            "enum": ["left", "right", "top", "bottom"]
+                                        },
+                                        "sidePosition": {
+                                            "description": "Position of the interface on its side",
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "required": ["position", "interfaces"]
+                    }
+                }
+            },
+            "required": ["layout"],
+            "additionalProperties": false
         }
     }
 }

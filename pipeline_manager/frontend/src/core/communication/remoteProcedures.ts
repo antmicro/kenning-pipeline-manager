@@ -21,7 +21,9 @@ import runInfo from './runInformation';
 import EditorManager from '../EditorManager';
 import NotificationHandler, { LOG_LEVEL } from '../notifications';
 import { MAIN_TERMINAL, terminalStore } from '../stores';
-import { saveSpecificationConfiguration } from '../../components/saveConfiguration.ts';
+import {
+    saveSpecificationConfiguration, saveLayoutConfiguration,
+} from '../../components/saveConfiguration.ts';
 
 // eslint-disable-next-line import/no-cycle
 import getExternalApplicationManager from './ExternalApplicationManager';
@@ -938,4 +940,24 @@ export function graph_set_name(params: { name: string, graph_id?: string }) {
         return;
     }
     getGraph(params.graph_id).name = params.name;
+}
+
+/**
+ * @returns layout of the currently displayed graph
+ */
+export function layout_get() {
+    return saveLayoutConfiguration.getSave();
+}
+
+/**
+ * Applies a layout to the currently displayed graph.
+ *
+ * @returns errors that occurred while applying the layout
+ */
+export function layout_set(params: { layout: any }) {
+    const errors = EditorManager.importGraphLayout(
+        editorManager.baklavaView.editor.graph,
+        params,
+    );
+    return { errors };
 }
