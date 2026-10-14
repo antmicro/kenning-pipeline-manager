@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { toPng } from 'html-to-image';
+import { toPng, toSvg } from 'html-to-image';
 import { useViewModel } from 'baklavajs';
 import EditorManager from '../core/EditorManager';
 import NotificationHandler from '../core/notifications';
@@ -34,6 +34,51 @@ const saveBlob = (blob: Blob, filename: string) => {
     linkElement.download = filename;
     linkElement.click();
 };
+
+export const saveDataUrl = (dataUrl: string, filename: string) => {
+    const downloadLink = document.createElement('a');
+    downloadLink.download = filename;
+    downloadLink.href = dataUrl;
+    downloadLink.dataset.downloadurl = [
+        dataUrl,
+        downloadLink.download,
+        downloadLink.href,
+    ].join(':');
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+};
+
+export type ImageFormat = 'png' | 'svg';
+
+/**
+ * Renders the currently displayed graph to an image.
+ *
+ * @param format Format of the image
+ * @param width Width of the PNG image, ignored for SVG
+ * @param height Height of the PNG image, ignored for SVG
+ * @returns Image encoded as a data URL
+ */
+export async function renderGraphImage(
+    format: ImageFormat,
+    width = 1920,
+    height = 1080,
+): Promise<string> {
+    // Get editor with data flow
+    const nodeEditor: HTMLElement = document.querySelector('.inner-editor')!;
+    // Exclude nodes hidden in export (e.g. node palette and zoom controls)
+    const filter = (node: any) => !node.classList?.contains('export-hidden');
+
+    if (format === 'svg') {
+        return toSvg(nodeEditor, { filter, imagePlaceholder: brokenImage });
+    }
+    return toPng(nodeEditor, {
+        filter,
+        imagePlaceholder: brokenImage,
+        canvasWidth: width,
+        canvasHeight: height,
+    });
+}
 
 export const saveLayoutConfiguration: SaveConfiguration = {
     saveName: 'layout',
@@ -304,11 +349,6 @@ export const exportGraph = {
     saveName: 'dataflow',
 
     exportCallback() {
-        // Get editor with data flow
-        const nodeEditor: HTMLElement = document.querySelector('.inner-editor')!;
-        // Exclude node palette
-        const filter = (node: any) => !node.classList?.contains('baklava-node-palette');
-
         if (this.width < 0) {
             NotificationHandler.showToast('error', `Negative width. The image could not be saved.`);
             return;
@@ -326,25 +366,8 @@ export const exportGraph = {
             this.height = this.maxHeight;
         }
 
-        toPng(nodeEditor, {
-            filter,
-            imagePlaceholder: brokenImage,
-            canvasWidth: this.width,
-            canvasHeight: this.height,
-        })
-            .then((dataUrl) => {
-                const downloadLink = document.createElement('a');
-                downloadLink.download = this.saveName;
-                downloadLink.href = dataUrl;
-                downloadLink.dataset.downloadurl = [
-                    dataUrl,
-                    downloadLink.download,
-                    downloadLink.href,
-                ].join(':');
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            })
+        renderGraphImage('png', this.width, this.height)
+            .then((dataUrl) => saveDataUrl(dataUrl, this.saveName))
             .catch((error) => {
                 NotificationHandler.showToast('error', `Export to PNG failed: ${error}`);
             });

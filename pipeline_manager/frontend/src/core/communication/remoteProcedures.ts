@@ -22,7 +22,7 @@ import EditorManager from '../EditorManager';
 import NotificationHandler, { LOG_LEVEL } from '../notifications';
 import { MAIN_TERMINAL, terminalStore } from '../stores';
 import {
-    saveSpecificationConfiguration, saveLayoutConfiguration,
+    saveSpecificationConfiguration, saveLayoutConfiguration, renderGraphImage, ImageFormat,
 } from '../../components/saveConfiguration.ts';
 
 // eslint-disable-next-line import/no-cycle
@@ -960,4 +960,16 @@ export function layout_set(params: { layout: any }) {
         params,
     );
     return { errors };
+}
+
+/**
+ * Renders the currently displayed graph to an image.
+ *
+ * @returns image encoded as a data URL
+ */
+export async function graph_export_image(
+    params: { format: ImageFormat, width?: number, height?: number },
+) {
+    const data = await renderGraphImage(params.format, params.width, params.height);
+    return { format: params.format, data };
 }

@@ -9,18 +9,18 @@ Defines the editor context menu, the menu for saving/opening/exporting current g
 -->
 <script>
 import { watch } from 'vue';
-import { toSvg } from 'html-to-image';
 import { useViewModel } from 'baklavajs';
 import DropdownItem from '../DropdownItem.vue';
 import Logo from '../../icons/Logo.vue';
 import NotificationHandler from '../../core/notifications';
-import { brokenImage } from '../../../../resources/broken_image.js';
 import { loadingScreen } from '../../core/utils';
 import { parseJSON } from '../../core/validate-json';
 import { GraphFactory } from '../../core/NodeFactory.js';
 import { menuState, configurationState } from '../../core/nodeCreation/ConfigurationState.ts';
 import EditorManager from '../../core/EditorManager';
-import { saveGraphConfiguration, saveLayoutConfiguration } from '../saveConfiguration.ts';
+import {
+    saveGraphConfiguration, saveLayoutConfiguration, renderGraphImage, saveDataUrl,
+} from '../saveConfiguration.ts';
 import getExternalApplicationManager from '../../core/communication/ExternalApplicationManager';
 
 export default {
@@ -158,24 +158,8 @@ export default {
             document.getElementById('load-dataflow-button').value = '';
         },
         exportToSvg() {
-            // Get editor with data flow
-            const nodeEditor = document.querySelector('.inner-editor');
-            // Exclude nodes hidden in export (e.g. node palette and zoom controls)
-            const filter = (node) => !node.classList?.contains('export-hidden');
-            toSvg(nodeEditor, { filter, imagePlaceholder: brokenImage })
-                .then((dataUrl) => {
-                    const downloadLink = document.createElement('a');
-                    downloadLink.download = 'dataflow.svg';
-                    downloadLink.href = dataUrl;
-                    downloadLink.dataset.downloadurl = [
-                        dataUrl,
-                        downloadLink.download,
-                        downloadLink.href,
-                    ].join(':');
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                })
+            renderGraphImage('svg')
+                .then((dataUrl) => saveDataUrl(dataUrl, 'dataflow.svg'))
                 .catch((error) => {
                     NotificationHandler.showToast('error', `Export to SVG failed: ${error}`);
                 });
