@@ -829,13 +829,12 @@ export default function createPipelineManagerGraph(graph) {
         const ignoredNodeSet = this.editor.getIgnoredNodes(this.id);
 
         const nodes = this.nodes.filter((n) => !ignoredNodeSet.has(n.layer));
-
         const sizes = nodes.map((node) => {
             const HTMLelement = document.getElementById(node.id);
             return {
                 width: HTMLelement.offsetWidth,
                 height: HTMLelement.offsetHeight,
-                position: this.editor.getNodeDisplayedPosition(node),
+                position: node.position,
             };
         });
         const margin = 100;
