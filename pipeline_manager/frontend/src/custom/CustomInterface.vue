@@ -9,6 +9,12 @@ Interface that is used to display inputs, outputs and properties of a node.
 
 The custom implementations introduces wrapper functions that prevent the user
 from creating and deleting connections or altering nodes' values if the editor is read-only.
+
+The rendering is split across four components, one per interface kind:
+`InterfaceBus` (bus), `InterfacePort` (normal interface),
+`InterfacePositioned` (custom shape / positioned interface) and
+`InterfaceProperty` (properties). This component keeps the shared state and
+the root element, and picks the right one for the given interface.
 -->
 
 <template>
@@ -18,231 +24,115 @@ from creating and deleting connections or altering nodes' values if the editor i
         class="baklava-node-interface"
         :class="newClasses(intf)"
     >
-        <div
-            class="__port-bus"
-            :class="{
-                '__big-bus': intf.isTwoSidedBus(),
-                greyedout_arrow: highlighted,
-            }"
+        <InterfaceBus
             v-if="intf.port && intf.bus?.type"
-            no-drag="true"
-            :style="{height: intf.bus?.size.toString() + 'px'}"
-            @mouseenter="startHoverWrapper"
-            @mouseleave="endHoverWrapper"
-            @pointerdown.left="(e) => { onMouseDown(); e.stopPropagation() }"
-        >
-            <div
-                v-if="isExposed && (hovered || editExternalName)"
-                :class="{
-                    '__port_name_left': intf.side === 'left',
-                    '__port_name_top': intf.side == 'top',
-                    '__port_name_right': intf.side === 'right',
-                    '__port_name_bottom': intf.side == 'bottom'
-                }"
-            >
-                <input
-                    v-if="editExternalName"
-                    v-model="inputExternalName"
-                    ref="externalNameInput"
-                    type="text"
-                    spellcheck="false"
-                    autocomplete="off"
-                    class="__port_input"
-                    :class="{ '__error': externalNameInputIncorrect }"
-                    placeholder="External name"
-                    @focusout="externalNameFocusOutCallback"
-                    @keydown.enter.exact.stop="(e) => { e.target.blur(); }"
-                    @input="externalNameInputCallback"
-                    @pointerdown.left.stop="(e) => e.stopPropagation()"
-                    @keydown.ctrl.stop="(e) => e.stopPropagation()"
-                />
-                <span
-                    v-else
-                    @pointerdown.left.stop="enableExternalNameEdit"
-                    @keydown.stop
-                >
-                    {{ intf.externalName }}
-                </span>
-            </div>
-            <div
-                class="__port-bus-stub"
-                v-if="tempBusIntfOffset && intf.bus?.size"
-                :class="{
-                    picked: picked,
-                    '__square': isExposed,
-                    '--input': intf.side === 'left',
-                    '--output': intf.side === 'right',
-                }"
-            >
-                <div
-                    class="__port"
-                    no-drag="true"
-                    v-if="!hidePort"
-                    :style="{
-                        position: 'absolute',
-                        top: tempBusIntfOffset + 'px',
-                        pointerEvents: 'none',
-                    }"
-                >
-                </div>
-            </div>
-            <div
-                class="__port-bus-stub"
-                v-for="stub in intf.bus?.stubs"
-                :key="stub.id"
-                :id="stub.id"
-                :class="newClasses(stub)"
-            >
-                <div
-                    class="__port"
-                    v-if="!hidePort"
-                    no-drag="true"
-                    @pointerdown.left.stop="(e) => onStubMouseDown(e, stub.id, stub.offset )"
-                    :style="{
-                        position: 'absolute',
-                        top: stub.offset + 'px',
-                    }"
-                >
-                </div>
-            </div>
-            <span
-                class="__port-bus-name"
-            >
-                {{ intf.name }}
-            </span>
-        </div>
-        <div
-            class="__port"
-            v-if="intf.port && !intf.bus?.size && !hidePort"
-            @mouseenter="startHoverWrapper"
-            @mouseleave="endHoverWrapper"
-            @pointerdown.left="onMouseDown"
-            no-drag="true"
-            :class="{
-                greyedout_arrow: highlighted,
-                picked: picked,
-                '__square': isExposed,
-                '__port_centered': positioned
-                }"
-        >
-            <div
-                v-if="isExposed && (hovered || editExternalName)"
-                :class="{
-                    '__port_name_left': intf.side === 'left',
-                    '__port_name_top': intf.side == 'top',
-                    '__port_name_right': intf.side === 'right',
-                    '__port_name_bottom': intf.side == 'bottom'
-                }"
-            >
-                <input
-                    v-if="editExternalName"
-                    v-model="inputExternalName"
-                    ref="externalNameInput"
-                    type="text"
-                    spellcheck="false"
-                    autocomplete="off"
-                    class="__port_input"
-                    :class="{ '__error': externalNameInputIncorrect }"
-                    placeholder="External name"
-                    @focusout="externalNameFocusOutCallback"
-                    @keydown.enter.exact.stop="(e) => { e.target.blur(); }"
-                    @input="externalNameInputCallback"
-                    @pointerdown.left.stop="(e) => e.stopPropagation()"
-                    @keydown.ctrl.stop="(e) => e.stopPropagation()"
-                />
-                <span
-                    v-else
-                    @pointerdown.left.stop="enableExternalNameEdit"
-                    @keydown.stop
-                >
-                    {{ intf.externalName }}
-                </span>
-            </div>
-            <Arrow
-                v-if="displayArrow"
-                :noninteractable="true"
-                color="black"
-                scale="big"
-                :rotate="arrowRotation"
-            />
-        </div>
-
-        <div
-            no-drag="true"
-            class="__port-name"
-            @mouseenter="startPropertyHover"
-            @mouseleave="endPropertyHover"
-            :class="spanClasses"
-        >
-            <!-- @keydown.stop is added so that events are not bubbled up to the editor -->
-            <component
-                :is="intf.component"
-                v-if="showComponent"
-                v-model="intf.value"
-                :node="node"
-                :intf="intf"
-                @keydown.stop
-                :tabindex="tabindexValue"
-                @click="setValue"
-                @input="setValue"
-            />
-            <span v-else-if="!intf.bus?.size">
-                {{ intf.name }}
-            </span>
-            <div
-                v-if="isExposed && (propertyHovered || editExternalName) && !intf.port && !sidebar"
-                class="__property_name"
-            >
-                <input
-                    v-if="editExternalName"
-                    v-model="inputExternalName"
-                    ref="externalNameInput"
-                    type="text"
-                    spellcheck="false"
-                    autocomplete="off"
-                    class="__property_input"
-                    :class="{ '__error': externalNameInputIncorrect }"
-                    placeholder="External name"
-                    @focusout="externalNameFocusOutCallback"
-                    @keydown.enter.exact.stop="(e) => { e.target.blur(); }"
-                    @input="externalNameInputCallback"
-                    @pointerdown.left.stop="(e) => e.stopPropagation()"
-                    @keydown.ctrl.stop="(e) => e.stopPropagation()"
-                />
-                <span
-                    v-else
-                    @pointerdown.left.stop="enableExternalNameEdit"
-                    @keydown.stop
-                >
-                    {{ intf.externalName }}
-                </span>
-            </div>
-        </div>
+            :intf="intf"
+            :temporaryConnection="temporaryConnection"
+            :nodeWidth="width"
+            :highlighted="highlighted"
+            :picked="picked"
+            :hide-port="hidePort"
+            :is-exposed="isExposed"
+            :hovered="hovered"
+            :edit-external-name="editExternalName"
+            :input-external-name="inputExternalName"
+            :external-name-input-incorrect="externalNameInputIncorrect"
+            :temp-bus-intf-offset="tempBusIntfOffset"
+            :new-classes="newClasses"
+            :start-hover-wrapper="startHoverWrapper"
+            :end-hover-wrapper="endHoverWrapper"
+            :on-mouse-down="onMouseDown"
+            :external-name-focus-out-callback="externalNameFocusOutCallback"
+            :external-name-input-callback="externalNameInputCallback"
+            :enable-external-name-edit="enableExternalNameEdit"
+            :set-input-external-name="setInputExternalName"
+        />
+        <InterfacePort
+            v-if="intf.port && !intf.bus?.size && !hidePort && !positioned"
+            :intf="intf"
+            :highlighted="highlighted"
+            :picked="picked"
+            :is-exposed="isExposed"
+            :hovered="hovered"
+            :edit-external-name="editExternalName"
+            :input-external-name="inputExternalName"
+            :external-name-input-incorrect="externalNameInputIncorrect"
+            :display-arrow="displayArrow"
+            :arrow-rotation="arrowRotation"
+            :start-hover-wrapper="startHoverWrapper"
+            :end-hover-wrapper="endHoverWrapper"
+            :on-mouse-down="onMouseDown"
+            :external-name-focus-out-callback="externalNameFocusOutCallback"
+            :external-name-input-callback="externalNameInputCallback"
+            :enable-external-name-edit="enableExternalNameEdit"
+            :set-input-external-name="setInputExternalName"
+        />
+        <InterfacePositioned
+            v-if="intf.port && !intf.bus?.size && !hidePort && positioned"
+            :intf="intf"
+            :highlighted="highlighted"
+            :picked="picked"
+            :is-exposed="isExposed"
+            :hovered="hovered"
+            :edit-external-name="editExternalName"
+            :input-external-name="inputExternalName"
+            :external-name-input-incorrect="externalNameInputIncorrect"
+            :display-arrow="displayArrow"
+            :arrow-rotation="arrowRotation"
+            :start-hover-wrapper="startHoverWrapper"
+            :end-hover-wrapper="endHoverWrapper"
+            :on-mouse-down="onMouseDown"
+            :external-name-focus-out-callback="externalNameFocusOutCallback"
+            :external-name-input-callback="externalNameInputCallback"
+            :enable-external-name-edit="enableExternalNameEdit"
+            :set-input-external-name="setInputExternalName"
+        />
+        <InterfaceProperty
+            :intf="intf"
+            :node="node"
+            :positioned="positioned"
+            :hiddenName="hiddenName"
+            :show-component="showComponent"
+            :tabindex-value="tabindexValue"
+            :is-exposed="isExposed"
+            :property-hovered="hovered"
+            :edit-external-name="editExternalName"
+            :input-external-name="inputExternalName"
+            :external-name-input-incorrect="externalNameInputIncorrect"
+            :sidebar="sidebar"
+            :start-property-hover="startPropertyHover"
+            :end-property-hover="endPropertyHover"
+            :external-name-focus-out-callback="externalNameFocusOutCallback"
+            :external-name-input-callback="externalNameInputCallback"
+            :enable-external-name-edit="enableExternalNameEdit"
+            :set-input-external-name="setInputExternalName"
+        />
     </div>
 </template>
 
 <script>
 import {
-    defineComponent, ref, computed, nextTick,
+    defineComponent, ref, computed,
 } from 'vue';
 import { useElementSize } from '@vueuse/core';
 import {
-    Components, useViewModel, useGraph, TextInterface,
+    Components, useViewModel, useGraph,
 } from '@baklavajs/renderer-vue';
-import Arrow from '../icons/Arrow.vue';
 import doubleClick from '../core/doubleClick';
-import { ir } from '../core/interfaceRegistry.ts';
 import { useTemporaryConnection } from './temporaryConnection';
-import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
-
-/**
- * A property's value as last reported to the external application, by the
- * property's id: a property is reported when its value is edited to another.
- */
-const reportedValues = new Map();
+import InterfaceBus from './InterfaceBus.vue';
+import InterfacePort from './InterfacePort.vue';
+import InterfacePositioned from './InterfacePositioned.vue';
+import InterfaceProperty from './InterfaceProperty.vue';
 
 export default defineComponent({
     extends: Components.NodeInterface,
+    components: {
+        InterfaceBus,
+        InterfacePort,
+        InterfacePositioned,
+        InterfaceProperty,
+    },
     props: {
         highlighted: Boolean,
         picked: Boolean,
@@ -254,9 +144,6 @@ export default defineComponent({
         sidebar: { default: false, required: false },
         hidePort: { default: false, required: false },
         tabindexValue: { default: -1, required: false },
-    },
-    components: {
-        Arrow,
     },
     setup(props) {
         const {
@@ -299,69 +186,9 @@ export default defineComponent({
                 props.updateDynamicInterfaces(props.intf),
             );
         }
-        const tempBusIntfOffset = ref(undefined);
-        const onBusMove = (ev) => {
-            if (temporaryConnection.value && props.intf.bus?.type) {
-                temporaryConnection.value.updated = ev.offsetY;
-                tempBusIntfOffset.value = ev.offsetY;
-
-                const bus = props.intf;
-                if (props.intf.isTwoSidedBus()) {
-                    if (ev.offsetX > width.value / 2) {
-                        bus.side = 'right';
-                    } else {
-                        bus.side = 'left';
-                    }
-                }
-            } else {
-                tempBusIntfOffset.value = undefined;
-            }
-        };
-        const mousePosStubDragStart = ref(undefined);
-        const movedStubId = ref(undefined);
-        const movedStubOffset = ref(undefined);
-        const onStubMove = (ev) => {
-            if (!viewModel.value.editor.readonly) {
-                const stub = props.intf.findBusStub(movedStubId.value);
-                const curY = ev.clientY;
-                // no recalculations on each pan since this is used in callaback
-                const dv = (curY - mousePosStubDragStart.value) / graph.value.scaling;
-                stub.offset = movedStubOffset.value + dv;
-                stub.offset = Math.min(Math.max(stub.offset, 0), props.intf.bus?.size ?? 0);
-            }
-        };
-        const onStubMouseUp = () => {
-            if (!viewModel.value.editor.readonly) {
-                window.removeEventListener('pointermove', onStubMove);
-                window.removeEventListener('pointerup', onStubMouseUp);
-                mousePosStubDragStart.value = undefined;
-                movedStubId.value = undefined;
-                movedStubOffset.value = undefined;
-            }
-        };
-        const stubSideSwitch = doubleClick(700, (id) => {
-            if (props.intf.isTwoSidedBus()) {
-                const stub = props.intf.findBusStub(id);
-                props.switchSides(stub);
-            }
-        });
-
-        const onStubMouseDown = (ev, id, off) => {
-            if (viewModel.value.editor.readonly) {
-                return;
-            }
-            window.addEventListener('pointermove', onStubMove);
-            window.addEventListener('pointerup', onStubMouseUp);
-            mousePosStubDragStart.value = ev.clientY;
-            movedStubId.value = id;
-            movedStubOffset.value = off;
-            stubSideSwitch(id);
-        };
 
         const hovered = ref(false);
-        const startHoverWrapper = (ev) => {
-            window.addEventListener('pointermove', onBusMove);
-            onBusMove(ev);
+        const startHoverWrapper = (_) => {
             hovered.value = true;
             if (!viewModel.value.editor.readonly) {
                 hoveredOver(props.intf);
@@ -369,8 +196,6 @@ export default defineComponent({
         };
 
         const endHoverWrapper = () => {
-            window.removeEventListener('pointermove', onBusMove);
-            tempBusIntfOffset.value = undefined;
             hovered.value = false;
             if (!viewModel.value.editor.readonly) {
                 hoveredOver(undefined);
@@ -435,30 +260,14 @@ export default defineComponent({
             '--connected': intf.connectionCount > 0,
             '--positioned': props.positioned,
         });
-        const spanClasses = computed(() => ({
-            highlighted: props.positioned,
-            hidden: (props.positioned && !hovered.value) || props.hiddenName,
-            '--positioned': props.positioned,
-            '--top': props.intf.side === 'top' && props.positioned,
-            '--bottom': props.intf.side === 'bottom' && props.positioned,
-            '--left': props.intf.side === 'left' && props.positioned,
-            '--right': props.intf.side === 'right' && props.positioned,
-            '--input': props.intf.direction === 'input' && props.positioned,
-            '--output': props.intf.direction === 'output' && props.positioned,
-            '--inout': props.intf.direction === 'inout' && props.positioned,
-        }));
 
         const isExposed = computed(() =>
             props.intf.externalName !== undefined,
         );
 
         // External name editing
-        const externalNameComponent = new TextInterface('External name', props.intf.externalName).setPort(false);
-        externalNameComponent.componentName = 'TextInterface';
-
         const editExternalName = ref(false);
         const externalNameInputIncorrect = ref(false);
-        const externalNameInput = ref(null);
         const externalNames = [];
 
         const inputExternalName = ref(props.intf.externalName);
@@ -479,15 +288,14 @@ export default defineComponent({
             editExternalName.value = true;
             e.preventDefault();
 
-            // Wait for the next tick to focus the input, so that it is rendered first
-            nextTick().then(() => {
-                externalNameInput.value.focus();
-                externalNameInput.value.select();
-                externalNameInputIncorrect.value = graph.value.isIncorrectExternalName(
-                    props.intf.externalName,
-                    externalNames,
-                );
-            });
+            externalNameInputIncorrect.value = graph.value.isIncorrectExternalName(
+                props.intf.externalName,
+                externalNames,
+            );
+        };
+
+        const setInputExternalName = (value) => {
+            inputExternalName.value = value;
         };
 
         const externalNameInputCallback = (e) => {
@@ -512,43 +320,6 @@ export default defineComponent({
             );
         };
 
-        // A property's edit, reported to the external application
-        // (`properties_on_change`, with `notifyWhenChanged`). Here, where the
-        // edit is made, rather than by watching the property: a graph node's
-        // exposed properties are not seen by a watch, nor do they emit their
-        // `setValue` where their node does, so their edits went unreported.
-        // Once per value, the first edit too; not a value set by code.
-        if (!props.intf.port && !reportedValues.has(props.intf.id)) {
-            reportedValues.set(props.intf.id, JSON.stringify(props.intf.value));
-        }
-        const reportEdit = () => {
-            if (props.intf.port || !props.node) return;
-            const now = JSON.stringify(props.intf.value);
-            if (reportedValues.get(props.intf.id) === now) return;
-            reportedValues.set(props.intf.id, now);
-            getExternalApplicationManager().notifyAboutChange('properties_on_change', {
-                graph_id: props.node.graphInstance.id,
-                node_id: props.node.id,
-                properties: [{ id: props.intf.id, new_value: props.intf.value }],
-            });
-        };
-
-        const setValue = () => {
-            reportEdit();
-            if (!props.intf.value) return;
-            if (!(isExposed.value || ir.isRegistered(props.intf.id))) return;
-
-            const { editor } = viewModel.value;
-            const allNodes = Array.from(editor.graphs).map((g) => g.nodes).flat();
-            const allProperties = allNodes.map((n) => Object.entries(n.inputs)).flat()
-                .filter(([key, _]) => key.startsWith('property_'));
-            const exposedProperties = allProperties.map(([_, value]) => value)
-                .filter((prop) => prop.id === props.intf.id);
-
-            // eslint-disable-next-line no-return-assign
-            exposedProperties.forEach((prop) => prop.value = props.intf.value);
-        };
-
         return {
             arrowRotation,
             displayArrow,
@@ -556,7 +327,6 @@ export default defineComponent({
             el,
             enableExternalNameEdit,
             endHoverWrapper,
-            externalNameInput,
             externalNameInputIncorrect,
             externalNameInputCallback,
             externalNameFocusOutCallback,
@@ -564,7 +334,6 @@ export default defineComponent({
             isConnected,
             inputExternalName,
             newClasses,
-            spanClasses,
             onMouseDown,
             openSidebar,
             showComponent,
@@ -574,10 +343,9 @@ export default defineComponent({
             propertyHovered,
             startPropertyHover,
             endPropertyHover,
-            setValue,
-            tempBusIntfOffset,
-            onStubMouseUp,
-            onStubMouseDown,
+            setInputExternalName,
+            temporaryConnection,
+            width,
         };
     },
 });
