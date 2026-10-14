@@ -50,6 +50,7 @@ export default {
         @pointerover="() => this.$emit('hoverStart')"
         @pointerleave="() => this.$emit('hoverStop')"
         v-click-outside="() => this.$emit('update:openPanel', false)"
+        aria-label="settings"
     >
         <Cogwheel :hover="hover" class="small_svg" />
         <div :class="['tooltip', mobileClasses]">

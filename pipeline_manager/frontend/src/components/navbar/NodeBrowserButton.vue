@@ -54,6 +54,7 @@ export default {
         @click="() => this.$emit('onClicked')"
         @pointerover="() => this.$emit('hoverStart')"
         @pointerleave="() => this.$emit('hoverStop')"
+        aria-label="node-palette"
     >
         <Cube :hover="hover" class="small_svg"/>
         <div :class="['tooltip-left', mobileClasses, 'tooltip']">
