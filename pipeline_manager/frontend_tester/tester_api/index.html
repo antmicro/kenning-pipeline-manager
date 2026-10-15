@@ -117,6 +117,8 @@
 
     // Frontend requests
 
+    const open_dialog = () => sendPM({ method: 'open_dialog_request', params: { title: "customBox", wait: true } });
+
     const getInput = () => JSON.parse(document.getElementById('input').value);
 
     const graph_get = () => sendPM({ method: 'graph_get' });
@@ -152,6 +154,25 @@
           const { params: { dataflow } } = request;
           response = { type: 0, content: dataflow, filename: 'pipeline.json' }
           break;
+        case 'dialog_boxes_get':
+          response = {
+            "customBox": {
+              "title": "Call procedure",
+              "confirmText": "Run",
+              "template": {
+                "name": {
+                  "name": "Procedure",
+                  "type": "text"
+                },
+                "age": {
+                  "name": "Number of iteration",
+                  "type": "int",
+                  "min": 0
+                }
+              }
+            }
+          }
+        break
         default:
           response = null;
       }
@@ -168,6 +189,7 @@
           <button onclick="specification_change()">Set specification</button>
           <button onclick="graph_change()">Set graph</button>
           <button onclick="any_request()">Handle provided request</button>
+          <button onclick="open_dialog()">Open dialog</button>
         </div>
         <div class="io-container">
           <div>Specification/Dataflow/Custom request</div>
