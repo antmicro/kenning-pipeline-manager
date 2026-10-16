@@ -685,7 +685,7 @@ export default function createPipelineManagerGraph(graph) {
                     nodesErrors.push(`Node '${node.type}' with id ${specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, n.id)} is invalid:`, ...nodeErrors.map((e) => `    ${e}`));
                 }
                 // check for bus stubs not connected to anything
-                n.interfaces?.filter((i) => i.bus?.type !== undefined).forEach((intf) => {
+                n.interfaces?.filter((i) => i.bus?.stubs !== undefined).forEach((intf) => {
                     (intf.bus?.stubs ?? []).forEach((stub) => {
                         if (!connectedIds.includes(stub.id)) {
                             errors.push(`Interface bus stub ${stub.id} in interface ${intf.id} is not connected to anything`);
