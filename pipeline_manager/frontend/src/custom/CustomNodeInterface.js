@@ -354,9 +354,13 @@ export function withCustomNodeFunctions(Base) {
         isInConnection(connection) {
             if (this.isBusInterface()) {
                 return this.bus?.stubs?.some((stub) =>
-                    [connection.to, connection.from].includes(stub));
+                    [connection.to, connection.from].some(
+                        (end) => end === stub || end?.id === stub.id,
+                    ));
             }
-            return [connection.to, connection.from].includes(this);
+            return [connection.to, connection.from].some(
+                (end) => end === this || end?.id === this.id,
+            );
         }
 
         /**

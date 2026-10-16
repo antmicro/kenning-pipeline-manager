@@ -32,20 +32,13 @@ the root element, and picks the right one for the given interface.
             :highlighted="highlighted"
             :picked="picked"
             :hide-port="hidePort"
+            :switchSides="switchSides"
             :is-exposed="isExposed"
             :hovered="hovered"
-            :edit-external-name="editExternalName"
-            :input-external-name="inputExternalName"
-            :external-name-input-incorrect="externalNameInputIncorrect"
-            :temp-bus-intf-offset="tempBusIntfOffset"
             :new-classes="newClasses"
             :start-hover-wrapper="startHoverWrapper"
             :end-hover-wrapper="endHoverWrapper"
             :on-mouse-down="onMouseDown"
-            :external-name-focus-out-callback="externalNameFocusOutCallback"
-            :external-name-input-callback="externalNameInputCallback"
-            :enable-external-name-edit="enableExternalNameEdit"
-            :set-input-external-name="setInputExternalName"
         />
         <InterfacePort
             v-if="intf.port && !intf.bus?.size && !hidePort && !positioned"
@@ -54,18 +47,11 @@ the root element, and picks the right one for the given interface.
             :picked="picked"
             :is-exposed="isExposed"
             :hovered="hovered"
-            :edit-external-name="editExternalName"
-            :input-external-name="inputExternalName"
-            :external-name-input-incorrect="externalNameInputIncorrect"
             :display-arrow="displayArrow"
             :arrow-rotation="arrowRotation"
             :start-hover-wrapper="startHoverWrapper"
             :end-hover-wrapper="endHoverWrapper"
             :on-mouse-down="onMouseDown"
-            :external-name-focus-out-callback="externalNameFocusOutCallback"
-            :external-name-input-callback="externalNameInputCallback"
-            :enable-external-name-edit="enableExternalNameEdit"
-            :set-input-external-name="setInputExternalName"
         />
         <InterfacePositioned
             v-if="intf.port && !intf.bus?.size && !hidePort && positioned"
@@ -74,18 +60,11 @@ the root element, and picks the right one for the given interface.
             :picked="picked"
             :is-exposed="isExposed"
             :hovered="hovered"
-            :edit-external-name="editExternalName"
-            :input-external-name="inputExternalName"
-            :external-name-input-incorrect="externalNameInputIncorrect"
             :display-arrow="displayArrow"
             :arrow-rotation="arrowRotation"
             :start-hover-wrapper="startHoverWrapper"
             :end-hover-wrapper="endHoverWrapper"
             :on-mouse-down="onMouseDown"
-            :external-name-focus-out-callback="externalNameFocusOutCallback"
-            :external-name-input-callback="externalNameInputCallback"
-            :enable-external-name-edit="enableExternalNameEdit"
-            :set-input-external-name="setInputExternalName"
         />
         <InterfaceProperty
             :intf="intf"
@@ -96,16 +75,9 @@ the root element, and picks the right one for the given interface.
             :tabindex-value="tabindexValue"
             :is-exposed="isExposed"
             :property-hovered="hovered"
-            :edit-external-name="editExternalName"
-            :input-external-name="inputExternalName"
-            :external-name-input-incorrect="externalNameInputIncorrect"
             :sidebar="sidebar"
             :start-property-hover="startPropertyHover"
             :end-property-hover="endPropertyHover"
-            :external-name-focus-out-callback="externalNameFocusOutCallback"
-            :external-name-input-callback="externalNameInputCallback"
-            :enable-external-name-edit="enableExternalNameEdit"
-            :set-input-external-name="setInputExternalName"
         />
     </div>
 </template>
@@ -116,7 +88,7 @@ import {
 } from 'vue';
 import { useElementSize } from '@vueuse/core';
 import {
-    Components, useViewModel, useGraph,
+    Components, useViewModel,
 } from '@baklavajs/renderer-vue';
 import doubleClick from '../core/doubleClick';
 import { useTemporaryConnection } from './temporaryConnection';
@@ -154,7 +126,6 @@ export default defineComponent({
         const { width } = useElementSize(el);
 
         const { viewModel } = useViewModel();
-        const { graph } = useGraph();
         const { hoveredOver, temporaryConnection } = props.sidebar ?
             { hoveredOver: null, temporaryConnection: null } : useTemporaryConnection();
 
@@ -265,74 +236,13 @@ export default defineComponent({
             props.intf.externalName !== undefined,
         );
 
-        // External name editing
-        const editExternalName = ref(false);
-        const externalNameInputIncorrect = ref(false);
-        const externalNames = [];
-
-        const inputExternalName = ref(props.intf.externalName);
-
-        /**
-         * Update the list of external names of the interfaces in the current graph.
-         */
-        const updateExternalNames = () => {
-            externalNames.splice(0, externalNames.length);
-            externalNames.push(...graph.value.obtainExposedNames());
-            externalNames.splice(externalNames.indexOf(props.intf.externalName), 1);
-        };
-
-        const enableExternalNameEdit = (e) => {
-            // Get the list of external names of the interfaces in the subgraph
-            updateExternalNames();
-
-            editExternalName.value = true;
-            e.preventDefault();
-
-            externalNameInputIncorrect.value = graph.value.isIncorrectExternalName(
-                props.intf.externalName,
-                externalNames,
-            );
-        };
-
-        const setInputExternalName = (value) => {
-            inputExternalName.value = value;
-        };
-
-        const externalNameInputCallback = (e) => {
-            externalNameInputIncorrect.value = graph.value.isIncorrectExternalName(
-                e.target.value,
-                externalNames,
-            );
-        };
-
-        const externalNameFocusOutCallback = () => {
-            editExternalName.value = false;
-            externalNameInputIncorrect.value = false;
-            if (inputExternalName.value === props.intf.externalName) return;
-
-            const newExternalName = graph.value.resolveNewExposedName(inputExternalName.value);
-            inputExternalName.value = newExternalName;
-
-            viewModel.value.editor.exposeInterface(
-                graph.value.id,
-                props.intf,
-                newExternalName,
-            );
-        };
-
         return {
             arrowRotation,
             displayArrow,
-            editExternalName,
             el,
-            enableExternalNameEdit,
             endHoverWrapper,
-            externalNameInputIncorrect,
-            externalNameInputCallback,
-            externalNameFocusOutCallback,
             hovered,
             isConnected,
-            inputExternalName,
             newClasses,
             onMouseDown,
             openSidebar,
@@ -343,7 +253,6 @@ export default defineComponent({
             propertyHovered,
             startPropertyHover,
             endPropertyHover,
-            setInputExternalName,
             temporaryConnection,
             width,
         };

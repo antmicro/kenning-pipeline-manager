@@ -34,64 +34,36 @@ control.
         <span v-else-if="!intf.bus?.size">
             {{ intf.name }}
         </span>
-        <div
-            v-if="isExposed && (propertyHovered || editExternalName) && !intf.port && !sidebar"
-            class="__property_name"
-        >
-            <input
-                v-if="editExternalName"
-                ref="externalNameInput"
-                :value="inputExternalName"
-                type="text"
-                spellcheck="false"
-                autocomplete="off"
-                class="__property_input"
-                :class="{ '__error': externalNameInputIncorrect }"
-                placeholder="External name"
-                @focusout="externalNameFocusOutCallback"
-                @keydown.enter.exact.stop="(e) => { e.target.blur(); }"
-                @input="onExternalNameInput"
-                @pointerdown.left.stop="(e) => e.stopPropagation()"
-                @keydown.ctrl.stop="(e) => e.stopPropagation()"
-            />
-            <span
-                v-else
-                @pointerdown.left.stop="enableExternalNameEdit"
-                @keydown.stop
-            >
-                {{ intf.externalName }}
-            </span>
-        </div>
+        <ExternalNameInput
+            :intf="intf"
+            :visible="isExposed && propertyHovered && !intf.port && !sidebar"
+            wrapper-class="__property_name"
+            input-class="__property_input"
+        />
     </div>
 </template>
 
 <script setup>
-import {
-    ref, watch, nextTick, computed,
-} from 'vue';
+import { computed } from 'vue';
 import { useViewModel } from '@baklavajs/renderer-vue';
 import { ir } from '../core/interfaceRegistry.ts';
 import getExternalApplicationManager from '../core/communication/ExternalApplicationManager';
+import ExternalNameInput from './ExternalNameInput.vue';
+import { CustomNodeInterface } from './CustomNodeInterface.js';
+import { CustomNode } from '../core/NodeFactory.js';
 
 const props = defineProps({
     intf: { type: CustomNodeInterface, required: true },
     node: { type: CustomNode, default: null },
     positioned: { type: Boolean, default: false },
-    hiddenName: { type: String, default: '' },
+    hiddenName: { type: Boolean, default: false },
     showComponent: { type: Boolean, default: false },
     tabindexValue: { type: Number, default: -1 },
     isExposed: { type: Boolean, default: false },
     propertyHovered: { type: Boolean, default: false },
-    editExternalName: { type: Boolean, default: false },
-    inputExternalName: { type: String, default: undefined },
-    externalNameInputIncorrect: { type: Boolean, default: false },
     sidebar: { type: Boolean, default: false },
     startPropertyHover: { type: Function, required: true },
     endPropertyHover: { type: Function, required: true },
-    externalNameFocusOutCallback: { type: Function, required: true },
-    externalNameInputCallback: { type: Function, required: true },
-    enableExternalNameEdit: { type: Function, required: true },
-    setInputExternalName: { type: Function, required: true },
 });
 const { viewModel } = useViewModel();
 
@@ -137,24 +109,6 @@ const setValue = () => {
     // eslint-disable-next-line no-return-assign,no-param-reassign
     exposedProperties.forEach((prop) => prop.value = props.intf.value);
 };
-
-const onExternalNameInput = (e) => {
-    props.setInputExternalName(e.target.value);
-    props.externalNameInputCallback(e);
-};
-
-const externalNameInput = ref(null);
-watch(
-    () => props.editExternalName,
-    (val) => {
-        if (val) {
-            nextTick().then(() => {
-                externalNameInput.value?.focus();
-                externalNameInput.value?.select();
-            });
-        }
-    },
-);
 
 // A property's edit, reported to the external application
 // (`properties_on_change`, with `notifyWhenChanged`). Here, where the

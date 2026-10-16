@@ -898,7 +898,7 @@ export default class PipelineManagerEditor extends Editor {
 
     _getFromView(node, field) {
         const view = this.currentView;
-        const viewEntry = node.views?.find((v) => v.name === view);
+        const viewEntry = node?.views?.find((v) => v.name === view);
         if (viewEntry && viewEntry.style) {
             const val = this.getNodeStyle(viewEntry.style)?.[field];
             if (val) {
@@ -983,7 +983,7 @@ export default class PipelineManagerEditor extends Editor {
     getNodeInterfacePositions(node) {
         const viewPos = this._getFromView(node, 'positions');
         if (viewPos) return viewPos;
-        return this.getNodeStyle(this.getNodeTypeStyle(node.type))?.positions ?? {};
+        return this.getNodeStyle(this.getNodeTypeStyle(node?.type))?.positions ?? {};
     }
 
     getCustomNodeTitlePosition(node) {

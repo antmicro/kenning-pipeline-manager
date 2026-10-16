@@ -22,39 +22,16 @@ stub preview and the bus name.
         @mouseleave="endHoverWrapperBus"
         @pointerdown.left="(e) => { onMouseDown(); e.stopPropagation() }"
     >
-        <div
-            v-if="isExposed && (hovered || editExternalName)"
-            :class="{
+        <ExternalNameInput
+            :intf="intf"
+            :visible="isExposed && hovered"
+            :wrapper-class="{
                 '__port_name_left': intf.side === 'left',
                 '__port_name_top': intf.side == 'top',
                 '__port_name_right': intf.side === 'right',
                 '__port_name_bottom': intf.side == 'bottom'
             }"
-        >
-            <input
-                v-if="editExternalName"
-                ref="externalNameInput"
-                :value="inputExternalName"
-                type="text"
-                spellcheck="false"
-                autocomplete="off"
-                class="__port_input"
-                :class="{ '__error': externalNameInputIncorrect }"
-                placeholder="External name"
-                @focusout="externalNameFocusOutCallback"
-                @keydown.enter.exact.stop="(e) => { e.target.blur(); }"
-                @input="onExternalNameInput"
-                @pointerdown.left.stop="(e) => e.stopPropagation()"
-                @keydown.ctrl.stop="(e) => e.stopPropagation()"
-            />
-            <span
-                v-else
-                @pointerdown.left.stop="enableExternalNameEdit"
-                @keydown.stop
-            >
-                {{ intf.externalName }}
-            </span>
-        </div>
+        />
         <div
             class="__port-bus-stub"
             v-if="tempBusIntfOffset && intf.bus?.size"
@@ -105,11 +82,13 @@ stub preview and the bus name.
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue';
+import { ref } from 'vue';
 import {
     useViewModel, useGraph,
 } from '@baklavajs/renderer-vue';
 import doubleClick from '../core/doubleClick';
+import ExternalNameInput from './ExternalNameInput.vue';
+import { CustomNodeInterface } from './CustomNodeInterface.js';
 
 const { viewModel } = useViewModel();
 const { graph } = useGraph();
@@ -123,17 +102,11 @@ const props = defineProps({
     hidePort: { type: Boolean, default: false },
     isExposed: { type: Boolean, default: false },
     hovered: { type: Boolean, default: false },
-    editExternalName: { type: Boolean, default: false },
-    inputExternalName: { type: String, default: undefined },
-    externalNameInputIncorrect: { type: Boolean, default: false },
     newClasses: { type: Function, required: true },
+    switchSides: { type: Function, required: true },
     startHoverWrapper: { type: Function, required: true },
     endHoverWrapper: { type: Function, required: true },
     onMouseDown: { type: Function, required: true },
-    externalNameFocusOutCallback: { type: Function, required: true },
-    externalNameInputCallback: { type: Function, required: true },
-    enableExternalNameEdit: { type: Function, required: true },
-    setInputExternalName: { type: Function, required: true },
 });
 
 const mousePosStubDragStart = ref(undefined);
@@ -178,14 +151,14 @@ const onStubMouseDown = (ev, id, off) => {
 };
 const tempBusIntfOffset = ref(undefined);
 const onBusMove = (ev) => {
-    if (props.temporaryConnection.value && props.intf.bus?.type) {
+    if (props.temporaryConnection && props.intf.bus?.type) {
         /* eslint-disable vue/no-mutating-props,no-param-reassign */
-        props.temporaryConnection.value.updated = ev.offsetY;
+        props.temporaryConnection.updated = ev.offsetY;
         tempBusIntfOffset.value = ev.offsetY;
 
         const bus = props.intf;
         if (props.intf.isTwoSidedBus()) {
-            if (ev.offsetX > props.nodeWidth.value / 2) {
+            if (ev.offsetX > props.nodeWidth / 2) {
                 bus.side = 'right';
             } else {
                 bus.side = 'left';
@@ -206,24 +179,6 @@ const endHoverWrapperBus = () => {
     tempBusIntfOffset.value = undefined;
     props.endHoverWrapper();
 };
-
-const onExternalNameInput = (e) => {
-    props.setInputExternalName(e.target.value);
-    props.externalNameInputCallback(e);
-};
-
-const externalNameInput = ref(null);
-watch(
-    () => props.editExternalName,
-    (val) => {
-        if (val) {
-            nextTick().then(() => {
-                externalNameInput.value?.focus();
-                externalNameInput.value?.select();
-            });
-        }
-    },
-);
 </script>
 <style lang="scss">
 .__big-bus {
