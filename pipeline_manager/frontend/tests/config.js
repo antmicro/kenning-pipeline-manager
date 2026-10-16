@@ -37,7 +37,8 @@ export function getUrl() {
  * @param {import('@playwright/test').TestInfo} testInfo
  * @param {'specification' | 'dataflow' | 'layout'} purpose
  * @param {string} filenameWithoutExtension
- * @param {list[string]} selectGraphs
+ * @param {string[]} selectGraphs
+ * @param {string[]} checkboxesToApply
  * @returns {Promise<string>} A file path of the saved file
  */
 export async function saveFileAs(
@@ -45,7 +46,8 @@ export async function saveFileAs(
     testInfo,
     purpose,
     filenameWithoutExtension,
-    selectGraphs=[]
+    selectGraphs = [],
+    checkboxesToApply = [],
 ) {
     const optionSelection = {
         'specification': 'Save specification as...',
@@ -58,6 +60,16 @@ export async function saveFileAs(
     await logo.hover();
 
     await page.getByRole('button', { name: text }).click();
+
+    if (checkboxesToApply) {
+        for (const checkboxToApply of checkboxesToApply) {
+            const checkbox = page.locator('.create-menu .baklava-checkbox').filter({ hasText: checkboxToApply });
+            const isChecked = await checkbox.evaluate(el => el.classList.contains('--checked'));
+            if (!isChecked) {
+                await checkbox.click();
+            }
+        }
+    }
 
     const graphList = await page.locator('.graph_list');
 

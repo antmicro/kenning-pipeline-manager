@@ -38,8 +38,9 @@ async function saveDataflowAs(
     testInfo: TestInfo,
     filename: string,
     graphs: string[] = [],
+    checkboxesToApply: string[] = [],
 ) {
-    return saveFileAs(page, testInfo, 'dataflow', filename, graphs);
+    return saveFileAs(page, testInfo, 'dataflow', filename, graphs, checkboxesToApply);
 }
 
 async function loadIncludeSpecification(testInfo: TestInfo) {
@@ -201,6 +202,26 @@ examples.forEach(({ dataflow, specification, timeout, graphCount }) => {
         await loadDatflowFromFile(page, filepath);
         await expectNoErrors(page);
     });
+});
+
+test(`subgraph load+save with saved current view location`, async ({ page }, testInfo) => {
+    const specification = 'sample-subgraph-specification.json';
+    await page.goto(getUrl());
+    await loadSpecification(page, specification);
+    await expectNoErrors(page);
+    await loadDataflow(page, 'sample-subgraph-dataflow.json');
+    await expectNoErrors(page);
+    const filepath = await saveDataflowAs(page, testInfo, 'temp', [], ['Preserve current view location']);
+    await deepCleanEditor(page);
+
+    await loadSpecification(page, specification);
+    await expectNoErrors(page);
+    await loadDatflowFromFile(page, filepath);
+    await expectNoErrors(page);
+
+    await enableNavigationBar(page);
+    await page.locator('.tab').getByText('Graphs').click();
+    await expect(page.locator('.entries').locator('.__entry-content')).toHaveCount(6);
 });
 
 test('save and load graph partially', async ({ page }, testInfo) => {
