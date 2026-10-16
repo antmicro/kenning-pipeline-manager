@@ -80,6 +80,13 @@
                 "$ref": "#/$defs/node"
             }
         },
+        "interfaceComposites": {
+            "description": "Definitions of composite (hierarchically grouped) interfaces, mapping each composite type name to the sub-interfaces it contains",
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/$defs/interfaceComposite"
+            }
+        },
         "graphs": {
             "description": "Definition of the available graphs",
             "type": "array",
@@ -107,6 +114,39 @@
                 "string",
                 "array"
             ]
+        },
+        "interfaceComposite": {
+            "description": "Definition of a single composite interface: the list of sub-interfaces it contains",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name displayed in a node",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "Type that defines styling of the input socket. It is also used for validation purposes",
+                        "type": [
+                            "string",
+                            "array"
+                        ]
+                    },
+                    "direction": {
+                        "description": "Tells whether the connector is input, output, or both",
+                        "enum": [
+                            "input",
+                            "output",
+                            "inout"
+                        ]
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "additionalProperties": false
+            }
         },
         "node": {
             "type": "object",
