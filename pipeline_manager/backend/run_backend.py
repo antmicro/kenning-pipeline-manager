@@ -40,7 +40,7 @@ def create_backend(argv):  # noqa: D103
         "--tcp-server-port",
         type=int,
         help="The port of the Pipeline Manager TCP Server",
-        default=9000,
+        default=9876,
     )
     parser.add_argument(
         "--backend-host",

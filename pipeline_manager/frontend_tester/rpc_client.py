@@ -10,7 +10,7 @@ from pipeline_manager_backend_communication.communication_backend import (
 from pipeline_manager_backend_communication.misc_structures import MessageType
 
 host = "127.0.0.1"
-port = 9000
+port = 9876
 
 
 class RPCMethods:

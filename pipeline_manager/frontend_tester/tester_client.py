@@ -842,7 +842,7 @@ def main(argv):  # noqa: D103
         "--port",
         type=int,
         help="The port of the Pipeline Manager Server",
-        default=9000,
+        default=9876,
     )
     parser.add_argument(
         "--output-path",

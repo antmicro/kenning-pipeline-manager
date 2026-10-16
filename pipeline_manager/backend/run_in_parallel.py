@@ -73,7 +73,7 @@ def server_process_handler(
 async def start_server_in_parallel(
     frontend_path: Path,
     tcp_server_host: str = "127.0.0.1",
-    tcp_server_port: int = 9000,
+    tcp_server_port: int = 9876,
     backend_host: str = "127.0.0.1",
     backend_port: int = 5000,
     verbosity: str = "INFO",
