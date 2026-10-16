@@ -786,8 +786,10 @@ export default function createPipelineManagerGraph(graph) {
                 // which is suppressed in baklavajs functionality
                 const checkConnectionResult = this.checkConnection(fromIf, toIf);
                 if (!checkConnectionResult.connectionAllowed) {
+                    const fromNodeName = state?.nodes.find((n) => n.id === fromIf.nodeId)?.name;
+                    const toNodeName = state?.nodes.find((n) => n.id === toIf.nodeId)?.name;
                     errors.push(
-                        `Could not create connection of id '${c.id}'. ${checkConnectionResult.error}`,
+                        `Could not create connection from node '${fromNodeName}' (interface: ${fromIf.name}, node ID: ${fromIf.nodeId}) to '${toNodeName}' (interface: ${toIf.name}, node ID: ${toIf.nodeId}) of ID '${c.id}'. ${checkConnectionResult.error}`,
                     );
                 } else {
                     checkConnectionResult.connectionsInDanger.forEach((connectionToRemove) => {
