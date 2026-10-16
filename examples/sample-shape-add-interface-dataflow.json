@@ -14,6 +14,13 @@
                     "twoColumn": true,
                     "interfaces": [
                         {
+                            "name": "c1",
+                            "id": "666fc34e-0b23-448f-b188-61fe445c64f3",
+                            "direction": "inout",
+                            "side": "bottom",
+                            "sidePosition": 0
+                        },
+                        {
                             "name": "a1",
                             "id": "a3b40ac9-9579-4d90-9659-1a24e388150b",
                             "direction": "inout",
@@ -26,13 +33,6 @@
                             "direction": "inout",
                             "side": "right",
                             "sidePosition": 0
-                        },
-                        {
-                            "name": "c1",
-                            "id": "666fc34e-0b23-448f-b188-61fe445c64f3",
-                            "direction": "inout",
-                            "side": "bottom",
-                            "sidePosition": 0
                         }
                     ],
                     "properties": [],
@@ -44,8 +44,8 @@
                 {
                     "id": "c847d0f4-77c1-4ec9-9ba1-ee266388fa42",
                     "position": {
-                        "x": 1085,
-                        "y": -545
+                        "x": 1006,
+                        "y": -549
                     },
                     "width": 200,
                     "twoColumn": true,
@@ -74,8 +74,8 @@
                 {
                     "id": "872b6c19-f546-43fd-83d7-3c686cd7be41",
                     "position": {
-                        "x": 49,
-                        "y": 122
+                        "x": 120,
+                        "y": 124
                     },
                     "width": 200,
                     "twoColumn": true,
@@ -104,8 +104,8 @@
                 {
                     "id": "55c269f8-c470-4e26-aafd-a047ea9d5210",
                     "position": {
-                        "x": 554,
-                        "y": 560
+                        "x": 604,
+                        "y": 538
                     },
                     "width": 200,
                     "twoColumn": true,
@@ -128,17 +128,17 @@
             "groups": [],
             "connections": [
                 {
-                    "id": "e4d2e68a-64a5-448b-8cbe-d626264d867d",
+                    "id": "d252786c-6612-4690-9e64-5b9684b84a44",
                     "from": "cc618f46-d967-4b4b-8cb8-bbba0fa6e4b0",
                     "to": "d4fa16e1-6c5a-4b5f-9b87-54e3505c56dd"
                 },
                 {
-                    "id": "de0c25e2-de28-4e62-a80c-9e06fa8542b3",
+                    "id": "2517b891-0805-40f7-b7af-d9dac710c08f",
                     "from": "a3b40ac9-9579-4d90-9659-1a24e388150b",
                     "to": "ed702851-42f8-4ccb-ba4d-ef2ed580780d"
                 },
                 {
-                    "id": "1afcc24f-e037-4914-a30e-e89f350f0562",
+                    "id": "7e37204f-d2dd-4759-a8cc-5f4168026acf",
                     "from": "666fc34e-0b23-448f-b188-61fe445c64f3",
                     "to": "3538e5ee-6238-4317-a5e2-a73582fd42ec"
                 }
@@ -146,5 +146,122 @@
         }
     ],
     "entryGraph": "cc9e70c2-2357-4368-b36c-f1a8058a5a74",
-    "version": "20250623.14"
+    "version": "20250623.14",
+    "metadata": {
+        "connectionStyle": "orthogonal",
+        "editableTypes": true,
+        "styles": {
+            "AntmicroStyle": {
+                "shape": "https://raw.githubusercontent.com/antmicro/antmicro-sphinx-utils/main/logo/white.svg"
+            },
+            "BoxStyle": {
+                "shape": "svgs/box.svg",
+                "positions": {
+                    "a1": {
+                        "x": 0.38576938553557877,
+                        "y": 55.23436094278765
+                    },
+                    "b1": {
+                        "x": 98.62837290192964,
+                        "y": 46.25444737520576
+                    },
+                    "c1": {
+                        "x": 48.81070292884815,
+                        "y": 68.3335776499612
+                    }
+                }
+            },
+            "BoxEmptyStyle": {
+                "shape": "svgs/box.svg"
+            },
+            "GNDStyle": {
+                "shape": "svgs/gnd.svg",
+                "positions": {
+                    "a": {
+                        "x": 50,
+                        "y": 0
+                    }
+                }
+            },
+            "ResistorStyle": {
+                "shape": "svgs/resistor.svg",
+                "positions": {
+                    "a": {
+                        "x": 0,
+                        "y": 50
+                    },
+                    "b": {
+                        "x": 100,
+                        "y": 50
+                    }
+                }
+            },
+            "VoltageStyle": {
+                "shape": "svgs/voltage.svg",
+                "positions": {
+                    "a": {
+                        "x": 50,
+                        "y": 0
+                    },
+                    "b": {
+                        "x": 50,
+                        "y": 100
+                    }
+                }
+            },
+            "SignalStyle": {
+                "shape": "svgs/signal.svg",
+                "positions": {
+                    "a": {
+                        "x": 50,
+                        "y": 0
+                    },
+                    "b": {
+                        "x": 50,
+                        "y": 100
+                    }
+                }
+            },
+            "NPNStyle": {
+                "shape": "svgs/npn.svg",
+                "hiddenNames": [
+                    "c",
+                    "b",
+                    "e"
+                ],
+                "positions": {
+                    "c": {
+                        "x": 81,
+                        "y": 0
+                    },
+                    "b": {
+                        "x": 0,
+                        "y": 50
+                    },
+                    "e": {
+                        "x": 81,
+                        "y": 100
+                    }
+                }
+            },
+            "PNPStyle": {
+                "shape": "svgs/pnp.svg",
+                "hiddenNames": "all",
+                "positions": {
+                    "e": {
+                        "x": 73,
+                        "y": 0
+                    },
+                    "b": {
+                        "x": 5,
+                        "y": 50
+                    },
+                    "c": {
+                        "x": 73,
+                        "y": 95
+                    }
+                }
+            }
+        }
+    }
 }
