@@ -86,6 +86,33 @@ const menuEndpointPairs: MenuEndpointPair[] = [
             await expectNoErrors(page);
         },
     },
+    {
+        endpoint: 'graph_get',
+        menuItem: 'Save graph file',
+        viaMenu: async (page) => {
+            const downloadPromise = page.waitForEvent('download');
+            await clickMenuItem(page, 'Save graph file');
+            return getComparableDataflow(
+                page,
+                JSON.parse(await fs.readFile(await (await downloadPromise).path(), 'utf-8')),
+            );
+        },
+        viaRPC: async (page) => getComparableDataflow(page),
+    },
+    {
+        endpoint: 'graph_get',
+        menuItem: 'Save graph as file as...',
+        viaMenu: async (page) => {
+            await clickMenuItem(page, 'Save graph as file as...');
+            const downloadPromise = page.waitForEvent('download');
+            await page.getByRole('button', { name: 'Save', exact: true }).click();
+            return getComparableDataflow(
+                page,
+                JSON.parse(await fs.readFile(await (await downloadPromise).path(), 'utf-8')),
+            );
+        },
+        viaRPC: async (page) => getComparableDataflow(page),
+    },
 ];
 
 /**
@@ -122,12 +149,14 @@ async function getOtherDataflow() {
 /**
  * Returns the dataflow in a comparable form.
  */
-async function getComparableDataflow(page: Page) {
-    const { dataflow } = (await callFrontendRPC(page, 'graph_get')).result;
-    dataflow.graphs.forEach((graph: any) => graph.connections?.forEach((connection: any) => {
+async function getComparableDataflow(page: Page, dataflow?: any) {
+    const comparable = dataflow ?? (await callFrontendRPC(page, 'graph_get')).result.dataflow;
+    comparable.graphs.forEach((graph: any) => graph.connections?.forEach((connection: any) => {
         delete connection.id;
     }));
-    return JSON.parse(JSON.stringify(dataflow).split(dataflow.entryGraph).join('displayed-graph'));
+    return JSON.parse(
+        JSON.stringify(comparable).split(comparable.entryGraph).join('displayed-graph'),
+    );
 }
 
 /**
