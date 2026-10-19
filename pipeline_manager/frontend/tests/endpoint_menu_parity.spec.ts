@@ -131,6 +131,27 @@ const menuEndpointPairs: MenuEndpointPair[] = [
             expect(errors).toEqual([]);
         },
     },
+    {
+        endpoint: 'layout_get',
+        menuItem: 'Save layout',
+        viaMenu: async (page) => {
+            const downloadPromise = page.waitForEvent('download');
+            await clickMenuItem(page, 'Save layout');
+            return JSON.parse(await fs.readFile(await (await downloadPromise).path(), 'utf-8'));
+        },
+        viaRPC: async (page) => (await callFrontendRPC(page, 'layout_get')).result,
+    },
+    {
+        endpoint: 'layout_get',
+        menuItem: 'Save layout as file as...',
+        viaMenu: async (page) => {
+            await clickMenuItem(page, 'Save layout as file as...');
+            const downloadPromise = page.waitForEvent('download');
+            await page.getByRole('button', { name: 'Save', exact: true }).click();
+            return JSON.parse(await fs.readFile(await (await downloadPromise).path(), 'utf-8'));
+        },
+        viaRPC: async (page) => (await callFrontendRPC(page, 'layout_get')).result,
+    },
 ];
 
 /**
