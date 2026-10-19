@@ -46,6 +46,17 @@ const menuEndpointPairs: MenuEndpointPair[] = [
             return getSpecification(page);
         },
     },
+    {
+        endpoint: 'frontend_specification_get',
+        menuItem: 'Save specification as...',
+        viaMenu: async (page) => {
+            await clickMenuItem(page, 'Save specification as...');
+            const downloadPromise = page.waitForEvent('download');
+            await page.getByRole('button', { name: 'Save', exact: true }).click();
+            return JSON.parse(await fs.readFile(await (await downloadPromise).path(), 'utf-8'));
+        },
+        viaRPC: async (page) => getSpecification(page),
+    },
 ];
 
 /**
