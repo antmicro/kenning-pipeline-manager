@@ -4,7 +4,11 @@
  */
 
 import { test, expect, Page } from '@playwright/test';
+import fs from 'fs/promises';
+import { getPathToJsonFile, expectNoErrors } from './config.js';
 import { callFrontendRPC, prepareEditor } from './utils/endpoints';
+
+const otherSpecificationPath = getPathToJsonFile('sample-styling-specification.json');
 
 type Action = (page: Page) => Promise<unknown>;
 type MenuEndpointPair = { endpoint: string, menuItem: string, viaMenu: Action, viaRPC: Action };
@@ -23,6 +27,25 @@ const menuEndpointPairs: MenuEndpointPair[] = [
             await callFrontendRPC(page, 'graph_add');
         },
     },
+    {
+        endpoint: 'specification_change',
+        menuItem: 'Load specification',
+        viaMenu: async (page) => {
+            const fileChooserPromise = page.waitForEvent('filechooser');
+            await clickMenuItem(page, 'Load specification');
+            await (await fileChooserPromise).setFiles(otherSpecificationPath);
+            await expectNoErrors(page);
+            return getSpecification(page);
+        },
+        viaRPC: async (page) => {
+            const specification = JSON.parse(
+                await fs.readFile(otherSpecificationPath, 'utf-8'),
+            );
+            await callFrontendRPC(page, 'specification_change', { specification });
+            await expectNoErrors(page);
+            return getSpecification(page);
+        },
+    },
 ];
 
 /**
@@ -31,6 +54,13 @@ const menuEndpointPairs: MenuEndpointPair[] = [
 async function clickMenuItem(page: Page, text: string) {
     await page.locator('.logo').hover();
     await page.getByText(text, { exact: true }).click();
+}
+
+/**
+ * Returns the currently loaded specification.
+ */
+async function getSpecification(page: Page) {
+    return (await callFrontendRPC(page, 'frontend_specification_get')).result.specification;
 }
 
 /**
