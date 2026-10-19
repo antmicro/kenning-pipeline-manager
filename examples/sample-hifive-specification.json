@@ -75,6 +75,14 @@
                 "name": "Zephyr",
                 "url": "https://github.com/zephyrproject-rtos/zephyr/blob/e560c91b1f74146baa3177b07b92a8733c60b7c7/"
             }
+        },
+        "styles": {
+            "renodeStyle": {
+                "color": "#2094F3"
+            },
+            "darkRenodeStyle": {
+                "color": "#186EB4"
+            }
         }
     },
     "nodes": [
@@ -89410,7 +89418,8 @@
             "urls": {
                 "designer_soc": "fu540",
                 "zephyr": "dts/riscv/sifive/riscv64-fu540.dtsi"
-            }
+            },
+            "subgraphId": "e7b92922-e893-4614-b54f-9d5632e3faab"
         },
         {
             "category": "SoCs/SiFive/fu740",
@@ -300359,7 +300368,342 @@
                 "designer_soc": "zynqmp_rpu",
                 "zephyr": "dts/arm/xilinx/zynqmp_rpu.dtsi"
             }
+        },
+        {
+            "name": "RISCv64 CPU",
+            "interfaces": [
+                {
+                    "name": "11",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "3",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "7",
+                    "type": "Connector",
+                    "direction": "input"
+                }
+            ]
+        },
+        {
+            "name": "plic",
+            "interfaces": [
+                {
+                    "name": "0",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "4",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "6",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "7",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "8",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "9",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "10",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "11",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "12",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "13",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "14",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "15",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "16",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "17",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "18",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "19",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "20",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "21",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "22",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "52",
+                    "type": "Connector",
+                    "direction": "input"
+                }
+            ]
+        },
+        {
+            "name": "clint",
+            "interfaces": [
+                {
+                    "name": "0",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "1",
+                    "type": "Connector",
+                    "direction": "output"
+                }
+            ]
+        },
+        {
+            "name": "uart0",
+            "interfaces": [
+                {
+                    "name": "IRQ",
+                    "type": "Connector",
+                    "direction": "output"
+                }
+            ]
+        },
+        {
+            "name": "spi",
+            "interfaces": [
+                {
+                    "name": "0",
+                    "type": "Connector",
+                    "direction": "output"
+                }
+            ]
+        },
+        {
+            "name": "gpio",
+            "interfaces": [
+                {
+                    "name": "0",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "1",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "2",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "3",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "4",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "5",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "6",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "7",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "8",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "9",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "10",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "11",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "12",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "13",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "14",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "15",
+                    "type": "Connector",
+                    "direction": "output"
+                }
+            ]
         }
     ],
-    "version": "20250623.14"
+    "version": "20250623.14",
+    "graphs": [
+        {
+            "id": "e7b92922-e893-4614-b54f-9d5632e3faab",
+            "name": "fu540",
+            "nodes": [
+                {
+                    "id": "d5d51e70-487d-4dc1-97be-97aa340f6578",
+                    "name": "Wurth Elektronik 615008137421",
+                    "instanceName": "Ethernet Connector",
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "rj45",
+                            "id": "223c2238-ed23-43a0-bf9e-90d299bb8566",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "ethernet",
+                            "id": "6fa9eccd-9713-4426-aca6-cbaeb3ad9e8b",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "default",
+                            "style": "renodeStyle",
+                            "position": {
+                                "x": 100,
+                                "y": 200
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "ff82d9b8-5e7e-4dde-8e19-d3c9c9032e98",
+                    "name": "GbE Phy GMII",
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "ethernet",
+                            "id": "e3a191dd-9053-409c-98a7-9eb6847e81fe",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "GbE",
+                            "id": "341063e4-21a1-4f5d-afa8-9220599ab5c8",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "default",
+                            "style": "renodeStyle",
+                            "position": {
+                                "x": 700,
+                                "y": 500
+                            }
+                        }
+                    ]
+                }
+            ],
+            "groups": [],
+            "connections": [
+                {
+                    "id": "2b1c8708-c49e-4f83-8f15-1a99b71c3639",
+                    "from": "6fa9eccd-9713-4426-aca6-cbaeb3ad9e8b",
+                    "to": "e3a191dd-9053-409c-98a7-9eb6847e81fe"
+                }
+            ],
+            "defaultStyle": {
+                "backgroundSize": 100,
+                "backgroundColor": "#1d1e27",
+                "connectionStyle": "curved"
+            }
+        }
+    ]
 }
