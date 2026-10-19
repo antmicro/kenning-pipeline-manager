@@ -70,6 +70,22 @@ const menuEndpointPairs: MenuEndpointPair[] = [
             await callFrontendRPC(page, 'graph_set_name', { name: 'Renamed graph' });
         },
     },
+    {
+        endpoint: 'graph_change',
+        menuItem: 'Load graph file',
+        viaMenu: async (page) => {
+            const dataflowPath = test.info().outputPath('dataflow.json');
+            await fs.writeFile(dataflowPath, JSON.stringify(await getOtherDataflow()));
+            const fileChooserPromise = page.waitForEvent('filechooser');
+            await clickMenuItem(page, 'Load graph file');
+            await (await fileChooserPromise).setFiles(dataflowPath);
+            await expectNoErrors(page);
+        },
+        viaRPC: async (page) => {
+            await callFrontendRPC(page, 'graph_change', { dataflow: await getOtherDataflow() });
+            await expectNoErrors(page);
+        },
+    },
 ];
 
 /**
@@ -85,6 +101,22 @@ async function clickMenuItem(page: Page, text: string) {
  */
 async function getSpecification(page: Page) {
     return (await callFrontendRPC(page, 'frontend_specification_get')).result.specification;
+}
+
+/**
+ * Returns the sample dataflow with a renamed graph and moved nodes,
+ * so that loading it changes the editor.
+ */
+async function getOtherDataflow() {
+    const dataflow = JSON.parse(
+        await fs.readFile(getPathToJsonFile('sample-dataflow.json'), 'utf-8'),
+    );
+    const [graph] = dataflow.graphs;
+    graph.name = 'Loaded graph';
+    graph.nodes.forEach((node: any) => {
+        node.position.x += 100;
+    });
+    return dataflow;
 }
 
 /**
