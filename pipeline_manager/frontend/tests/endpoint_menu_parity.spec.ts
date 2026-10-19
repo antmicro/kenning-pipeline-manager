@@ -139,7 +139,7 @@ const menuEndpointPairs: MenuEndpointPair[] = [
             await clickMenuItem(page, 'Save layout');
             return JSON.parse(await fs.readFile(await (await downloadPromise).path(), 'utf-8'));
         },
-        viaRPC: async (page) => (await callFrontendRPC(page, 'layout_get')).result,
+        viaRPC: getLayoutViaRPC,
     },
     {
         endpoint: 'layout_get',
@@ -150,7 +150,38 @@ const menuEndpointPairs: MenuEndpointPair[] = [
             await page.getByRole('button', { name: 'Save', exact: true }).click();
             return JSON.parse(await fs.readFile(await (await downloadPromise).path(), 'utf-8'));
         },
-        viaRPC: async (page) => (await callFrontendRPC(page, 'layout_get')).result,
+        viaRPC: getLayoutViaRPC,
+    },
+    {
+        endpoint: 'graph_export_image',
+        menuItem: 'Export graph to PNG',
+        viaMenu: async (page) => {
+            await clickMenuItem(page, 'Export graph to PNG');
+            const downloadPromise = page.waitForEvent('download');
+            await page.getByRole('button', { name: 'Export', exact: true }).click();
+            return fs.readFile(await (await downloadPromise).path());
+        },
+        viaRPC: async (page) => {
+            const { data } = (await callFrontendRPC(
+                page, 'graph_export_image', { format: 'png' },
+            )).result;
+            return Buffer.from(data.slice(data.indexOf(',') + 1), 'base64');
+        },
+    },
+    {
+        endpoint: 'graph_export_image',
+        menuItem: 'Export graph to HTML-based SVG',
+        viaMenu: async (page) => {
+            const downloadPromise = page.waitForEvent('download');
+            await clickMenuItem(page, 'Export graph to HTML-based SVG');
+            return normalizeSvg(await fs.readFile(await (await downloadPromise).path(), 'utf-8'));
+        },
+        viaRPC: async (page) => {
+            const { data } = (await callFrontendRPC(
+                page, 'graph_export_image', { format: 'svg' },
+            )).result;
+            return normalizeSvg(decodeURIComponent(data.slice(data.indexOf(',') + 1)));
+        },
     },
 ];
 
@@ -167,6 +198,15 @@ async function clickMenuItem(page: Page, text: string) {
  */
 async function getSpecification(page: Page) {
     return (await callFrontendRPC(page, 'frontend_specification_get')).result.specification;
+}
+
+/**
+ * Returns the layout of the displayed graph.
+ */
+async function getLayoutViaRPC(page: Page) {
+    const { result } = await callFrontendRPC(page, 'layout_get');
+    delete result.graph_id;
+    return result;
 }
 
 /**
@@ -195,6 +235,14 @@ async function getMovedLayout(page: Page) {
         node.position.y += 50;
     });
     return { layout };
+}
+
+/**
+ * Replaces random class names that html-to-image generates with consistent names.
+ */
+function normalizeSvg(svg: string) {
+    const names = [...svg.matchAll(/<style>\.(\w+)::/g)].map(([, name]) => name);
+    return names.reduce((result, name, i) => result.split(name).join(`pseudo-${i}`), svg);
 }
 
 /**

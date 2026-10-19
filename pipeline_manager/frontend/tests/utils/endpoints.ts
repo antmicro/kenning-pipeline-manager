@@ -25,4 +25,5 @@ export async function callFrontendRPC(page: Page, method: string, params?: objec
 export async function prepareEditor(page: Page) {
     await page.goto(getUrl());
     await page.waitForSelector(`#${loadVideoNodeId}`);
+    await callFrontendRPC(page, 'viewport_center');
 }
