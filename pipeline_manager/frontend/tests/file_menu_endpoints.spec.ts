@@ -1,30 +1,11 @@
-import { test, expect, Page } from '@playwright/test';
-import { getUrl, loadVideoNodeId, verifyNodeCount } from './config.js';
+import { test, expect } from '@playwright/test';
+import { verifyNodeCount } from './config.js';
+import { callFrontendRPC, prepareEditor } from './utils/endpoints';
 
 type Graph = { id: string, name: string, nodes: { id: string }[] };
 
-/**
- * Sends a JSON-RPC request to the frontend through `postMessage`
- * and waits for the response.
- */
-async function callFrontendRPC(page: Page, method: string, params?: object) {
-    return page.evaluate(([rpcMethod, rpcParams]) => new Promise((resolve) => {
-        const id = `test-${rpcMethod}-${Date.now()}`;
-        const listener = (event: MessageEvent) => {
-            if (event.data?.id !== id || !('result' in event.data || 'error' in event.data)) return;
-            window.removeEventListener('message', listener);
-            resolve(event.data);
-        };
-        window.addEventListener('message', listener);
-        window.postMessage({
-            jsonrpc: '2.0', id, method: rpcMethod, params: rpcParams,
-        }, '*');
-    }), [method, params] as const) as Promise<any>;
-}
-
 test.beforeEach(async ({ page }) => {
-    await page.goto(getUrl());
-    await page.waitForSelector(`#${loadVideoNodeId}`);
+    await prepareEditor(page);
 });
 
 test('test graph_add endpoint', async ({ page }) => {
