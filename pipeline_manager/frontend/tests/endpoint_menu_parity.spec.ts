@@ -57,6 +57,19 @@ const menuEndpointPairs: MenuEndpointPair[] = [
         },
         viaRPC: async (page) => getSpecification(page),
     },
+    {
+        endpoint: 'graph_set_name',
+        menuItem: 'Set graph name',
+        viaMenu: async (page) => {
+            await clickMenuItem(page, 'Set graph name');
+            const titleInput = page.locator('.editorTitleInput input');
+            await titleInput.fill('Renamed graph');
+            await titleInput.press('Enter');
+        },
+        viaRPC: async (page) => {
+            await callFrontendRPC(page, 'graph_set_name', { name: 'Renamed graph' });
+        },
+    },
 ];
 
 /**
