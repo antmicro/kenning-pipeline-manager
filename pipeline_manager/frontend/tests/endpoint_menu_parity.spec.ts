@@ -113,6 +113,24 @@ const menuEndpointPairs: MenuEndpointPair[] = [
         },
         viaRPC: async (page) => getComparableDataflow(page),
     },
+    {
+        endpoint: 'layout_set',
+        menuItem: 'Load layout',
+        viaMenu: async (page) => {
+            const layoutPath = test.info().outputPath('layout.json');
+            await fs.writeFile(layoutPath, JSON.stringify(await getMovedLayout(page)));
+            const fileChooserPromise = page.waitForEvent('filechooser');
+            await clickMenuItem(page, 'Load layout');
+            await (await fileChooserPromise).setFiles(layoutPath);
+            await expectNoErrors(page);
+        },
+        viaRPC: async (page) => {
+            const { errors } = (await callFrontendRPC(
+                page, 'layout_set', await getMovedLayout(page),
+            )).result;
+            expect(errors).toEqual([]);
+        },
+    },
 ];
 
 /**
@@ -144,6 +162,18 @@ async function getOtherDataflow() {
         node.position.x += 100;
     });
     return dataflow;
+}
+
+/**
+ * Returns the current layout with every node moved, so that loading it changes the editor.
+ */
+async function getMovedLayout(page: Page) {
+    const { layout } = (await callFrontendRPC(page, 'layout_get')).result;
+    Object.values(layout).forEach((node: any) => {
+        node.position.x += 100;
+        node.position.y += 50;
+    });
+    return { layout };
 }
 
 /**
