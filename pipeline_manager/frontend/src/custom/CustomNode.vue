@@ -500,6 +500,8 @@ const contextMenuTitleItems = computed(() => {
         items.at(-1).endSection = true;
         if (graph.value.selectedNodes.length > 1) {
             items.push({ value: 'groupNodes', label: 'Group Nodes' });
+        } else {
+            items.push({ value: 'groupNodes', label: 'Create a group with this node' });
         }
         const groups = (graph.value.groups ?? []).filter((g) => g.nodes.includes(node.value.id));
         if (groups.length > 0) {
@@ -775,6 +777,9 @@ const onContextMenuTitleClick = async (action) => {
             break;
         }
         case 'groupNodes':
+            if (!graph.value.selectedNodes.includes(props.node)) {
+                graph.value.selectedNodes.push(props.node);
+            }
             menuState.groupMenu = true;
             break;
         case 'delete':
