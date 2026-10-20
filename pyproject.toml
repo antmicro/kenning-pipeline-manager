@@ -79,7 +79,8 @@ include = [
     "pipeline_manager*"
 ]
 exclude = [
-    "examples*"
+    "examples*",
+    "pipeline-manager/schema_fuzzer"
 ]
 namespaces = false
 
