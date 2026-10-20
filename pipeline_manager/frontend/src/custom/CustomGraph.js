@@ -111,7 +111,7 @@ export default function createPipelineManagerGraph(graph) {
         const groupsToRemove = [];
         associated.forEach((g) => {
             const index = g.nodes.indexOf(node.id);
-            if (g.nodes.length > 2) {
+            if (g.nodes.length > 1) {
                 this.events.editGroup.emit(g);
                 g.nodes.splice(index, 1);
             } else {
