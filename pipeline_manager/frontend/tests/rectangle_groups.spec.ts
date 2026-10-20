@@ -158,6 +158,7 @@ test('delete group', async ({ page }) => {
     const nodeC = getNode(page, 'Model evaluation');
 
     await removeFromGroup(nodeA, page);
+    await removeFromGroup(nodeB, page);
     await removeFromGroup(nodeC, page);
 
     await expect(group).not.toBeVisible();
@@ -170,6 +171,7 @@ test('delete group', async ({ page }) => {
     await nodeC.click();
     await deleteNode(nodeC, page);
     await deleteNode(nodeB, page);
+    await deleteNode(nodeA, page);
 
     await expect(newGroup).not.toBeVisible();
 });
