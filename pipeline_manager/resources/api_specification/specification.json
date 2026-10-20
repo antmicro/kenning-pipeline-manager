@@ -116,7 +116,31 @@
         "graph_get": {
             "description": "Returns dataflow used by frontend",
             "params": {
-                "$ref": "common_types#/$defs/null_or_empty"
+                "description": "Serialization options",
+                "type": ["object", "null"],
+                "properties": {
+                    "readonly": {
+                        "description": "Specifies whether the returned dataflow should be marked as read only.",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "hideHud": {
+                        "description": "Specifies whether the returned dataflow should have the HUD disabled.",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "position": {
+                        "description": "Specifies whether the current view location should be included.",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "hideLayers": {
+                        "description": "Specifies whether information about hidden layers should be included.",
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "additionalProperties": false
             },
             "returns": {
                 "$ref": "common_types#/$defs/dataflow_object"

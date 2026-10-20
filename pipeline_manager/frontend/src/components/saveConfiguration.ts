@@ -276,6 +276,37 @@ export const saveSpecificationConfiguration: SaveConfiguration = {
     },
 };
 
+export type GraphSaveOptions = {
+    readonly?: boolean;
+    hideHud?: boolean;
+    position?: boolean;
+    hideLayers?: boolean;
+    graphName?: string | null;
+};
+
+/**
+ * Serializes the dataflow together with styles from the specification.
+ */
+export function serializeGraph(options: GraphSaveOptions = {}) {
+    const editorManager = EditorManager.getEditorManagerInstance();
+    const specification = editorManager.saveSpecification();
+    const dataflow = editorManager.saveDataflow({
+        readonly: !!options.readonly,
+        hideHud: !!options.hideHud,
+        position: !!options.position,
+        hideLayers: !!options.hideLayers,
+        graphName: options.graphName,
+    });
+
+    if (Object.hasOwn(specification, 'metadata') && Object.hasOwn(specification.metadata, 'styles')) {
+        if (!Object.hasOwn(dataflow, 'metadata')) {
+            dataflow.metadata = {};
+        }
+        dataflow.metadata.styles = specification.metadata.styles;
+    }
+    return dataflow;
+}
+
 export const saveGraphConfiguration: SaveConfiguration = {
     readonly: false,
     hideHud: false,
@@ -285,23 +316,7 @@ export const saveGraphConfiguration: SaveConfiguration = {
     saveName: 'save',
 
     getSave() {
-        const editorManager = EditorManager.getEditorManagerInstance();
-        const specification = editorManager.saveSpecification();
-        const dataflow = editorManager.saveDataflow({
-            readonly: !!this.readonly,
-            hideHud: !!this.hideHud,
-            position: !!this.position,
-            hideLayers: !!this.hideLayers,
-            graphName: this.graphName,
-        });
-
-        if (Object.hasOwn(specification, 'metadata') && Object.hasOwn(specification.metadata, 'styles')) {
-            if (!Object.hasOwn(dataflow, 'metadata')) {
-                dataflow.metadata = {};
-            }
-            dataflow.metadata.styles = specification.metadata.styles;
-        }
-        return dataflow;
+        return serializeGraph(this);
     },
 
     saveCallback() {

@@ -22,7 +22,8 @@ import EditorManager from '../EditorManager';
 import NotificationHandler, { LOG_LEVEL } from '../notifications';
 import { MAIN_TERMINAL, terminalStore } from '../stores';
 import {
-    saveSpecificationConfiguration, saveLayoutConfiguration, renderGraphImage, ImageFormat,
+    saveSpecificationConfiguration, saveLayoutConfiguration, serializeGraph,
+    renderGraphImage, ImageFormat, GraphSaveOptions,
 } from '../../components/saveConfiguration.ts';
 
 // eslint-disable-next-line import/no-cycle
@@ -237,12 +238,16 @@ export function frontend_specification_get(params: { graph: boolean, minify: boo
     return { specification: saveConfiguration.getSave() };
 }
 
+type GraphGetParamsType = Omit<GraphSaveOptions, 'graphName'>;
+
 /**
+ * Serializes the dataflow.
+ *
  * @returns currently used dataflow
  */
-export function graph_get() {
+export function graph_get(params?: GraphGetParamsType) {
     return {
-        dataflow: editorManager.saveDataflow(),
+        dataflow: serializeGraph(params ?? {}),
     };
 }
 
