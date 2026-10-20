@@ -10,6 +10,7 @@
 
 import { toRaw } from 'vue';
 import { CustomNodeInterface } from './CustomNodeInterface.js';
+import { resolveComposite } from '../core/interfaceComposites.js';
 
 /**
  * Normalizes a sub-interface type to the array form used by the ports.
@@ -48,6 +49,10 @@ function createSubPort(intf, sub) {
         compositeParent: intf.id,
     });
     port.nodeId = intf.nodeId;
+    const composite = resolveComposite(port);
+    if (composite !== undefined) {
+        port.composite = composite.interfaces;
+    }
     return port;
 }
 

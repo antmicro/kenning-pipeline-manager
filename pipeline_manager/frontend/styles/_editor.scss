@@ -95,20 +95,21 @@
     margin-left: -0.5em;
     margin-right: -0.5em;
 
-    &.__port_composite_expanded .__port_composite_port {
-        position: absolute;
-        top: calc(50% - 0.5em);
-        opacity: 0;
-        pointer-events: none;
+    &.__port_composite_expanded {
+        & > .__port_composite_port {
+            position: absolute;
+            top: calc(50% - 0.5em);
+            opacity: 0;
+            pointer-events: none;
+        }
     }
 
     .__port_composite_strip {
         position: absolute;
         top: 0;
         bottom: 0;
-        width: 0.2em;
+        width: 0.3em;
         border-radius: 2px;
-        background-color: var(--kpm-composite-color, transparent);
         pointer-events: none;
     }
 
@@ -171,6 +172,7 @@
 
     // the composite port (and its name) hides while unrolled
     &.--composite-expanded {
+        padding: 0.8em;
         & > .__port-name {
             display: none;
         }
