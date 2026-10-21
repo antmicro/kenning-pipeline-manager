@@ -115,14 +115,13 @@ export default defineComponent({
         const updateCoords = () => {
             const from = getDomElements(props.connection.from);
             const to = getDomElements(props.connection.to);
-            if (from.node && to.node) {
-                if (!resizeObserver) {
-                    resizeObserver = new ResizeObserver(() => {
-                        updateCoords();
-                    });
-                    resizeObserver.observe(from.node);
-                    resizeObserver.observe(to.node);
-                }
+            if (!from.node || !to.node || !from.port || !to.port) return;
+            if (!resizeObserver) {
+                resizeObserver = new ResizeObserver(() => {
+                    updateCoords();
+                });
+                resizeObserver.observe(from.node);
+                resizeObserver.observe(to.node);
             }
 
             const [x1, y1] = getPortCoordinates(from);
@@ -140,6 +139,13 @@ export default defineComponent({
             await nextTick();
             updateCoords();
         });
+        watch(
+            () => [props.connection.from, props.connection.to],
+            async () => {
+                await nextTick();
+                updateCoords();
+            },
+        );
         // If any side of any interface in from or to node changes we may need to
         // Rerender connections
         watch([fromNodeInterfacesSide, toNodeInterfacesSide], async () => {

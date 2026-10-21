@@ -148,13 +148,20 @@ function expandCompositeInterfaces(intf, graph) {
  * @param {Object} graph - graph the node belongs to.
  */
 function collapseCompositeInterfaces(intf, graph) {
+    if (!intf.isCompositeInterface()) return;
     // eslint-disable-next-line no-param-reassign
     intf.compositeReturn = intf.compositeReturn ?? {};
     const remembered = intf.compositeReturn;
 
     (intf.compositePorts ?? []).forEach((port) => {
+        if (!port.isCompositeInterface()) return;
+        collapseCompositeInterfaces(port, graph);
+    });
+
+    const connections = graph?.connections ?? [];
+    (intf.compositePorts ?? []).forEach((port) => {
         if (port === undefined) return;
-        [...(port.connections ?? [])].forEach((connection) => {
+        [...connections].forEach((connection) => {
             const side = endpointSide(connection, port);
             if (side === undefined) return;
             remembered[connection.id] = port.id;
