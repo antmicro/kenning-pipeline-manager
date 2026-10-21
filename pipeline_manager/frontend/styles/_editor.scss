@@ -88,19 +88,84 @@
     color: var(--baklava-control-color-foreground);
     min-height: 1em;
 }
+.__port_composite {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    // the unrolled ports align with the normal ports of the node, so the
+    // group cancels the horizontal padding of its own (parent) interface row
+    margin-left: -0.5em;
+    margin-right: -0.5em;
+
+    // While unrolled, the composite port itself disappears; it stays in the
+    // DOM (invisible) as an anchor for the connections attached to it.
+    &.__port_composite_expanded .__port_composite_port {
+        position: absolute;
+        top: calc(50% - 0.5em);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .__port_composite_toggle {
+        position: absolute;
+        right: -0.55em;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.1em;
+        height: 1.1em;
+        padding: 0;
+        font-size: 0.7em;
+        line-height: 1;
+        color: var(--baklava-control-color-foreground);
+        background-color: var(--baklava-control-color-background);
+        border: solid 1px var(--baklava-control-color-primary);
+        border-radius: 50%;
+        cursor: pointer;
+
+        &:hover {
+            color: var(--baklava-control-color-background);
+            background-color: var(--baklava-control-color-primary);
+        }
+
+        &.__port_composite_toggle_left {
+            right: auto;
+            left: -0.55em;
+        }
+    }
+}
+
+.baklava-node-interface {
+    &.--output .__port_composite .__port_composite_port {
+        align-self: flex-end;
+    }
+
+    &.--input .__port_composite .__port_composite_port {
+        align-self: flex-start;
+    }
+
+    // the invisible anchor stays on the port edge of the respective side
+    &.--output .__port_composite.__port_composite_expanded .__port_composite_port {
+        right: -1em;
+    }
+
+    &.--input .__port_composite.__port_composite_expanded .__port_composite_port {
+        left: -1em;
+    }
+
+    // the composite port (and its name) hides while unrolled
+    &.--composite-expanded {
+        & > .__port-name {
+            display: none;
+        }
+    }
+}
 
 
 
 .baklava-node-interface {
     padding: 0.5em 0;
-
-    .--output {
-        height: 1em;
-    }
-
-    .--input {
-        height: 1em;
-    }
 
     .highlighted {
         color: black;

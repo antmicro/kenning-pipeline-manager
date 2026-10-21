@@ -10,8 +10,9 @@ Interface that is used to display inputs, outputs and properties of a node.
 The custom implementations introduces wrapper functions that prevent the user
 from creating and deleting connections or altering nodes' values if the editor is read-only.
 
-The rendering is split across four components, one per interface kind:
+The rendering is split across components, one per interface kind:
 `InterfaceBus` (bus), `InterfacePort` (normal interface),
+`InterfaceComposite` (composite interface, collapsible into its sub-interfaces),
 `InterfacePositioned` (custom shape / positioned interface) and
 `InterfaceProperty` (properties). This component keeps the shared state and
 the root element, and picks the right one for the given interface.
@@ -40,8 +41,23 @@ the root element, and picks the right one for the given interface.
             :end-hover-wrapper="endHoverWrapper"
             :on-mouse-down="onMouseDown"
         />
+        <InterfaceComposite
+            v-if="intf.port && !intf.bus?.size && !hidePort && !positioned && isCompositeInterface"
+            :intf="intf"
+            :node="node"
+            :graph="graph"
+            :highlighted="highlighted"
+            :picked="picked"
+            :is-exposed="isExposed"
+            :hovered="hovered"
+            :display-arrow="displayArrow"
+            :arrow-rotation="arrowRotation"
+            :start-hover-wrapper="startHoverWrapper"
+            :end-hover-wrapper="endHoverWrapper"
+            :on-mouse-down="onMouseDown"
+        />
         <InterfacePort
-            v-if="intf.port && !intf.bus?.size && !hidePort && !positioned"
+            v-if="intf.port && !intf.bus?.size && !hidePort && !positioned && !isCompositeInterface"
             :intf="intf"
             :highlighted="highlighted"
             :picked="picked"
@@ -88,12 +104,13 @@ import {
 } from 'vue';
 import { useElementSize } from '@vueuse/core';
 import {
-    Components, useViewModel,
+    Components, useViewModel, useGraph,
 } from '@baklavajs/renderer-vue';
 import doubleClick from '../core/doubleClick';
 import { useTemporaryConnection } from './temporaryConnection';
 import InterfaceBus from './InterfaceBus.vue';
 import InterfacePort from './InterfacePort.vue';
+import InterfaceComposite from './InterfaceComposite.vue';
 import InterfacePositioned from './InterfacePositioned.vue';
 import InterfaceProperty from './InterfaceProperty.vue';
 
@@ -102,6 +119,7 @@ export default defineComponent({
     components: {
         InterfaceBus,
         InterfacePort,
+        InterfaceComposite,
         InterfacePositioned,
         InterfaceProperty,
     },
@@ -130,6 +148,12 @@ export default defineComponent({
             { hoveredOver: null, temporaryConnection: null } : useTemporaryConnection();
 
         const isPositionedInterface = props.intf.isPositioned();
+
+        const isCompositeInterface = computed(
+            () => props.intf.isCompositeInterface?.() ?? false,
+        );
+
+        const { graph } = useGraph();
 
         props.intf.events.beforeSetValue.unsubscribe(props.intf);
         props.intf.events.beforeSetValue.subscribe(props.intf, (value, prevent) => {
@@ -230,6 +254,9 @@ export default defineComponent({
             '--output': intf.side === 'right' && intf.bus?.type !== 'twoSided' && !props.positioned,
             '--connected': intf.connectionCount > 0,
             '--positioned': props.positioned,
+            '--composite-sub': intf.isCompositeSub === true,
+            '--composite-expanded': intf.isCompositeInterface?.() === true
+                && intf.compositeExpanded === true,
         });
 
         const isExposed = computed(() =>
@@ -249,11 +276,13 @@ export default defineComponent({
             showComponent,
             isExposed,
             isPositionedInterface,
+            isCompositeInterface,
             startHoverWrapper,
             propertyHovered,
             startPropertyHover,
             endPropertyHover,
             temporaryConnection,
+            graph,
             width,
         };
     },
