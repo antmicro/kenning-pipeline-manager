@@ -182,7 +182,10 @@ export function withCustomNodeFunctions(Base) {
          */
         isInterfaceHidable() {
             if (this.bus === undefined) {
-                return this.connectionCount === 0;
+                const subPortsConnected = (this.compositePorts ?? []).some(
+                    (port) => (port?.connectionCount ?? 0) > 0,
+                );
+                return this.connectionCount === 0 && !subPortsConnected;
             }
             return this.bus.stubs === undefined || this.bus.stubs.length === 0;
         }
@@ -206,7 +209,30 @@ export function withCustomNodeFunctions(Base) {
         }
 
         /**
-         * Checks whether this interface (or property) belongs to a group.
+         * Checks whether this interface is a composite interface, i.e. one of its
+         * types names a composite defined in the specification's
+         * `interfaceComposites`, and it hence hierarchically contains
+         * sub-interfaces.
+         *
+         * @returns {boolean} True if the interface is a composite interface.
+         */
+        isCompositeInterface() {
+            return this.composite !== undefined;
+        }
+
+        /**
+         * Returns the sub-interfaces of this composite interface.
+         *
+         * @returns {Array} The list of sub-interfaces, empty if this interface is
+         * not a composite one.
+         */
+        getCompositeSubInterfaces() {
+            return this.composite ?? [];
+        }
+
+        /**
+         * Checks whether this interface (or property) belongs to a group, i.e. it
+         * carries the shared group reference.
          *
          * @returns {boolean} True if the interface (or property) is grouped.
          */
@@ -366,6 +392,12 @@ export function withCustomNodeFunctions(Base) {
                     [connection.to, connection.from].some(
                         (end) => end === stub || end?.id === stub.id,
                     ));
+            }
+            if ((this.compositePorts ?? []).some((port) =>
+                [connection.to, connection.from].some(
+                    (end) => end === port || end?.id === port?.id,
+                ))) {
+                return true;
             }
             return [connection.to, connection.from].some(
                 (end) => end === this || end?.id === this.id,
