@@ -672,7 +672,8 @@ const onContextMenuTitleClick = async (action) => {
             });
             const nodeConnections = graph.value.connections.filter(
                 (c) =>
-                    (interfaces.find((i) => i === c.from || i === c.to) !== undefined),
+                    (interfaces.some((i) => (i.isInConnection?.(c)
+                        ?? (i === c.from || i === c.to)))),
             );
             nodeConnections.forEach((c) => {
                 graph.value.removeConnection(c);

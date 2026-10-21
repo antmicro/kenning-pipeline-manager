@@ -597,6 +597,14 @@ export default function createPipelineManagerGraph(graph) {
                 const s = nodeInput.findBusStub(id);
                 if (s) {
                     result = s;
+                } else {
+                    // interfaces unrolled from a composite interface
+                    const p = (nodeInput.compositePorts ?? []).find(
+                        (port) => port?.id === id,
+                    );
+                    if (p) {
+                        result = p;
+                    }
                 }
             }
         });
