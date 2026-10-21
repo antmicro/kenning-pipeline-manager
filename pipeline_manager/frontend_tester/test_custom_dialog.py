@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """Module with tests of subgraph switching."""
 
-import logging
-import multiprocessing
 import subprocess
 import tempfile
 import time
@@ -15,84 +13,12 @@ from typing import Optional
 import pytest
 from playwright.sync_api import BrowserContext, sync_playwright
 
-from pipeline_manager.backend.run_backend import create_backend, run_uvicorn
-from pipeline_manager.frontend_builder import build_frontend
-
 PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
 SERVER_PORT = 5000
-TCP_SERVER_PORT = 9876
 PROCESS_SHUTDOWN_TIME = 5
 
 TASK_NAME = "Foo"
-
-
-@pytest.fixture
-def rpc_server(build_server_app: str):
-    """Fixture to provide a backend server."""
-    startup_time = 5
-    process = None
-    try:
-        logging.info("Creating backend")
-        sio, app, _ = create_backend(
-            [
-                "",
-                "--frontend-directory",
-                str(build_server_app),
-                "--backend-host",
-                SERVER_ADDRESS,
-                "--backend-port",
-                str(SERVER_PORT),
-                "--tcp-server-port",
-                str(TCP_SERVER_PORT),
-            ]
-        )
-        process = multiprocessing.Process(
-            target=run_uvicorn,
-            args=(
-                app,
-                sio,
-                "127.0.0.1",
-                SERVER_PORT,
-                "127.0.0.1",
-                TCP_SERVER_PORT,
-                False,
-            ),
-        )
-        process.start()
-        logging.info("Started backend")
-        time.sleep(startup_time)
-        yield
-    except Exception as e:
-        pytest.fail(f"Failed to start a RPC-JSON backend: {e}")
-    finally:
-        if process:
-            # process group to ensure uvicorn shutdown
-            process.terminate()
-            time.sleep(PROCESS_SHUTDOWN_TIME)
-            process.join()
-
-
-@pytest.fixture(scope="session")
-def build_server_app(request: pytest.FixtureRequest):
-    """Context manager to build a server app in a temporary directory."""
-    frontend_directory = request.config.getoption(
-        "--frontend-directory",
-        default=None,
-    )
-    if frontend_directory:
-        yield frontend_directory
-        return
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        return_code = build_frontend(
-            build_type="server-app", output_directory=Path(tmp_dir)
-        )
-        assert not return_code, (
-            "Building a server app failed."
-            f"Return non-zero code: {return_code}"
-        )
-        yield tmp_dir
 
 
 def open_dialog_box(context: BrowserContext):
@@ -135,7 +61,11 @@ def test_custom_dialog(
     Test if switching to a subgraph while utilizing RPC communication
     works.
     """
-    args = ["python3", "pipeline_manager/frontend_tester/rpc_client.py"]
+    args = [
+        "python3",
+        "pipeline_manager/frontend_tester/clients/"
+        "subgraph_switching_client.py",
+    ]
     client_process = None
 
     trace_name: Optional[str] = None
