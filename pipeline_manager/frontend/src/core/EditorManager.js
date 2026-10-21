@@ -33,6 +33,7 @@ import messageSchema from '../../../resources/schemas/message_schema.json' with 
 import ConnectionRenderer from './ConnectionRenderer.js';
 import Specification from './Specification.js';
 import validateJSON, { parseJSON } from './validate-json.js';
+import { setInterfaceCompositeTypes, clearInterfaceCompositeTypes } from './interfaceCompositeTypes.js';
 import { updateInterfacePosition } from '../custom/CustomNode.js';
 
 import globalProperties from '../globalProperties.ts';
@@ -576,6 +577,7 @@ export default class EditorManager {
         this.specification.currentSpecification = {};
         this.specification.includedSpecification = {};
         this.specification.unresolvedSpecification = reactive({});
+        clearInterfaceCompositeTypes();
     }
 
     isSpecificationLoaded() {
@@ -1685,6 +1687,8 @@ export default class EditorManager {
                 }
             });
         }
+
+        setInterfaceCompositeTypes(dataflowSpecification.interfaceComposites);
 
         resolvedNodes.forEach((node) => {
             errors.push(...this.validateNodeStyle(node));

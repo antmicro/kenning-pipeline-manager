@@ -10,6 +10,7 @@ import { Node } from '@baklavajs/core';
 import { BaklavaEvent } from '@baklavajs/events';
 
 import { useViewModel } from '@baklavajs/renderer-vue';
+import { v4 as uuidv4 } from 'uuid';
 import { updateInterfacePosition } from '../custom/CustomNode.js';
 import {
     CustomNodeInterface,
@@ -21,6 +22,7 @@ import {
     validateInterfaceGroups,
     generateProperties,
 } from './interfaceParser.js';
+import { resolveComposite } from './interfaceCompositeTypes.js';
 
 import CheckboxInterface from '../interfaces/CheckboxInterface.js';
 import HexInterface from '../interfaces/HexInterface.js';
@@ -803,6 +805,10 @@ export class CustomNode extends Node {
         Object.entries({ ...this.inputs, ...this.outputs }).forEach((io) => {
             const [ioName, ioState] = io;
 
+            // ports created by unrolling a composite interface are a visual,
+            // runtime-only feature and are never saved
+            if (ioState.isCompositeSub === true) return;
+
             if (ioState.port) {
                 if (!ioState.hidden) {
                     if (ioState.interfaces) {
@@ -1002,6 +1008,12 @@ export class CustomNode extends Node {
                 intf = this.inputs[ioName];
                 intf.externalName = ioState.externalName;
                 if (ioState.hidden !== undefined) this.inputs[ioName].hidden = ioState.hidden;
+            }
+            if (intf !== undefined && intf.composite === undefined) {
+                const composite = resolveComposite(ioState);
+                if (composite !== undefined) {
+                    intf.composite = composite.interfaces;
+                }
             }
             if (ioState.bus?.stubs && intf) {
                 intf.bus = intf.bus ?? {};
@@ -1205,6 +1217,14 @@ export const createBaklavaInterfaces = (parsedInterfaces) => {
                 sidePositionDef: intf.sidePosition,
                 sideDef: intf.side,
             });
+
+            // sub-interfaces must be unique per node instance
+            if (baklavaIntf.composite !== undefined) {
+                baklavaIntf.composite = intf.composite.map((sub) => ({
+                    ...sub,
+                    id: uuidv4(),
+                }));
+            }
 
             return createViewInterface(baklavaIntf);
         };

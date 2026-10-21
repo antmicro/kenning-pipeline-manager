@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { resolveComposite } from './interfaceCompositeTypes.js';
+
 const defaultDirection = 'inout';
 
 /**
@@ -26,6 +28,13 @@ function createInterface(io, hidden, name = undefined) {
     }
     intf.componentName = 'NodeInterface';
     intf.hidden = hidden;
+
+    // Interfaces declaring a composite type (from the specification's
+    // `interfaceComposites`) are turned into hierarchically grouped interfaces
+    const composite = resolveComposite(intf);
+    if (composite !== undefined) {
+        intf.composite = composite.interfaces;
+    }
 
     // Readonly values used for detecting whether there were any changes to the interface
     intf.originalSide = intf.side;
