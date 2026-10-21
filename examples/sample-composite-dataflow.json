@@ -1,0 +1,87 @@
+{
+    "version": "20250623.14",
+    "graphs": [
+        {
+            "id": "a1b2c3d4-0000-4000-8000-000000000001",
+            "name": "Composite interfaces example",
+            "nodes": [
+                {
+                    "id": "a1b2c3d4-1111-4000-8000-000000000001",
+                    "name": "CompositeGenerator",
+                    "instanceName": "CompositeGenerator",
+                    "position": {
+                        "x": -250,
+                        "y": -100
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "channels",
+                            "id": "a1b2c3d4-2222-4000-8000-000000000001",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0,
+                            "hidden": false
+                        },
+                        {
+                            "name": "plain",
+                            "id": "a1b2c3d4-2222-4000-8000-000000000002",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1,
+                            "hidden": false
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": []
+                },
+                {
+                    "id": "a1b2c3d4-3333-4000-8000-000000000001",
+                    "name": "CompositeConsumer",
+                    "instanceName": "CompositeConsumer",
+                    "position": {
+                        "x": 150,
+                        "y": 0
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "channels",
+                            "id": "a1b2c3d4-4444-4000-8000-000000000001",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0,
+                            "hidden": false
+                        },
+                        {
+                            "name": "monitor",
+                            "id": "a1b2c3d4-4444-4000-8000-000000000002",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1,
+                            "hidden": false
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "gamma",
+                            "id": "a1b2c3d4-5555-4000-8000-000000000001",
+                            "value": 1.0
+                        }
+                    ],
+                    "enabledInterfaceGroups": []
+                }
+            ],
+            "connections": [
+                {
+                    "id": "a1b2c3d4-6666-4000-8000-000000000001",
+                    "from": "a1b2c3d4-2222-4000-8000-000000000001",
+                    "to": "a1b2c3d4-4444-4000-8000-000000000001"
+                }
+            ]
+        }
+    ],
+    "metadata": {}
+}

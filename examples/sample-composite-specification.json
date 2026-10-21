@@ -1,0 +1,76 @@
+{
+    "version": "20250623.14",
+    "nodes": [
+        {
+            "name": "CompositeGenerator",
+            "interfaces": [
+                {
+                    "name": "channels",
+                    "type": "rgb",
+                    "direction": "output"
+                },
+                {
+                    "name": "plain",
+                    "type": "grayscale",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "description": "Node exposing a composite (RGB) output interface next to a plain one.",
+            "color": "#e9a726"
+        },
+        {
+            "name": "CompositeConsumer",
+            "interfaces": [
+                {
+                    "name": "channels",
+                    "type": "rgb",
+                    "direction": "input"
+                },
+                {
+                    "name": "monitor",
+                    "type": "channel",
+                    "direction": "input"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "gamma",
+                    "type": "number",
+                    "default": 1.0
+                }
+            ],
+            "description": "Node consuming a composite (RGB) input interface.",
+            "color": "#004972"
+        }
+    ],
+    "interfaceComposites": {
+        "rgb": [
+            {
+                "name": "red",
+                "type": "channel"
+            },
+            {
+                "name": "green",
+                "type": "channel"
+            },
+            {
+                "name": "blue",
+                "type": "channel"
+            }
+        ]
+    },
+    "metadata": {
+        "interfaces": {
+            "rgb": {
+                "interfaceColor": "#AB47BC"
+            },
+            "channel": {
+                "interfaceColor": "#29B6F6"
+            },
+            "grayscale": {
+                "interfaceColor": "#FFA726"
+            }
+        }
+    }
+}
