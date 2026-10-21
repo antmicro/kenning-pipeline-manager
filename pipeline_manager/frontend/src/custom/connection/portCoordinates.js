@@ -4,19 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Baklava file that is not exported so it has to be copy-pasted here locally into the project
-
 export default function getPortCoordinates(resolved) {
     if (resolved.node && resolved.interface && resolved.port) {
+        // Sum the offsets along the whole offsetParent chain from the port up to the node.
+        let x = 0;
+        let y = 0;
+        let element = resolved.port;
+        while (element !== null && element !== resolved.node && element !== document.body) {
+            x += element.offsetLeft;
+            y += element.offsetTop;
+            element = element.offsetParent;
+        }
+        if (element !== resolved.node) {
+            return [0, 0];
+        }
         return [
-            resolved.node.offsetLeft +
-                resolved.interface.offsetLeft +
-                resolved.port.offsetLeft +
-                resolved.port.clientWidth / 2,
-            resolved.node.offsetTop +
-                resolved.interface.offsetTop +
-                resolved.port.offsetTop +
-                resolved.port.clientHeight / 2,
+            x + resolved.node.offsetLeft + resolved.port.clientWidth / 2,
+            y + resolved.node.offsetTop + resolved.port.clientHeight / 2,
         ];
     }
     return [0, 0];
