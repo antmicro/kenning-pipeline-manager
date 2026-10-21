@@ -27,23 +27,27 @@ export default class BaklavaInterfaceTypes {
 
                 if (firstType !== undefined) {
                     const color = this.types[firstType].interfaceColor;
-                    const arrows = el.querySelectorAll('.__port:not(.greyedout_arrow)');
+                    // consider only the elements belonging to this very interface:
+                    // don't go too deep when querying the interfaces
+                    const ownPorts = (selector) => [...el.querySelectorAll(selector)]
+                        .filter((port) => port.closest('.baklava-node-interface') === el);
+                    const arrows = ownPorts('.__port:not(.greyedout_arrow)');
                     // iterate through all in case interface bus is used
                     arrows.forEach((arrow) => {
                         // eslint-disable-next-line no-param-reassign
-                        if (arrow !== null) arrow.style.backgroundColor = color;
-                        else {
-                            const greyArrow = el.querySelector('.__port');
-                            if (greyArrow !== null) {
-                                greyArrow.style.backgroundColor =
-                                    getComputedStyle(greyArrow).getPropertyValue('$gray-500');
-                            }
-                        }
+                        arrow.style.backgroundColor = color;
                     });
-                    const buses = el.querySelectorAll('.__port-bus:not(.greyedout_arrow)');
+                    if (arrows.length === 0) {
+                        const greyArrow = ownPorts('.__port')[0];
+                        if (greyArrow !== undefined) {
+                            greyArrow.style.backgroundColor =
+                                getComputedStyle(greyArrow).getPropertyValue('$gray-500');
+                        }
+                    }
+                    const buses = ownPorts('.__port-bus:not(.greyedout_arrow)');
                     buses.forEach((bus) => {
                         // eslint-disable-next-line no-param-reassign
-                        if (bus !== null) bus.style.borderColor = color;
+                        bus.style.borderColor = color;
                     });
                 }
             }

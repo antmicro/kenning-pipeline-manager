@@ -45,6 +45,7 @@ created out of an `interfaceComposites` specification entry.
                 :rotate="arrowRotation"
             />
         </div>
+        <div class="__port_composite_strip" :style="{ 'background-color': groupColor }" ></div>
         <button
             v-if="subPorts.length"
             type="button"
@@ -73,6 +74,7 @@ created out of an `interfaceComposites` specification entry.
 
 <script setup>
 import { computed } from 'vue';
+import { useViewModel } from '@baklavajs/renderer-vue';
 import Arrow from '../icons/Arrow.vue';
 import ExternalNameInput from './ExternalNameInput.vue';
 import CustomInterface from './CustomInterface.vue';
@@ -95,9 +97,22 @@ const props = defineProps({
 
 const noop = () => {};
 
+const { viewModel } = useViewModel();
+
 const expanded = computed(() => props.intf.compositeExpanded ?? false);
 
 const subPorts = computed(() => getCompositePorts(props.intf));
+
+const groupColor = computed(() => {
+    if (!expanded.value) {
+        return undefined;
+    }
+    const types = viewModel.value?.interfaceTypes?.types ?? {};
+    const intfTypes = Array.isArray(props.intf.type) ? props.intf.type : [props.intf.type];
+    return intfTypes
+        .map((type) => types[type]?.interfaceColor)
+        .find((color) => color !== undefined);
+});
 
 const toggleTitle = computed(() => (expanded.value
     ? 'Collapse the composite interface'
