@@ -32,9 +32,12 @@ function normalizeType(type) {
  */
 function createSubPort(intf, sub) {
     const direction = sub.direction ?? intf.direction ?? 'inout';
+    const saved = (toRaw(intf).compositeSaved ?? []).find(
+        (entry) => entry?.name === sub.name,
+    );
     const port = new CustomNodeInterface(sub.name);
     Object.assign(port, {
-        id: sub.id,
+        id: saved?.id ?? sub.id,
         name: sub.name,
         type: normalizeType(sub.type),
         direction,
@@ -49,6 +52,7 @@ function createSubPort(intf, sub) {
         parentComposite: intf,
     });
     port.nodeId = intf.nodeId;
+    port.compositeSaved = saved?.composite;
     const composite = resolveComposite(port);
     if (composite !== undefined) {
         port.composite = composite.interfaces;
@@ -84,7 +88,7 @@ export function getCompositePorts(intf) {
  * @returns {string|undefined} `'from'`, `'to'`, or undefined if the interface
  * is not an endpoint of the connection.
  */
-function endpointSide(connection, intf) {
+export function endpointSide(connection, intf) {
     if (connection.from === intf || connection.from?.id === intf.id) return 'from';
     if (connection.to === intf || connection.to?.id === intf.id) return 'to';
     return undefined;
@@ -213,8 +217,8 @@ export function getCompositeLeafPairs(fromIntf, toIntf) {
         if (fromPort === undefined) return true;
         const toPort = toPorts.find((port) => port?.name === fromPort.name);
         if (toPort === undefined) return true;
-        const fromNested = fromPort.isCompositeInterface?.() === true;
-        const toNested = toPort.isCompositeInterface?.() === true;
+        const fromNested = fromPort.isCompositeInterface() === true;
+        const toNested = toPort.isCompositeInterface() === true;
         if (fromNested !== toNested) return true;
         if (!fromNested) {
             pairs.push([fromPort, toPort]);
@@ -242,21 +246,31 @@ function findPortById(ports, id) {
     return (ports ?? []).find((port) => port?.id === id);
 }
 
+/**
+ * Resolves the leaf port a connection endpoint belongs to by following the
+ * chain of `compositeReturn`.
+ *
+ * @param {Object} root - The group port holding the first provenance entry.
+ * @param {string} connId - The id of the connection to resolve.
+ * @returns {Object|undefined} The leaf port the endpoint was created on, or
+ * undefined when it cannot be resolved.
+ */
+function provenanceLeaf(root, connId) {
+    let port = findPortById(toRaw(root).compositePorts, toRaw(root).compositeReturn?.[connId]);
+    while (port !== undefined && toRaw(port).isCompositeInterface() === true) {
+        const nextPortId = toRaw(port).compositeReturn?.[connId];
+        if (nextPortId === undefined) break;
+        port = findPortById(toRaw(port).compositePorts, nextPortId);
+    }
+    return port;
+}
+
 function descendantLeafOf(connection, side, root) {
     const endpoint = connection[side];
     if (endpoint === undefined) return undefined;
     const rawRoot = toRaw(root);
     if (endpoint.id === rawRoot.id) {
-        // follow the chain of provenance maps down to the leaf port the
-        // connection endpoint was originally created on
-        const connId = connection.id;
-        let port = findPortById(rawRoot.compositePorts, rawRoot.compositeReturn?.[connId]);
-        while (port !== undefined && toRaw(port).isCompositeInterface?.() === true) {
-            const nextPortId = toRaw(port).compositeReturn?.[connId];
-            if (nextPortId === undefined) break;
-            port = findPortById(toRaw(port).compositePorts, nextPortId);
-        }
-        return port;
+        return provenanceLeaf(rawRoot, connection.id);
     }
     let current = toRaw(endpoint);
     while (current !== undefined) {
@@ -341,7 +355,7 @@ export function checkCompositeConnection(graph, from, to) {
  * @param {string} side - `'from'` or `'to'`.
  * @param {Object} port - The leaf port the endpoint was created on.
  */
-function settleEndpoint(connection, side, port) {
+export function settleEndpoint(connection, side, port) {
     let current = toRaw(port);
     let parent = current.parentComposite;
     while (parent !== undefined && toRaw(parent).compositeExpanded !== true) {
@@ -390,4 +404,104 @@ export function addCompositeConnection(graph, from, to) {
     }
     graph.refreshConnections?.();
     return created[created.length - 1];
+}
+
+/**
+ * Resolves the endpoint ids a connection should be saved with.
+ *
+ * @param {Object} connection - The connection to serialize.
+ * @returns {Object} `{ from, to }` with the ids of the leaf ports (or of the
+ * plain endpoints when they do not belong to a composite interface).
+ */
+export function connectionSaveState(connection) {
+    const savedId = (endpoint) => {
+        const raw = toRaw(endpoint);
+        if (raw === undefined) return undefined;
+        if (raw.compositeReturn?.[connection.id] !== undefined) {
+            const leaf = provenanceLeaf(raw, connection.id);
+            if (leaf !== undefined) return toRaw(leaf).id;
+        }
+        return raw.id;
+    };
+    return { from: savedId(connection.from), to: savedId(connection.to) };
+}
+
+/**
+ * Tells whether any port of the hierarchy of `port` is one of the saved connection endpoints.
+ *
+ * @param {Object} port - The port (or group port) to inspect.
+ * @param {Set<string>} connectedIds - Ids of the leaf ports held by connections.
+ * @returns {boolean} True if the port itself or any of its descendants is connected.
+ */
+function subtreeConnected(port, connectedIds) {
+    const raw = toRaw(port);
+    if (connectedIds.has(raw.id)) return true;
+    if (!raw.isCompositeInterface()) return false;
+    return (getCompositePorts(raw) ?? []).some(
+        (sub) => sub !== undefined && subtreeConnected(sub, connectedIds),
+    );
+}
+
+/**
+ * Builds the `composite` tree of a composite interface for saving.
+ *
+ * @param {Object} intf - The composite interface.
+ * @param {Set<string>} connectedIds - Ids of the leaf ports held by connections.
+ * @returns {Array|undefined} The tree `[{ id, name, composite? }]`, or
+ * undefined when nothing in the hierarchy is connected.
+ */
+export function compositeTreeToSave(intf, connectedIds) {
+    const build = (port) => {
+        if (!subtreeConnected(port, connectedIds)) return undefined;
+        const raw = toRaw(port);
+        const entry = { id: raw.id, name: raw.name };
+        if (raw.isCompositeInterface()) {
+            const subs = getCompositePorts(raw).map(build).filter((e) => e !== undefined);
+            if (subs.length > 0) entry.composite = subs;
+        }
+        return entry;
+    };
+    const entries = (getCompositePorts(toRaw(intf)) ?? [])
+        .filter((port) => port !== undefined)
+        .map(build)
+        .filter((entry) => entry !== undefined);
+    return entries.length > 0 ? entries : undefined;
+}
+
+/**
+ * Builds the ports of a composite interface and, recursively, all its nested composite sub-ports.
+ *
+ * @param {Object} intf - The composite interface.
+ */
+export function buildCompositePortsDeep(intf) {
+    getCompositePorts(intf).forEach((port) => {
+        if (port !== undefined && toRaw(port).isCompositeInterface()) {
+            buildCompositePortsDeep(port);
+        }
+    });
+}
+
+/**
+ * Finds a port unrolled from a composite interface by its id.
+ *
+ * @param {Object} intf - The composite interface whose hierarchy to search.
+ * @param {string} id - The id of the port to find.
+ * @returns {Object|undefined} The port with the given id, if found.
+ */
+export function findPortInHierarchy(intf, id) {
+    let result;
+    (toRaw(intf).compositePorts ?? []).some((port) => {
+        if (port === undefined) return false;
+        if (toRaw(port).id === id) {
+            result = port;
+            return true;
+        }
+        const inner = findPortInHierarchy(port, id);
+        if (inner !== undefined) {
+            result = inner;
+            return true;
+        }
+        return false;
+    });
+    return result;
 }

@@ -16,7 +16,10 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import { startTransaction, commitTransaction } from '../core/History.ts';
 import { updateInterfacePosition } from './CustomNode.js';
 import { createStub } from './CustomNodeInterface.js';
-import { checkCompositeConnection } from './compositeInterfaces.js';
+import {
+    checkCompositeConnection, connectionSaveState, endpointSide, settleEndpoint,
+    findPortInHierarchy,
+} from './compositeInterfaces.js';
 import GraphTemplate from './CustomGraphTemplate.js';
 
 /* eslint-disable no-param-reassign */
@@ -609,10 +612,8 @@ export default function createPipelineManagerGraph(graph) {
                 if (s) {
                     result = s;
                 } else {
-                    // interfaces unrolled from a composite interface
-                    const p = (nodeInput.compositePorts ?? []).find(
-                        (port) => port?.id === id,
-                    );
+                    // interfaces unrolled from a composite interface, at any nesting depth
+                    const p = findPortInHierarchy(nodeInput, id);
                     if (p) {
                         result = p;
                     }
@@ -795,6 +796,13 @@ export default function createPipelineManagerGraph(graph) {
                         });
                     }
                     this.internalAddConnection(conn);
+
+                    [fromIf, toIf].forEach((intf) => {
+                        if (toRaw(intf).isCompositeSub === true) {
+                            const side = endpointSide(conn, intf);
+                            if (side !== undefined) settleEndpoint(conn, side, intf);
+                        }
+                    });
                 }
             }
         });
@@ -846,13 +854,16 @@ export default function createPipelineManagerGraph(graph) {
             name: this.name !== '' ? this.name : undefined,
             nodes: this.nodes.map((n) => n.save()),
             groups: this.groups,
-            connections: this.connections.map((c) => ({
-                id: c.id,
-                from: c.from.id,
-                to: c.to.id,
-                // eslint-disable-next-line no-unused-vars
-                anchors: c.anchors?.map((a) => ({ x: a.x, y: a.y, index: a.index })),
-            })),
+            connections: this.connections.map((c) => {
+                const endpoints = connectionSaveState(c);
+                return {
+                    id: c.id,
+                    from: endpoints.from,
+                    to: endpoints.to,
+                    // eslint-disable-next-line no-unused-vars
+                    anchors: c.anchors?.map((a) => ({ x: a.x, y: a.y, index: a.index })),
+                };
+            }),
             scaling: this.scaling,
             panning: this.panning,
         };

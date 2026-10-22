@@ -23,6 +23,11 @@ import {
     generateProperties,
 } from './interfaceParser.js';
 import { resolveComposite } from './interfaceCompositeTypes.js';
+import {
+    buildCompositePortsDeep,
+    compositeTreeToSave,
+    connectionSaveState,
+} from '../custom/compositeInterfaces.js';
 
 import CheckboxInterface from '../interfaces/CheckboxInterface.js';
 import HexInterface from '../interfaces/HexInterface.js';
@@ -802,11 +807,18 @@ export class CustomNode extends Node {
         const newInterfaces = [];
         const enabledInterfaceGroups = [];
 
+        const connectedLeafIds = new Set();
+        (this.graphInstance?.connections ?? []).forEach((c) => {
+            if (c.from?.nodeId !== this.id && c.to?.nodeId !== this.id) return;
+            const { from, to } = connectionSaveState(c);
+            if (from !== undefined) connectedLeafIds.add(from);
+            if (to !== undefined) connectedLeafIds.add(to);
+        });
+
         Object.entries({ ...this.inputs, ...this.outputs }).forEach((io) => {
             const [ioName, ioState] = io;
 
-            // ports created by unrolling a composite interface are a visual,
-            // runtime-only feature and are never saved
+            // don't save composite stubs
             if (ioState.isCompositeSub === true) return;
 
             if (ioState.port) {
@@ -833,6 +845,14 @@ export class CustomNode extends Node {
                     const isBusEmpty = (!bus.size || !bus.type
                         || busStubs.length === 0);
 
+                    const compositeState = ioState.isCompositeInterface() === true
+                        ? { compositeExpanded: ioState.compositeExpanded ?? false }
+                        : undefined;
+                    if (compositeState !== undefined) {
+                        const tree = compositeTreeToSave(ioState, connectedLeafIds);
+                        if (tree !== undefined) compositeState.composite = tree;
+                    }
+
                     newInterfaces.push({
                         name: ioName.slice(ioState.direction.length + 1),
                         externalName: ioState.externalName,
@@ -842,6 +862,7 @@ export class CustomNode extends Node {
                         ...(!ioState.bus && { sidePosition: ioState.sidePosition }),
                         ...(!isBusEmpty && { bus }),
                         hidden: ioState.hidden,
+                        ...(compositeState ?? {}),
                     });
                 }
             } else {
@@ -941,6 +962,18 @@ export class CustomNode extends Node {
             parsedState = resolveDiscrepancies(parsedState, this.inputs, this.outputs);
         }
 
+        // Save for later rebuilding of state
+        const compositeStates = {};
+        ['inputs', 'outputs'].forEach((direction) => {
+            Object.entries(parsedState[direction] ?? {}).forEach(([name, intfState]) => {
+                const { composite, ...restState } = intfState ?? {};
+                if (composite !== undefined) {
+                    compositeStates[name] = composite;
+                    parsedState[direction][name] = restState;
+                }
+            });
+        });
+
         super.load(parsedState);
 
         this.height = parsedState?.height;
@@ -1009,10 +1042,18 @@ export class CustomNode extends Node {
                 intf.externalName = ioState.externalName;
                 if (ioState.hidden !== undefined) this.inputs[ioName].hidden = ioState.hidden;
             }
-            if (intf !== undefined && intf.composite === undefined) {
-                const composite = resolveComposite(ioState);
-                if (composite !== undefined) {
-                    intf.composite = composite.interfaces;
+            if (intf !== undefined) {
+                if (intf.composite === undefined) {
+                    const composite = resolveComposite(ioState);
+                    if (composite !== undefined) {
+                        intf.composite = composite.interfaces;
+                    }
+                }
+                if (intf.isCompositeInterface() === true) {
+                    // load port ids from save
+                    intf.compositeSaved = compositeStates[ioName];
+                    intf.compositeExpanded = ioState.compositeExpanded ?? false;
+                    buildCompositePortsDeep(intf);
                 }
             }
             if (ioState.bus?.stubs && intf) {
