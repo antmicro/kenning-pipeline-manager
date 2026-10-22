@@ -4,6 +4,7 @@ import {
     test, expect, Page,
     TestInfo,
 } from '@playwright/test';
+import { v4 as uuidv4 } from 'uuid';
 import { readFileSync, writeFileSync } from 'node:fs';
 import {
     getUrl,
@@ -15,7 +16,9 @@ import {
     getNode,
     openNodePalette,
     expectNoErrors,
-    saveFileAs
+    saveFileAs,
+    waitForSubgraph,
+    verifyNodeCount,
 } from './config.js';
 
 async function deepCleanEditor(page: Page) {
@@ -275,4 +278,87 @@ test(`entryGraph ${exampleNested.specification} in middle of structure`, async (
     await page.locator('span').getByText('Graphs').click();
     const entryCount = await page.locator('.entries').locator('.__entry').count();
     expect(entryCount).toBe(2);
+});
+
+const exampleNestedEntry = {
+    specification: 'sample-subgraph-specification.json',
+    dataflow: 'sample-subgraph-dataflow.json',
+};
+
+test(`entryGraph ${exampleNestedEntry.dataflow} nested after dead-end subgraph`, async ({ page }, testInfo) => {
+    const json = JSON.parse(readFileSync(getPathToJsonFile(exampleNestedEntry.dataflow), 'utf-8'));
+    const root = json.graphs[0];
+
+    // The first graph node points to a subgraph that does not contain the entry graph (a dead end)
+    // The second graph node points to the actual entry graph
+    const deadEndSubgraphId = uuidv4();
+    const entrySubgraphId = uuidv4();
+    const deadEndNode = root.nodes.find((n) => n.name === 'Test subgraph #1');
+    const entryNode = root.nodes.find((n) => n.name === 'Test subgraph #2');
+    deadEndNode.subgraph = deadEndSubgraphId;
+    entryNode.subgraph = entrySubgraphId;
+    root.nodes.splice(root.nodes.indexOf(deadEndNode), 1);
+    root.nodes.splice(root.nodes.indexOf(entryNode), 1);
+    root.nodes.unshift(deadEndNode, entryNode);
+
+    const newNode = (name: string, id: string, x: number) => ({
+        id,
+        name,
+        instanceName: name,
+        position: { x, y: 200 },
+        width: 200,
+        twoColumn: false,
+        interfaces: [
+            {
+                name: 'Input',
+                id: uuidv4(),
+                direction: 'input',
+                side: 'left',
+                sidePosition: 0,
+            },
+            {
+                name: 'Output',
+                id: uuidv4(),
+                direction: 'output',
+                side: 'right',
+                sidePosition: 0,
+            },
+        ],
+        properties: [],
+        enabledInterfaceGroups: [],
+    });
+
+    json.graphs.push(
+        {
+            id: deadEndSubgraphId,
+            name: 'Dead end subgraph',
+            nodes: [newNode('Test node #1', uuidv4(), 200)],
+            connections: [],
+        },
+        {
+            id: entrySubgraphId,
+            name: 'Nested entry graph',
+            nodes: [
+                newNode('Test node #1', uuidv4(), 200),
+                newNode('Test node #2', uuidv4(), 500),
+            ],
+            connections: [],
+        },
+    );
+    json.entryGraph = entrySubgraphId;
+
+    const outputPath = testInfo.outputPath('nested-entry-after-dead-end-dataflow.json');
+    writeFileSync(outputPath, JSON.stringify(json, null, 2), 'utf-8');
+
+    await page.goto(getUrl());
+    await loadSpecification(page, exampleNestedEntry.specification);
+    await expectNoErrors(page);
+    const fileChooser = await openFileChooser(page, 'dataflow');
+    await fileChooser.setFiles(outputPath);
+    await expectNoErrors(page);
+
+    // The editor must be switched to the entry graph, not to the dead-end
+    // subgraph visited first during the entry graph search.
+    await waitForSubgraph(page, 'Nested entry graph');
+    await verifyNodeCount(page, 2);
 });
