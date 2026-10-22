@@ -1025,8 +1025,13 @@ const getRows = (sockets) => {
 
 const fitTitle = computed(() => viewModel.value.editor.getNodeStyleFitTitle(props.node.type));
 
+const path = viewModel.value.editor.getNodeIconPath(props.node.type);
+const iconPath = viewModel.value.cache[`./${path}`] ?? path;
+
 const titleSize = computed(() => {
-    const width = (titleTextRef?.value?.offsetWidth ?? 0);
+    const width = (titleTextRef?.value?.offsetWidth ?? 0)
+        // Extend title with icon (of width 2em + 1em padding)
+        + (iconPath ? 50 : 0);
     const height = (titleTextRef?.value?.offsetHeight ?? 0);
     return {
         width,
@@ -1133,9 +1138,6 @@ watch(displayedProperties, () => {
         .filter((prop) => prop.setDefaultComponent !== undefined)
         .forEach((prop) => { prop.setDefaultComponent(); });
 }, { immediate: true });
-
-const path = viewModel.value.editor.getNodeIconPath(props.node.type);
-const iconPath = viewModel.value.cache[`./${path}`] ?? path;
 
 // Metadata ("icon" is not a string) > Predefined > Cached > Arbitrary URI
 const nodeStyle = computed(() => {
