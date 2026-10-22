@@ -5,26 +5,26 @@
             "name": "CompositeGenerator",
             "interfaces": [
                 {
-                    "name": "channels",
-                    "type": "rgb",
+                    "name": "axi",
+                    "type": "axi",
                     "direction": "output"
                 },
                 {
-                    "name": "plain",
-                    "type": "grayscale",
+                    "name": "gpio",
+                    "type": "signal",
                     "direction": "output"
                 }
             ],
             "properties": [],
-            "description": "Node exposing a composite (RGB) output interface next to a plain one.",
+            "description": "Node exposing a composite (AXI) output interface next to a plain one.",
             "color": "#e9a726"
         },
         {
             "name": "CompositeConsumer",
             "interfaces": [
                 {
-                    "name": "channels",
-                    "type": "rgb",
+                    "name": "axi",
+                    "type": "axi",
                     "direction": "input"
                 },
                 {
@@ -35,41 +35,453 @@
             ],
             "properties": [
                 {
-                    "name": "gamma",
+                    "name": "value",
                     "type": "number",
                     "default": 1.0
                 }
             ],
-            "description": "Node consuming a composite (RGB) input interface.",
+            "description": "Node consuming a composite (AXI) input interface.",
             "color": "#004972"
+        },
+        {
+            "name": "SyncGenerator",
+            "interfaces": [
+                {
+                    "name": "timing",
+                    "type": "sync",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "description": "Node exposing a composite (sync) output interface.",
+            "color": "#26A69A"
+        },
+        {
+            "name": "SyncConsumer",
+            "interfaces": [
+                {
+                    "name": "timing",
+                    "type": ["display", "sync"],
+                    "direction": "input"
+                }
+            ],
+            "properties": [],
+            "description": "Node consuming a composite (display) input interface. It shares the sync type with SyncGenerator so that the two are compatible by type, yet they are composite interfaces of different, non-exact types.",
+            "color": "#7E57C2"
         }
     ],
     "interfaceComposites": {
-        "rgb": [
+        "sync": [
             {
-                "name": "red",
-                "type": "channel"
+                "name": "hsync",
+                "type": "signal"
             },
             {
-                "name": "green",
-                "type": "channel"
+                "name": "vsync",
+                "type": "signal"
+            }
+        ],
+        "display": [
+            {
+                "name": "hsync",
+                "type": "signal"
             },
             {
-                "name": "blue",
-                "type": "channel"
+                "name": "vsync",
+                "type": "signal"
+            },
+            {
+                "name": "de",
+                "type": "signal"
+            }
+        ],
+        "axi": [
+            {
+                "name": "AW",
+                "type": "aw"
+            },
+            {
+                "name": "W",
+                "type": "signal"
+            },
+            {
+                "name": "B",
+                "type": "signal"
+            },
+            {
+                "name": "AR",
+                "type": "signal"
+            },
+            {
+                "name": "R",
+                "type": "signal"
+            }
+        ],
+        "aw": [
+            {
+                "name": "ID",
+                "type": "awid"
+            },
+            {
+                "name": "ADDR",
+                "type": "awaddr"
+            },
+            {
+                "name": "REGION",
+                "type": "awregion"
+            },
+            {
+                "name": "LEN",
+                "type": "awlen"
+            },
+            {
+                "name": "SIZE",
+                "type": "awsize"
+            },
+            {
+                "name": "BURST",
+                "type": "awburst"
+            },
+            {
+                "name": "LOCK",
+                "type": "signal"
+            },
+            {
+                "name": "CACHE",
+                "type": "awcache"
+            },
+            {
+                "name": "PROT",
+                "type": "awprot"
+            },
+            {
+                "name": "QOS",
+                "type": "awqos"
+            },
+            {
+                "name": "USER",
+                "type": "signal"
+            },
+            {
+                "name": "VALID",
+                "type": "signal"
+            },
+            {
+                "name": "READY",
+                "type": "awready"
+            }
+        ],
+        "awid": [
+            {
+                "name": "ID[0]",
+                "type": "signal"
+            },
+            {
+                "name": "ID[1]",
+                "type": "signal"
+            },
+            {
+                "name": "ID[2]",
+                "type": "signal"
+            },
+            {
+                "name": "ID[3]",
+                "type": "signal"
+            }
+        ],
+        "awaddr": [
+            {
+                "name": "ADDR[0]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[1]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[2]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[3]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[4]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[5]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[6]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[7]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[8]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[9]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[10]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[11]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[12]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[13]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[14]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[15]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[16]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[17]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[18]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[19]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[20]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[21]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[22]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[23]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[24]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[25]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[26]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[27]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[28]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[29]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[30]",
+                "type": "signal"
+            },
+            {
+                "name": "ADDR[31]",
+                "type": "signal"
+            }
+        ],
+        "awregion": [
+            {
+                "name": "REGION[0]",
+                "type": "signal"
+            },
+            {
+                "name": "REGION[1]",
+                "type": "signal"
+            },
+            {
+                "name": "REGION[2]",
+                "type": "signal"
+            },
+            {
+                "name": "REGION[3]",
+                "type": "signal"
+            }
+        ],
+        "awlen": [
+            {
+                "name": "LEN[0]",
+                "type": "signal"
+            },
+            {
+                "name": "LEN[1]",
+                "type": "signal"
+            },
+            {
+                "name": "LEN[2]",
+                "type": "signal"
+            },
+            {
+                "name": "LEN[3]",
+                "type": "signal"
+            },
+            {
+                "name": "LEN[4]",
+                "type": "signal"
+            },
+            {
+                "name": "LEN[5]",
+                "type": "signal"
+            },
+            {
+                "name": "LEN[6]",
+                "type": "signal"
+            },
+            {
+                "name": "LEN[7]",
+                "type": "signal"
+            }
+        ],
+        "awsize": [
+            {
+                "name": "SIZE[0]",
+                "type": "signal"
+            },
+            {
+                "name": "SIZE[1]",
+                "type": "signal"
+            },
+            {
+                "name": "SIZE[2]",
+                "type": "signal"
+            }
+        ],
+        "awburst": [
+            {
+                "name": "BURST[0]",
+                "type": "signal"
+            },
+            {
+                "name": "BURST[1]",
+                "type": "signal"
+            }
+        ],
+        "awcache": [
+            {
+                "name": "CACHE[0]",
+                "type": "signal"
+            },
+            {
+                "name": "CACHE[1]",
+                "type": "signal"
+            },
+            {
+                "name": "CACHE[2]",
+                "type": "signal"
+            },
+            {
+                "name": "CACHE[3]",
+                "type": "signal"
+            }
+        ],
+        "awprot": [
+            {
+                "name": "PROT[0]",
+                "type": "signal"
+            },
+            {
+                "name": "PROT[1]",
+                "type": "signal"
+            },
+            {
+                "name": "PROT[2]",
+                "type": "signal"
+            }
+        ],
+        "awqos": [
+            {
+                "name": "QOS[0]",
+                "type": "signal"
+            },
+            {
+                "name": "QOS[1]",
+                "type": "signal"
+            },
+            {
+                "name": "QOS[2]",
+                "type": "signal"
             }
         ]
     },
     "metadata": {
         "interfaces": {
-            "rgb": {
-                "interfaceColor": "#AB47BC"
+            "sync": {
+                "interfaceColor": "#26A69A"
             },
-            "channel": {
-                "interfaceColor": "#29B6F6"
+            "display": {
+                "interfaceColor": "#7E57C2"
             },
-            "grayscale": {
-                "interfaceColor": "#FFA726"
+            "axi": {
+                "interfaceColor": "#4abbe7"
+            },
+            "aw": {
+                "interfaceColor": "#a7bbb6"
+            },
+            "awid": {
+                "interfaceColor": "#0071a6"
+            },
+            "awaddr": {
+                "interfaceColor": "#1a47c2"
+            },
+            "awregion": {
+                "interfaceColor": "#710bf3"
+            },
+            "awlen": {
+                "interfaceColor": "#ac41d1"
+            },
+            "awsize": {
+                "interfaceColor": "#9e377b"
+            },
+            "awburst": {
+                "interfaceColor": "#eb9269"
+            },
+            "awcache": {
+                "interfaceColor": "#6010bd"
+            },
+            "awprot": {
+                "interfaceColor": "#429613"
+            },
+            "awqos": {
+                "interfaceColor": "#be4b24"
             }
         }
     }
