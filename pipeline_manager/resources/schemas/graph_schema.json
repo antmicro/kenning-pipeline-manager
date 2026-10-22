@@ -164,43 +164,15 @@
                                     "$ref": "#/$defs/hidden"
                                 },
                                 "bus": {
-                                    "description": "Determines bus attributes",
-                                    "type": "object",
-                                    "properties": {
-                                        "size": {
-                                            "description": "Size of the bus in pixels",
-                                            "type": "number"
-                                        },
-                                        "stubs": {
-                                            "description": "Endpoints of connections going into the bus",
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "description": "Unique id for the stub, needed for connection",
-                                                        "type": "string"
-                                                    },
-                                                    "offset": {
-                                                        "description": "Offset of stub within the bus in pixels",
-                                                        "type": "number"
-                                                    },
-                                                    "side": {
-                                                        "description": "Side has to be specified in the two-sided bus variant",
-                                                        "enum": [
-                                                            "left",
-                                                            "right"
-                                                        ]
-                                                    }
-                                                },
-                                                "required": [
-                                                    "id",
-                                                    "offset"
-                                                ],
-                                                "additionalProperties": false
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/$defs/bus"
+                                },
+                                "composite": {
+                                    "$ref": "#/$defs/composite"
+                                },
+                                "compositeExpanded": {
+                                    "description": "Determines whether the composite interface is unrolled into its sub-interfaces",
+                                    "type": "boolean",
+                                    "default": false
                                 }
                             },
                             "required": [
@@ -424,6 +396,69 @@
             "description": "Determines whether the property should be rendered in the node",
             "type": "boolean",
             "default": false
+        },
+        "composite": {
+            "description": "Determines composite interface components",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "Unique value assigned to the interface",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Name of the sub-interface",
+                        "type": "string"
+                    },
+                    "composite": {
+                        "$ref": "#/$defs/composite"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            }
+        },
+        "bus": {
+            "description": "Determines bus attributes",
+            "type": "object",
+            "properties": {
+                "size": {
+                    "description": "Size of the bus in pixels",
+                    "type": "number"
+                },
+                "stubs": {
+                    "description": "Endpoints of connections going into the bus",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "Unique id for the stub, needed for connection",
+                                "type": "string"
+                            },
+                            "offset": {
+                                "description": "Offset of stub within the bus in pixels",
+                                "type": "number"
+                            },
+                            "side": {
+                                "description": "Side has to be specified in the two-sided bus variant",
+                                "enum": [
+                                    "left",
+                                    "right"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "offset"
+                        ],
+                        "additionalProperties": false
+                    }
+                }
+            }
         }
     },
     "required": [
