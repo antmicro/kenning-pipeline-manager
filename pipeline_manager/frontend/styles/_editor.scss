@@ -115,7 +115,8 @@
 
     .__port_composite_toggle {
         position: absolute;
-        right: -0.55em;
+        top: 1em;
+        right: -0.35em;
         z-index: 2;
         display: flex;
         align-items: center;
@@ -138,7 +139,7 @@
 
         &.__port_composite_toggle_left {
             right: auto;
-            left: -0.55em;
+            left: -0.35em;
         }
     }
 }
@@ -174,7 +175,8 @@
     &.--composite-expanded {
         padding: 0.8em;
         & > .__port-name {
-            display: none;
+            font-weight: bold;
+            font-size: 1.125em;
         }
     }
 }

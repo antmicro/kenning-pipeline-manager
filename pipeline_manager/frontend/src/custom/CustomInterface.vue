@@ -21,6 +21,7 @@ the root element, and picks the right one for the given interface.
 <template>
     <div
         :id="intf.id"
+        :data-port-name="intf.port ? intf.name : undefined"
         ref="el"
         class="baklava-node-interface"
         :class="newClasses(intf)"
@@ -37,21 +38,6 @@ the root element, and picks the right one for the given interface.
             :is-exposed="isExposed"
             :hovered="hovered"
             :new-classes="newClasses"
-            :start-hover-wrapper="startHoverWrapper"
-            :end-hover-wrapper="endHoverWrapper"
-            :on-mouse-down="onMouseDown"
-        />
-        <InterfaceComposite
-            v-if="intf.port && !intf.bus?.size && !hidePort && !positioned && isCompositeInterface"
-            :intf="intf"
-            :node="node"
-            :graph="graph"
-            :highlighted="highlighted"
-            :picked="picked"
-            :is-exposed="isExposed"
-            :hovered="hovered"
-            :display-arrow="displayArrow"
-            :arrow-rotation="arrowRotation"
             :start-hover-wrapper="startHoverWrapper"
             :end-hover-wrapper="endHoverWrapper"
             :on-mouse-down="onMouseDown"
@@ -94,6 +80,21 @@ the root element, and picks the right one for the given interface.
             :sidebar="sidebar"
             :start-property-hover="startPropertyHover"
             :end-property-hover="endPropertyHover"
+        />
+        <InterfaceComposite
+            v-if="intf.port && !intf.bus?.size && !hidePort && !positioned && isCompositeInterface"
+            :intf="intf"
+            :node="node"
+            :graph="graph"
+            :highlighted="highlighted"
+            :picked="picked"
+            :is-exposed="isExposed"
+            :hovered="hovered"
+            :display-arrow="displayArrow"
+            :arrow-rotation="arrowRotation"
+            :start-hover-wrapper="startHoverWrapper"
+            :end-hover-wrapper="endHoverWrapper"
+            :on-mouse-down="onMouseDown"
         />
     </div>
 </template>
