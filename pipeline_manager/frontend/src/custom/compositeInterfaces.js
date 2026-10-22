@@ -10,7 +10,7 @@
 
 import { toRaw } from 'vue';
 import { CustomNodeInterface } from './CustomNodeInterface.js';
-import { resolveComposite } from '../core/interfaceComposites.js';
+import { resolveComposite, isSameCompositeType } from '../core/interfaceCompositeTypes.js';
 
 /**
  * Normalizes a sub-interface type to the array form used by the ports.
@@ -46,7 +46,7 @@ function createSubPort(intf, sub) {
         connectionCount: 0,
         // runtime-only port created by unrolling a composite interface
         isCompositeSub: true,
-        compositeParent: intf.id,
+        parentComposite: intf,
     });
     port.nodeId = intf.nodeId;
     const composite = resolveComposite(port);
@@ -191,4 +191,203 @@ export function toggleCompositeInterfaces(intf, graph) {
     } else {
         expandCompositeInterfaces(intf, graph);
     }
+}
+
+/**
+ * Returns the pairs of leaf sub-ports that the two composite interfaces share by name, recursing
+ * into nested composite sub-interfaces.
+ *
+ * @param {Object} fromIntf - One composite interface.
+ * @param {Object} toIntf - The other composite interface.
+ * @returns {Array<[Object, Object]>|undefined} The matched leaf-port pairs, or
+ * undefined when the hierarchies of the two composites do not match.
+ */
+export function getCompositeLeafPairs(fromIntf, toIntf) {
+    const fromPorts = getCompositePorts(fromIntf);
+    const toPorts = getCompositePorts(toIntf);
+    if (fromPorts.length === 0 || fromPorts.length !== toPorts.length) {
+        return undefined;
+    }
+    const pairs = [];
+    const mismatched = fromPorts.some((fromPort) => {
+        if (fromPort === undefined) return true;
+        const toPort = toPorts.find((port) => port?.name === fromPort.name);
+        if (toPort === undefined) return true;
+        const fromNested = fromPort.isCompositeInterface?.() === true;
+        const toNested = toPort.isCompositeInterface?.() === true;
+        if (fromNested !== toNested) return true;
+        if (!fromNested) {
+            pairs.push([fromPort, toPort]);
+            return false;
+        }
+        const inner = getCompositeLeafPairs(fromPort, toPort);
+        if (inner === undefined) return true;
+        pairs.push(...inner);
+        return false;
+    });
+    return mismatched ? undefined : pairs;
+}
+
+/**
+ * Resolves which leaf port of `root`'s hierarchy one endpoint of a connection
+ * belongs to.
+ *
+ * @param {Object} connection - The connection to inspect.
+ * @param {string} side - `'from'` or `'to'`.
+ * @param {Object} root - The composite interface whose hierarchy to resolve in.
+ * @returns {Object|undefined} The leaf port of the hierarchy the endpoint
+ * belongs to, or undefined when the connection does not touch `root`.
+ */
+function findPortById(ports, id) {
+    return (ports ?? []).find((port) => port?.id === id);
+}
+
+function descendantLeafOf(connection, side, root) {
+    const endpoint = connection[side];
+    if (endpoint === undefined) return undefined;
+    const rawRoot = toRaw(root);
+    if (endpoint.id === rawRoot.id) {
+        // follow the chain of provenance maps down to the leaf port the
+        // connection endpoint was originally created on
+        const connId = connection.id;
+        let port = findPortById(rawRoot.compositePorts, rawRoot.compositeReturn?.[connId]);
+        while (port !== undefined && toRaw(port).isCompositeInterface?.() === true) {
+            const nextPortId = toRaw(port).compositeReturn?.[connId];
+            if (nextPortId === undefined) break;
+            port = findPortById(toRaw(port).compositePorts, nextPortId);
+        }
+        return port;
+    }
+    let current = toRaw(endpoint);
+    while (current !== undefined) {
+        if (current.id === rawRoot.id) return endpoint;
+        current = current.parentComposite;
+    }
+    return undefined;
+}
+
+/**
+ * Tells whether the given leaf-port pair of two composite interfaces is already held by a
+ * connection, either directly on the leaf ports or on the ancestor ports they collapse into.
+ *
+ * @param {Object} graph - The graph the composite interfaces belong to.
+ * @param {Object} fromIntf - One composite interface.
+ * @param {Object} toIntf - The other composite interface.
+ * @param {Object} fromPort - A leaf port of the first composite.
+ * @param {Object} toPort - The matching leaf port of the second composite.
+ * @returns {boolean} True if a connection already covers the pair.
+ */
+function pairHasConnection(graph, fromIntf, toIntf, fromPort, toPort) {
+    return (graph?.connections ?? []).some((connection) => {
+        const matches = (fromSide, toSide) =>
+            descendantLeafOf(connection, fromSide, fromIntf)?.id === toRaw(fromPort).id
+            && descendantLeafOf(connection, toSide, toIntf)?.id === toRaw(toPort).id;
+        return matches('from', 'to') || matches('to', 'from');
+    });
+}
+
+/**
+ * Checks a connection between two composite interfaces.
+ *
+ * @param {Object} graph - The graph the composite interfaces belong to.
+ * @param {Object} from - One composite interface (output side).
+ * @param {Object} to - The other composite interface (input side).
+ * @returns {Object} `{ connectionAllowed, error? , pairs? }`; `pairs` holds
+ * the leaf-port pairs still to be connected.
+ */
+export function checkCompositeConnection(graph, from, to) {
+    if (!isSameCompositeType(from, to)) {
+        return {
+            connectionAllowed: false,
+            error: `Only composite interfaces of the same exact type can be connected.`,
+        };
+    }
+    const pairs = getCompositeLeafPairs(from, to);
+    if (pairs === undefined || pairs.length === 0) {
+        return {
+            connectionAllowed: false,
+            error: `Composite interfaces do not contain matching sub-interfaces.`,
+        };
+    }
+    const pending = [];
+    let failedError;
+    pairs.forEach(([fromPort, toPort]) => {
+        if (failedError !== undefined) return;
+        if (pairHasConnection(graph, from, to, fromPort, toPort)) return;
+        const pairCheck = graph.checkConnection(toRaw(fromPort), toRaw(toPort));
+        if (!pairCheck.connectionAllowed) {
+            failedError = pairCheck.error ?? pairCheck.errors;
+        } else {
+            pending.push([fromPort, toPort]);
+        }
+    });
+    if (failedError !== undefined) {
+        return { connectionAllowed: false, error: failedError };
+    }
+    if (pending.length === 0) {
+        return {
+            connectionAllowed: false,
+            error: 'Every sub-interface of the composite interfaces is already connected.',
+        };
+    }
+    return { connectionAllowed: true, pairs: pending };
+}
+
+/**
+ * Moves one connection endpoint from a leaf port up to the innermost expanded
+ * ancestor port.
+ *
+ * @param {Object} connection - The connection whose endpoint is settled.
+ * @param {string} side - `'from'` or `'to'`.
+ * @param {Object} port - The leaf port the endpoint was created on.
+ */
+function settleEndpoint(connection, side, port) {
+    let current = toRaw(port);
+    let parent = current.parentComposite;
+    while (parent !== undefined && toRaw(parent).compositeExpanded !== true) {
+        const rawParent = toRaw(parent);
+        rawParent.compositeReturn = rawParent.compositeReturn ?? {};
+        rawParent.compositeReturn[connection.id] = current.id;
+        rehomeEndpoint(connection, side, rawParent);
+        current = rawParent;
+        parent = current.parentComposite;
+    }
+}
+
+/**
+ * Connects two composite interfaces by creating one connection per pair of matching sub-interfaces.
+ *
+ * @param {Object} graph - The graph the composite interfaces belong to.
+ * @param {Object} from - One composite interface (output side).
+ * @param {Object} to - The other composite interface (input side).
+ * @returns {Object|undefined} One of the created connections (the others are
+ * listed in the graph), or undefined when the connection was rejected.
+ */
+export function addCompositeConnection(graph, from, to) {
+    const rawFrom = toRaw(from);
+    const rawTo = toRaw(to);
+    const check = checkCompositeConnection(graph, rawFrom, rawTo);
+    if (!check.connectionAllowed) return undefined;
+
+    const created = [];
+    let failed = false;
+    check.pairs.forEach(([fromPort, toPort]) => {
+        if (failed) return;
+        const connection = graph.addConnection(toRaw(fromPort), toRaw(toPort));
+        if (connection === undefined) {
+            failed = true;
+            return;
+        }
+        created.push(connection);
+        const fromSide = endpointSide(connection, fromPort);
+        const toSide = endpointSide(connection, toPort);
+        if (fromSide !== undefined) settleEndpoint(connection, fromSide, fromPort);
+        if (toSide !== undefined) settleEndpoint(connection, toSide, toPort);
+    });
+    if (failed) {
+        created.forEach((c) => graph.removeConnection(c));
+        return undefined;
+    }
+    graph.refreshConnections?.();
+    return created[created.length - 1];
 }

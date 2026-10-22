@@ -52,6 +52,31 @@ export function getInterfaceCompositeType(typeName) {
 }
 
 /**
+ * Checks whether two interfaces are composite ones of the same exact type.
+ *
+ * The interfaces match when they declare exactly the same set of composite
+ * type names (and at least one), so both unroll into the same hierarchical
+ * structure of sub-interfaces.
+ *
+ * @param {Object} a - First interface-like object with an optional `type` field.
+ * @param {Object} b - Second interface-like object with an optional `type` field.
+ * @returns {boolean} True when both interfaces are composite ones of the same
+ * exact type.
+ */
+export function isSameCompositeType(a, b) {
+    const getCompositeTypeNames = (io) => {
+        if (io === undefined) return [];
+        const types = Array.isArray(io.type) ? io.type : [io.type];
+        return [...new Set(types.filter((t) => interfaceCompositeTypes.has(t)))];
+    };
+    const namesA = getCompositeTypeNames(a);
+    if (namesA.length === 0) return false;
+    const namesB = getCompositeTypeNames(b);
+    if (namesA.length !== namesB.length) return false;
+    return namesA.every((name) => namesB.includes(name));
+}
+
+/**
  * Resolves the composite definition of an interface definition.
  *
  * An interface is a composite one when one of its types names a composite

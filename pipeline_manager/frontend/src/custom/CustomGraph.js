@@ -16,6 +16,7 @@ import { useViewModel } from '@baklavajs/renderer-vue';
 import { startTransaction, commitTransaction } from '../core/History.ts';
 import { updateInterfacePosition } from './CustomNode.js';
 import { createStub } from './CustomNodeInterface.js';
+import { checkCompositeConnection } from './compositeInterfaces.js';
 import GraphTemplate from './CustomGraphTemplate.js';
 
 /* eslint-disable no-param-reassign */
@@ -173,7 +174,6 @@ export default function createPipelineManagerGraph(graph) {
                 error: 'Connections are only allowed to input or inout interfaces.',
             };
         }
-
         if (this.connections.some((c) => c.from === from && c.to === to)) {
             return { connectionAllowed: false, error: 'Duplicate connections are not allowed.' };
         }
@@ -202,6 +202,17 @@ export default function createPipelineManagerGraph(graph) {
             };
         }
 
+        if (from.isCompositeInterface?.() && to.isCompositeInterface?.()) {
+            const compositeCheck = checkCompositeConnection(this, from, to);
+            if (!compositeCheck.connectionAllowed) {
+                return compositeCheck;
+            }
+            return {
+                connectionAllowed: true,
+                dummyConnection: new DummyConnection(from, to),
+                connectionsInDanger: [],
+            };
+        }
         if (from.type && to.type) {
             const fromTypes =
                 typeof from.type === 'string' || from.type instanceof String

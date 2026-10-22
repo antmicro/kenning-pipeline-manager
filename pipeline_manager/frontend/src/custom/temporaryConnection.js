@@ -12,6 +12,7 @@
 
 import { provide, inject, ref } from 'vue';
 import { useGraph } from '@baklavajs/renderer-vue';
+import { addCompositeConnection } from './compositeInterfaces';
 
 /**
  * This enum class is based on baklavajs enum `TemporaryConnectionState`
@@ -79,8 +80,12 @@ export function provideTemporaryConnection() {
 
     const onMouseUp = (ev) => {
         if (temporaryConnection.value && hoveringOver.value && hoveredOut.value) {
-            graph.value.addConnection(
-                temporaryConnection.value.from, temporaryConnection.value.to, ev.offsetY);
+            const { from, to } = temporaryConnection.value;
+            if (from?.isCompositeInterface?.() && to?.isCompositeInterface?.()) {
+                addCompositeConnection(graph.value, from, to);
+            } else {
+                graph.value.addConnection(from, to, ev.offsetY);
+            }
         }
         temporaryConnection.value = null;
     };
