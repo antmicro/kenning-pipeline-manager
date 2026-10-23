@@ -86,8 +86,8 @@ the root element, and picks the right one for the given interface.
             :intf="intf"
             :node="node"
             :graph="graph"
-            :highlighted="highlighted"
             :picked="picked"
+            :highlighted="highlighted"
             :is-exposed="isExposed"
             :hovered="hovered"
             :display-arrow="displayArrow"
@@ -101,7 +101,7 @@ the root element, and picks the right one for the given interface.
 
 <script>
 import {
-    defineComponent, ref, computed,
+    defineComponent, ref, computed, watch,
 } from 'vue';
 import { useElementSize } from '@vueuse/core';
 import {
@@ -125,7 +125,6 @@ export default defineComponent({
         InterfaceProperty,
     },
     props: {
-        highlighted: Boolean,
         picked: Boolean,
         positioned: { default: false, required: false },
         hiddenName: { default: false, required: false },
@@ -151,7 +150,7 @@ export default defineComponent({
         const isPositionedInterface = props.intf.isPositioned();
 
         const isCompositeInterface = computed(
-            () => props.intf.isCompositeInterface?.() ?? false,
+            () => props.intf.isCompositeInterface(),
         );
 
         const { graph } = useGraph();
@@ -249,20 +248,41 @@ export default defineComponent({
             return 'down';
         });
 
+        const renderTick = ref(0);
+
         const newClasses = (intf) => ({
             // intf may be a plain bus stub, which never carries a two-sided bus
             '--input': intf.side === 'left' && intf.bus?.type !== 'twoSided' && !props.positioned,
             '--output': intf.side === 'right' && intf.bus?.type !== 'twoSided' && !props.positioned,
-            '--connected': intf.connectionCount > 0,
+            '--connected': renderTick.value >= 0 && intf.connectionCount > 0,
             '--positioned': props.positioned,
-            '--composite-sub': intf.isCompositeSub === true,
-            '--composite-expanded': intf.isCompositeInterface?.() === true
-                && intf.compositeExpanded === true,
+            '--composite-sub': intf?.isCompositeSub === true,
+            '--composite-expanded': intf.isCompositeInterface?.() && intf?.compositeExpanded === true,
         });
 
         const isExposed = computed(() =>
             props.intf.externalName !== undefined,
         );
+
+        const highlighted = ref(false);
+
+        watch(temporaryConnection ?? ref(null), () => {
+            if (temporaryConnection?.value?.from) {
+                if (props.intf.port
+                && props.intf !== temporaryConnection.value.from) {
+                    const result = graph.value.checkConnection(
+                        temporaryConnection.value.from,
+                        props.intf,
+                    );
+                    if (!result.connectionAllowed) {
+                        highlighted.value = true;
+                    }
+                }
+            } else {
+                highlighted.value = false;
+            }
+            renderTick.value += 1;
+        });
 
         return {
             arrowRotation,
@@ -285,6 +305,7 @@ export default defineComponent({
             temporaryConnection,
             graph,
             width,
+            highlighted,
         };
     },
 });

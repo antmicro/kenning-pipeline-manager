@@ -117,7 +117,6 @@ from moving or deleting the nodes.
                 positioned="true"
                 :node="node"
                 :intf="input"
-                :highlighted="isHighlighted(input)"
                 :picked="isPickedInterface(input)"
                 :style="positionedInterfaceStyle(input)"
                 :hidden-name="isInterfaceHasHiddenName(input)"
@@ -160,7 +159,6 @@ from moving or deleting the nodes.
                             v-long-press-to-right:500
                             :node="node"
                             :intf="output"
-                            :highlighted="isHighlighted(output)"
                             :picked="isPickedInterface(output)"
                             :switchSides="switchSides"
                         />
@@ -180,7 +178,6 @@ from moving or deleting the nodes.
                             v-long-press-to-right:500
                             :node="node"
                             :intf="input"
-                            :highlighted="isHighlighted(input)"
                             :picked="isPickedInterface(input)"
                             :switchSides="switchSides"
                         />
@@ -236,7 +233,6 @@ const props = defineProps({
     selected: Boolean,
     greyedOut: Boolean,
     hidden: Boolean,
-    interfaces: Array,
     ignoredInterfacesType: Array,
 });
 
@@ -1746,9 +1742,6 @@ const openContextMenuProperty = async (property) => {
         }
     }
 };
-
-const isHighlighted = (intf) =>
-    (!intf ? false : props.interfaces?.map((p) => p?.id).includes(intf?.id));
 
 const previewInterfaceStyle = computed(() => {
     const preview = menuState.previewInterface;

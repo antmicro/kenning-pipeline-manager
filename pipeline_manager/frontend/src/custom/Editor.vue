@@ -80,7 +80,6 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     :node="node"
                     :selected="selectedNodes.includes(node)"
                     :greyedOut="greyedOutNodes.includes(node)"
-                    :interfaces="highlightInterfaces"
                     :ignoredInterfacesType="[...ignoredInterfacesTypes]"
                     @openContextMenu="(open, x, y, items, ignore, onclick,
                     urls, styles, onclose) => {
@@ -236,7 +235,6 @@ export default defineComponent({
         const editorManager = EditorManager.getEditorManagerInstance();
 
         const highlightConnections = ref([]);
-        const highlightInterfaces = ref([]);
         const groups = computed(() => graph.value.groups ?? []);
         const groupsOfNode = ref({});
         const visibleGroups = ref([]);
@@ -477,43 +475,6 @@ export default defineComponent({
                 highlightConnections.value.push(connection);
             }
         };
-
-        const addInterfaceHighlight = (it) => {
-            if (!highlightInterfaces.value.includes(it)) {
-                highlightInterfaces.value.push(it);
-            }
-        };
-        const clearInterfaceHighlight = () => {
-            highlightInterfaces.value.splice(0, highlightInterfaces.value.length);
-        };
-
-        watch(temporaryConnection?.temporaryConnection, () => {
-            if (typeof (temporaryConnection ?? null) === 'undefined') return;
-            if (temporaryConnection?.temporaryConnection === null) return;
-            if (temporaryConnection?.temporaryConnection?.value?.from) {
-                for (let a = 0; a < nodes.value.length; a += 1) {
-                    const viableConnections = [
-                        ...(Object.values(nodes.value[a].outputs) || []),
-                        ...(Object.values(nodes.value[a].inputs) || []),
-                    ];
-
-                    viableConnections.forEach((n) => {
-                        if (n.port
-                        && n !== temporaryConnection.temporaryConnection.value.from) {
-                            const result = graph.value.checkConnection(
-                                temporaryConnection.temporaryConnection.value.from,
-                                n,
-                            );
-                            if (!result.connectionAllowed) {
-                                addInterfaceHighlight(n);
-                            }
-                        }
-                    });
-                }
-            } else {
-                clearInterfaceHighlight();
-            }
-        });
 
         const removeHighlight = (connection) => {
             const index = highlightConnections.value.indexOf(connection);
@@ -1279,7 +1240,6 @@ export default defineComponent({
             visibleGroups,
             updateGroupName,
             ignoredNodes,
-            highlightInterfaces,
             editorStyle,
             zoomIn: panZoom.onZoomIn,
             zoomOut: panZoom.onZoomOut,

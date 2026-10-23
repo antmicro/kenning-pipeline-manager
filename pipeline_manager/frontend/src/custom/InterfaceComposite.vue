@@ -64,7 +64,6 @@ created out of an `interfaceComposites` specification entry.
                 :key="sub.id"
                 :intf="sub"
                 :node="node"
-                :highlighted="highlighted"
                 :picked="picked"
                 :switch-sides="noop"
             />
@@ -83,7 +82,7 @@ import { getCompositePorts, toggleCompositeInterfaces } from './compositeInterfa
 const props = defineProps({
     intf: { type: Object, required: true },
     node: { type: Object, required: true },
-    highlighted: { type: Boolean, default: false },
+    highlighted: { type: Boolean, required: true },
     picked: { type: Boolean, default: false },
     isExposed: { type: Boolean, default: false },
     hovered: { type: Boolean, default: false },
