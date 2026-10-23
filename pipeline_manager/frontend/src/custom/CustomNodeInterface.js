@@ -108,8 +108,17 @@ export function withCustomNodeFunctions(Base) {
          * @param {...*} args - Arguments forwarded to the `Base` constructor.
          */
         constructor(...args) {
-            super(...args);
+            const isInterfaceState = (arg) => typeof arg === 'object'
+                && arg !== null
+                && !Array.isArray(arg)
+                && Object.getPrototypeOf(arg) === Object.prototype;
+            const state = isInterfaceState(args[args.length - 1])
+                ? args[args.length - 1] : undefined;
+            super(...(state === undefined ? args : args.slice(0, -1)));
             Object.defineProperty(this, 'side', this.interfaceSideGetterSetter());
+            if (state !== undefined) {
+                Object.assign(this, state);
+            }
         }
 
         /**

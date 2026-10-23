@@ -765,8 +765,7 @@ export class CustomNode extends Node {
                 return;
             }
 
-            const baklavaIntf = new CustomNodeInterface(key);
-            Object.assign(baklavaIntf, intf);
+            const baklavaIntf = new CustomNodeInterface(key, intf);
             if (direction === 'output') {
                 this.addOutput(key, baklavaIntf);
             } else {
@@ -975,8 +974,7 @@ export class CustomNode extends Node {
             let intf;
             if (ioState.direction === 'input' || ioState.direction === 'inout') {
                 if (!(ioName in this.inputs)) {
-                    const baklavaIntf = new CustomNodeInterface(ioName);
-                    Object.assign(baklavaIntf, ioState);
+                    const baklavaIntf = new CustomNodeInterface(ioName, ioState);
                     this.addInput(ioName, baklavaIntf);
                 }
                 intf = this.inputs[ioName];
@@ -987,8 +985,7 @@ export class CustomNode extends Node {
                 occupied[ioState.side].push(ioState.sidePosition);
             } else if (ioState.direction === 'output') {
                 if (!(ioName in this.outputs)) {
-                    const baklavaIntf = new CustomNodeInterface(ioName);
-                    Object.assign(baklavaIntf, ioState);
+                    const baklavaIntf = new CustomNodeInterface(ioName, ioState);
                     this.addOutput(ioName, baklavaIntf);
                 }
                 intf = this.outputs[ioName];
@@ -999,8 +996,7 @@ export class CustomNode extends Node {
                 occupied[ioState.side].push(ioState.sidePosition);
             } else if (ioState.direction === undefined) {
                 if (!(ioName in this.inputs)) {
-                    const baklavaIntf = new CustomNodeInterface(ioName);
-                    Object.assign(baklavaIntf, ioState);
+                    const baklavaIntf = new CustomNodeInterface(ioName, ioState);
                     this.addOutput(ioName, baklavaIntf);
                 }
                 intf = this.inputs[ioName];
@@ -1204,11 +1200,11 @@ const createViewInterface = (newInf) => {
 export const createBaklavaInterfaces = (parsedInterfaces) => {
     function createBaklavaInterface(intf) {
         return () => {
-            const baklavaIntf = new CustomNodeInterface(intf.name);
-            Object.assign(baklavaIntf, intf);
-
-            baklavaIntf.sidePositionDef = intf.sidePosition;
-            baklavaIntf.sideDef = intf.side;
+            const baklavaIntf = new CustomNodeInterface(intf.name, {
+                ...intf,
+                sidePositionDef: intf.sidePosition,
+                sideDef: intf.side,
+            });
 
             return createViewInterface(baklavaIntf);
         };

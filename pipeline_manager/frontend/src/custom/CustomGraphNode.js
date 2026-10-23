@@ -433,8 +433,7 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
                 );
 
                 if (foundIntf === undefined) {
-                    const ni = new CustomNodeInterface(nodeIntf.name);
-                    Object.assign(ni, nodeIntf);
+                    const ni = new CustomNodeInterface(nodeIntf.name, nodeIntf);
                     ir.pushGraphIdToRegistry(ni.id, this.subgraph.id);
                     ir.createSharedInterface(ni);
 
