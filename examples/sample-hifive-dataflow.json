@@ -901,7 +901,7 @@
                     "views": [
                         {
                             "name": "default",
-                            "style": "darkRenodeStyle",
+                            "style": "renodeStyle",
                             "position": {
                                 "x": 1600,
                                 "y": 300

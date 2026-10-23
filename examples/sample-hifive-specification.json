@@ -79,9 +79,6 @@
         "styles": {
             "renodeStyle": {
                 "color": "#2094F3"
-            },
-            "darkRenodeStyle": {
-                "color": "#186EB4"
             }
         },
         "movementStep": 50
