@@ -95,7 +95,7 @@ const { graph } = useGraph();
 
 const props = defineProps({
     intf: { type: CustomNodeInterface, required: true },
-    temporaryConnection: { type: Object, required: true },
+    temporaryConnection: { type: Object, required: false },
     nodeWidth: { type: Number, required: true },
     highlighted: { type: Boolean, default: false },
     picked: { type: Boolean, default: false },

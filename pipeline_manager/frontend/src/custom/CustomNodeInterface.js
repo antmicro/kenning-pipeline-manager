@@ -83,6 +83,27 @@ export function createStub(intf, offset = undefined, stubID = undefined, stubSid
 }
 
 /**
+ * Side effects that must happen whenever the `side` of an interface changes.
+ *
+ * @param {Object} intf - The interface whose side changed.
+ * @param {string} val - The new side.
+ */
+export function propagateSideEffects(intf, val) {
+    if (intf.isOneSidedBus?.()) {
+        intf.bus?.stubs?.forEach((s) => {
+            // eslint-disable-next-line no-param-reassign
+            s.side = val;
+        });
+    }
+    const propagate = (port) => {
+        // eslint-disable-next-line no-param-reassign
+        port.side = val;
+        port.compositePorts?.forEach(propagate);
+    };
+    intf.compositePorts?.forEach(propagate);
+}
+
+/**
  * @typedef {Object} CustomNodeFunctions
  */
 
@@ -284,26 +305,8 @@ export function withCustomNodeFunctions(Base) {
          *
          * @returns {Object} A property descriptor with `get`, `set`.
          */
+        // eslint-disable-next-line class-methods-use-this
         interfaceSideGetterSetter() {
-            // for twoSided, each stub can have its' own side
-            if (this.isOneSidedBus()) {
-                return {
-                    get() {
-                        // eslint-disable-next-line no-underscore-dangle
-                        return this._side;
-                    },
-                    set(val) {
-                        // eslint-disable-next-line no-underscore-dangle
-                        this._side = val;
-                        this.bus?.stubs?.forEach((s) => {
-                            // eslint-disable-next-line no-param-reassign
-                            s.side = val;
-                        });
-                    },
-                    enumerable: true,
-                    configurable: true,
-                };
-            }
             return {
                 get() {
                     // eslint-disable-next-line no-underscore-dangle
@@ -312,6 +315,7 @@ export function withCustomNodeFunctions(Base) {
                 set(val) {
                     // eslint-disable-next-line no-underscore-dangle
                     this._side = val;
+                    propagateSideEffects(this, val);
                 },
                 enumerable: true,
                 configurable: true,

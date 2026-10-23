@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { updateInterfacePosition } from '../custom/CustomNode.js';
 import {
     CustomNodeInterface,
+    propagateSideEffects,
     createStub,
 } from '../custom/CustomNodeInterface.js';
 import {
@@ -1226,10 +1227,10 @@ const createViewInterface = (newInf) => {
             if (viewInf === undefined) {
                 /* eslint-disable no-param-reassign */
                 newInf.sideDef = value;
-                return;
+            } else {
+                viewInf.side = value;
             }
-
-            viewInf.side = value;
+            propagateSideEffects(this, value);
         },
         get() {
             const viewInf = getInterfaceFromView(this);
