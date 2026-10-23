@@ -1,0 +1,127 @@
+{
+    "version":"20250623.14",
+    "nodes":[
+        {
+            "name":"Motherboard",
+            "category": "Components",
+            "twoColumn": true,
+            "interfaces":[
+                {
+                    "name":"control-bus",
+                    "type":"control",
+                    "direction":"inout",
+                    "bus": {
+                        "size": 150,
+                        "type": "twoSided"
+                    }
+                },
+                {
+                    "name":"address-bus",
+                    "type":"address",
+                    "direction":"inout",
+                    "side":"right",
+                    "bus": {
+                        "size": 100,
+                        "type": "oneSided"
+                    }
+                },
+                {
+                    "name":"data-bus",
+                    "type":"data",
+                    "direction":"inout",
+                    "side":"right",
+                    "bus": {
+                        "size": 100,
+                        "type": "oneSided"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Central Processing Unit",
+            "category":"Components",
+            "twoColumn": true,
+            "interfaces":[
+                {
+                    "name":"control-signal",
+                    "type":"control",
+                    "direction":"inout"
+                },
+                {
+                    "name":"address-signal",
+                    "type":"address",
+                    "direction":"output"
+                },
+                {
+                    "name":"data-signal",
+                    "type":"data",
+                    "direction":"inout"
+                }
+            ]
+        },
+        {
+            "name": "I/O Controller",
+            "category":"Components",
+            "twoColumn": true,
+            "interfaces":[
+                {
+                    "name":"control-signal",
+                    "type":"control",
+                    "direction":"inout"
+                },
+                {
+                    "name":"address-signal",
+                    "type":"address",
+                    "direction":"inout"
+                },
+                {
+                    "name":"data-signal",
+                    "type":"data",
+                    "direction":"inout"
+                }
+            ]
+        },
+        {
+            "name": "Memory",
+            "category":"Components",
+            "twoColumn": true,
+            "interfaces":[
+                {
+                    "name":"control-signal",
+                    "type":"control",
+                    "direction":"inout"
+                },
+                {
+                    "name":"address-signal",
+                    "type":"address",
+                    "direction":"input"
+                },
+                {
+                    "name":"data-signal",
+                    "type":"data",
+                    "direction":"inout"
+                }
+            ]
+        }
+    ],
+    "metadata":{
+        "editableTypes":false,
+        "interfaces":{
+            "address":{
+                "interfaceColor":"#FF00FF",
+                "interfaceConnectionPattern":"dashed",
+                "interfaceConnectionColor":"#FF0000"
+            },
+            "control":{
+                "interfaceConnectionPattern":"dotted",
+                "interfaceConnectionColor":"#FFFF00"
+            },
+            "data":{
+                "interfaceConnectionPattern":"dashed",
+                "interfaceConnectionColor":"#00FFFF"
+            }
+        },
+        "connectionStyle":"orthogonal",
+        "movementStep":100
+    }
+}
