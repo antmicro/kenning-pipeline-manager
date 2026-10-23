@@ -9,6 +9,7 @@ Can be used by other applications to quickly form the specification
 for the Pipeline Manager server.
 """
 
+import copy
 import json
 import logging
 import re
@@ -196,6 +197,7 @@ class SpecificationBuilder(object):
         self._includeGraphs = {}
         self._graphs = {}
         self._metadata = {}
+        self._interface_composites: Dict[str, List[Dict]] = {}
         self.warnings = 0
 
         if self.check_urls:
@@ -2098,6 +2100,19 @@ class SpecificationBuilder(object):
                     )
             else:
                 self.metadata_add_param(prop, propvalue)
+        for name, subinterfaces in otherspec.get(
+            "interfaceComposites", {}
+        ).items():
+            existing = self._interface_composites.get(name)
+            if existing is not None:
+                if existing != subinterfaces:
+                    raise SpecificationBuilderException(
+                        f"Composite interface {name} already exists"
+                        " and is different:\n\tCurrent:"
+                        f"\t{existing}\n\tNew:\t{subinterfaces}"
+                    )
+                continue
+            self._interface_composites[name] = copy.deepcopy(subinterfaces)
         newnodes = list(otherspec.get("nodes", []))
         previousmissing = set()
         missing = set()
@@ -2291,6 +2306,24 @@ class SpecificationBuilder(object):
 
         return res
 
+    def _get_interface_composites(
+        self, sort_spec: bool, stringify: bool = False
+    ) -> Union[Dict[str, List[Dict]], str]:
+        res = self._interface_composites
+        if sort_spec:
+            res = {
+                name: sorted(
+                    self._interface_composites[name],
+                    key=lambda interface: interface["name"],
+                )
+                for name in sorted(self._interface_composites)
+            }
+
+        if stringify:
+            res = json.dumps(res)
+
+        return res
+
     def _style_to_list(self, style: Style):
         return style if isinstance(style, list) else [style]
 
@@ -2314,6 +2347,10 @@ class SpecificationBuilder(object):
         """
         spec = {"version": self.version}
         spec["nodes"] = self._get_nodes(sort_spec)
+        if self._interface_composites:
+            spec["interfaceComposites"] = self._get_interface_composites(
+                sort_spec
+            )
         if self._metadata:
             spec["metadata"] = self._get_metadata(sort_spec)
         if self._graphs:
