@@ -2,7 +2,7 @@
     "graphs": [
         {
             "id": "7d3cc356-70d2-4d58-a1ab-c4dc5e924dca",
-            "name": "graph-hifive",
+            "name": "Example of a graph with styles defined for subgraph",
             "nodes": [
                 {
                     "id": "7cba0eb4-1d85-4b48-b615-049693dd0377",
