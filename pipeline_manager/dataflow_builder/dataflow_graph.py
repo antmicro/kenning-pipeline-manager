@@ -348,11 +348,15 @@ class DataflowGraph(JsonConvertible):
                 )
                 interfaces.append(_interface)
 
-        # Values for properties initialization are taken
+        # Values for properties and width/height initialization are taken
         # from the specification.
         properties = []
-        if base_node and "properties" in base_node:
-            for prop in base_node["properties"]:
+        width = DataflowGraph._DEFAULT_NODE_WIDTH
+        height = None
+        if base_node:
+            width = base_node.get("width", DataflowGraph._DEFAULT_NODE_WIDTH)
+            height = base_node.get("height", None)
+            for prop in base_node.get("properties", []):
                 _property = None
                 _property = Property(
                     name=prop["name"],
@@ -366,10 +370,8 @@ class DataflowGraph(JsonConvertible):
             "specification_builder": self._spec_builder,
             "id": node_id,
             "name": base_node["name"] if base_node else name,
-            "width": getattr(
-                base_node, "width", DataflowGraph._DEFAULT_NODE_WIDTH
-            ),
-            "height": getattr(base_node, "height", None),
+            "width": width,
+            "height": height,
             "enabled_interface_groups": [],
             "instance_name": None,
             "interfaces": interfaces,
