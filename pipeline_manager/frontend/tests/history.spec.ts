@@ -4,7 +4,7 @@ import {
     leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
     dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
     AddConnection, getYAMLEditorContent, setYAMLEditorContent, assertPropertyCount,
-    enableSubgraphRemoval, addProperty, addInterface, assertInoutCount, getGroup
+    enableSubgraphRemoval, addProperty, addInterface, assertInoutCount, getGroup, getNodeInterfaces
 } from './config.js';
 
 
@@ -22,16 +22,6 @@ async function loadWebsite(page, requiredNodeId) {
     if (requiredNodeId) {
         await page.waitForSelector(`#${requiredNodeId}`);
     }
-}
-
-function getNodeInterfaces(page: Page, name: string, side: 'input' | 'output' | 'any' = 'any'): Locator {
-    const ioClass = {
-        any: '',
-        input: '.__inputs',
-        output: '.__outputs',
-    }[side];
-
-    return getNode(page, name).locator(`.__interfaces ${ioClass}`);
 }
 
 function getContextMenuOption(page: Page, optionName: string): Locator {

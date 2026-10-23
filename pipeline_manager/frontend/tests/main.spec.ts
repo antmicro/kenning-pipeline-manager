@@ -1,5 +1,20 @@
-import { test, expect } from '@playwright/test';
-import { expectNoConsoleErrors, getNode, getUrl, loadVideoNodeId, closeTerminal, getContextMenu, loadSpecification, loadDataflow, openNodePalette } from './config.js';
+import { test, expect, TestInfo, Locator } from '@playwright/test';
+import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs/promises';
+import {
+    expectNoConsoleErrors,
+    getNode,
+    getNodeInterfaces,
+    getUrl,
+    loadVideoNodeId,
+    closeTerminal,
+    getContextMenu,
+    loadSpecification,
+    loadDataflow,
+    openNodePalette,
+    openFileChooser,
+    expectNoErrors,
+} from './config.js';
 
 test('has title', async ({ page }) => {
     await page.goto(getUrl());
@@ -114,4 +129,126 @@ test('check metadata override', async ({ page }) => {
     await openNodePalette(page);
 
     expect(newNodeType).toBeVisible();
+});
+
+test('connection is redrawn when a property above the connected interface is hidden', async ({ page }, testInfo: TestInfo) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-specification.json');
+    await expectNoErrors(page);
+
+    // The SaveFrames node has an explicit height, so hiding a property does
+    // not change the node size and the connection can only be redrawn by the
+    // interface "hidden" watcher.
+    const framesInterfaceId = uuidv4();
+    const colorInterfaceId = uuidv4();
+    const dataflow = {
+        graphs: [
+            {
+                id: uuidv4(),
+                nodes: [
+                    {
+                        name: 'LoadVideo',
+                        id: uuidv4(),
+                        position: { x: 100, y: 100 },
+                        properties: [
+                            { name: 'filename', id: uuidv4(), value: '' },
+                        ],
+                        interfaces: [
+                            {
+                                name: 'frames',
+                                id: framesInterfaceId,
+                                direction: 'output',
+                                side: 'right',
+                                sidePosition: 0,
+                            },
+                        ],
+                    },
+                    {
+                        name: 'SaveFrames',
+                        id: uuidv4(),
+                        position: { x: 400, y: 100 },
+                        height: 500,
+                        properties: [
+                            { name: 'Folder name', id: uuidv4(), value: '' },
+                            { name: 'Name prefix', id: uuidv4(), value: '' },
+                        ],
+                        interfaces: [
+                            {
+                                name: 'color',
+                                id: colorInterfaceId,
+                                direction: 'input',
+                                side: 'left',
+                                sidePosition: 0,
+                            },
+                            {
+                                name: 'binary',
+                                id: uuidv4(),
+                                direction: 'input',
+                                side: 'left',
+                                sidePosition: 1,
+                            },
+                        ],
+                    },
+                ],
+                connections: [
+                    { from: framesInterfaceId, to: colorInterfaceId },
+                ],
+            },
+        ],
+    };
+    const dataflowPath = testInfo.outputPath('hidden-property-dataflow.json');
+    await fs.writeFile(dataflowPath, JSON.stringify(dataflow, null, 4));
+
+    const fileChooser = await openFileChooser(page, 'dataflow');
+    await fileChooser.setFiles(dataflowPath);
+
+    const saveFrames = getNode(page, 'SaveFrames');
+    await expect(saveFrames).toBeVisible();
+    await expect(page.locator('.custom-connections-container > g')).toHaveCount(1);
+
+    const targetInterface = getNodeInterfaces(page, 'SaveFrames', 'input').locator('.__port').first();
+
+    const getPortPosition = async (port: Locator) =>
+        port.evaluate((el) => {
+            const node = el.closest('.baklava-node');
+            const interfaceEl = el.closest('.baklava-node-interface');
+            return {
+                x: node.offsetLeft + interfaceEl.offsetLeft + el.offsetLeft + el.clientWidth / 2,
+                y: node.offsetTop + interfaceEl.offsetTop + el.offsetTop + el.clientHeight / 2,
+            };
+        });
+
+    const getConnectionOffset = async () => {
+        const d = await page
+            .locator('.custom-connections-container > g')
+            .first()
+            .locator('path')
+            .first()
+            .getAttribute('d');
+        const numbers = d.match(/-?\d+(\.\d+)?/g).map(Number);
+        const endpoint = { x: numbers[numbers.length - 2], y: numbers[numbers.length - 1] };
+        const portPosition = await getPortPosition(targetInterface);
+        return Math.abs(endpoint.y - portPosition.y);
+    };
+
+    // The connection ends at the port's position.
+    await expect
+        .poll(getConnectionOffset, {
+            timeout: 10_000,
+            message: 'The connection does not end at the port position before hiding the property.',
+        })
+        .toBeLessThan(5);
+
+    // Hide the property above the connected interface.
+    await saveFrames.locator('.__properties .__label', { hasText: 'Folder name' }).click({ button: 'right' });
+    await getContextMenu(page).getByText('Hide', { exact: true }).click();
+    await expect(saveFrames.locator('.__properties > div')).toHaveCount(1);
+
+    // The interface moved up, so the connection has to be redrawn to follow it.
+    await expect
+        .poll(getConnectionOffset, {
+            timeout: 10_000,
+            message: 'The connection was not redrawn after the property was hidden.',
+        })
+        .toBeLessThan(5);
 });

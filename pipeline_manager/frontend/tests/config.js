@@ -274,8 +274,8 @@ export async function enterSubgraph(node, page) {
     const contextMenuOption = getContextMenu(page).getByText('Go to graph');
     if (!await contextMenuOption.isVisible()) {
         const title = await getNodeTitle(node);
-        expect(contextMenuOption).toBeVisible();
         await title.click({ button: 'right' });
+        await expect(contextMenuOption).toBeVisible();
     }
     await contextMenuOption.click();
 }
@@ -552,6 +552,24 @@ export async function assertPropertyCount(node, count) {
         .locator('.__properties > div')
         .count();
     expect(props).toBe(count);
+}
+
+/**
+ * Get the interface section of a given node.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @param {string} name - Name of the node.
+ * @param {'input' | 'output' | 'any'} side - Interface side.
+ * @returns {import('@playwright/test').Locator} A locator pointing to node interfaces
+ */
+export function getNodeInterfaces(page, name, side = 'any') {
+    const ioClass = {
+        any: '',
+        input: '.__inputs',
+        output: '.__outputs',
+    }[side];
+
+    return getNode(page, name).locator(`.__interfaces ${ioClass}`);
 }
 
 /**

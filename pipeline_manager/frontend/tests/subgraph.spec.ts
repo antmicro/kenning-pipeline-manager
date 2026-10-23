@@ -5,6 +5,7 @@ import {
     waitForSubgraph,getYAML,deleteProperty,addProperty,addInterface,enterSubgraph,
     leaveSubgraph,getNode,deleteNode, getUrl, openFileChooser, enableEditingNodes,
     enableNavigationBar, addNode, getContextMenu, AddConnection,
+    assertPropertyCount,
 } from './config.js';
 
 import os from 'os';
@@ -620,4 +621,47 @@ test('test connecting to an inout interface of a graph node with its graph in th
     await expect(connections, {
         message: 'Connecting to an inout interface of a graph node failed.',
     }).toHaveCount(4);
+});
+
+async function toggleShowHiddenProperties(page: Page) {
+    const checkbox = page.getByText('Show hidden properties', { exact: true });
+    expect(checkbox).toBeVisible();
+    await checkbox.dispatchEvent('click');
+}
+
+test('test exposed hidden property keeps hidden attribute', async ({ page }) => {
+    await page.goto(getUrl());
+    await loadSpecification(page, 'sample-subgraph-specification.json');
+
+    await addNode(page, 'Second Category', 'Test subgraph #2', 400, 400);
+    const subgraphNode = getNode(page, 'Test subgraph #2');
+
+    await assertPropertyCount(subgraphNode, 1);
+
+    await enterSubgraph(subgraphNode, page);
+    await waitForSubgraph(page, 'Test subgraph #2');
+
+    const property = getNode(page, 'Test node #2').locator('.__properties .__label');
+
+    // Hide the property, then privatize and expose it again. The exposed
+    // property on the graph node has to keep the hidden attribute.
+    await property.click({ button: 'right' });
+    await getContextMenu(page).getByText('Hide', { exact: true }).click();
+
+    // The hidden property is not rendered, so it has to be shown to interact with it.
+    await toggleShowHiddenProperties(page);
+
+    await property.click({ button: 'right' });
+    await getContextMenu(page).getByText('Privatize Property', { exact: true }).click();
+
+    await property.click({ button: 'right' });
+    await getContextMenu(page).getByText('Expose Property', { exact: true }).click();
+
+    await leaveSubgraph(page);
+    await expect(subgraphNode).toBeVisible();
+
+    // The exposed property exists on the graph node but it's hidden.
+    await assertPropertyCount(subgraphNode, 1);
+    await toggleShowHiddenProperties(page);
+    await assertPropertyCount(subgraphNode, 0);
 });
