@@ -136,6 +136,11 @@ Additionally, these optional attributes may be used:
       * `id` - id of the stub used to identify it when creating connections just like a normal interface
       * `offset` - position of the stub within the parent bus
       * `side` - (optional) used when parent bus is two-sided.
+* `composite` - if the interface has a [composite type](specification-format.md#interface-composites) and any connection to it's leaves exist, the leaves
+  will be saved in a `composite`. This object will hold the (possibly) recursive structure of the composite interface. Each entry has:
+  * `name` - name of the subtype.
+  * `id` - id assigned to this endpoint.
+  * `composite` - (optional) for any further subtypes.
 
 
 Example of graph interfaces:

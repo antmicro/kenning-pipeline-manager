@@ -510,6 +510,8 @@ Every interface object has following properties:
   The first type in the list is a "base" type - it is used to color the interface based on [Interface style](#interface-style).
   If only one type between two interfaces is matching, the connection style matches the one defined for this particular type.
   Otherwise, if multiple types are matching, a white solid line for connection is rendered.
+  Type may also be a [composite](#interface-composites). When a type is listed in `interfaceComposites` list it will be reprenseted
+  in the editor as a togglable group.
 * `direction` (optional) - type of the interface in terms of direction, it can be:
 
     * `input` - interface accepts input data,
@@ -548,6 +550,7 @@ Every interface object has following properties:
 * `bus` (optional) - interfaces can be changed to represent a bus:
     * `bus.type` - sets the interface to behave like a bus. Can be either set to `"oneSided"` or `"twoSided"` resulting in bigger or smaller variation of the bus.
     * `bus.size` - sets the size of the bus in pixels.
+
 
 ```{note}
 Only interfaces of the same `type` can be connected together.
@@ -732,6 +735,45 @@ For example two interface groups can be defined that consist of common interface
 ```
 
 The interface group called `1` consists of three ranges of interfaces: `1[1]`, interfaces `1[3], 1[4], ..., 1[14]` and `1[35], 1[36], ..., 1[47]`.
+
+### Interface composites
+
+Is a mechanism of composing several interfaces into one master interface. Each composite is defined
+only by a list of it's subtypes paired with displayed names.
+It differs from [Interface Groups](#interface-groups) by the fact that many types may be represented by one composite.
+Additionally composite may include other composite types recursively.
+For example defining an `axi` connector:
+
+```json
+"interfaceComposites": {
+    "axi": [
+        {
+            "name": "AW",
+            "type": "aw"
+        },
+        {
+            "name": "W",
+            "type": "signal"
+        }
+    ]
+}
+```
+
+Then if you would like to also define sub-group for address channels `AW`:
+```json
+"aw": [
+    {
+        "name": "ID",
+        "type": "awid"
+    },
+    {
+        "name": "ADDR",
+        "type": "awaddr"
+    }
+]
+```
+
+And every type will be recursively resolved.
 
 ### Included Graphs
 
