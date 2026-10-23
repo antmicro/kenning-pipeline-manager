@@ -48,6 +48,15 @@ def builder() -> GraphBuilder:
     )
 
 
+@pytest.fixture
+def builder_with_shape() -> GraphBuilder:
+    """Provide a graph builder from sample-with-shape-specification.json."""
+    return GraphBuilder(
+        specification="examples/sample-with-shape-specification.json",
+        specification_version=DEFAULT_SPECIFICATION_VERSION,
+    )
+
+
 def test_creating_empty_graph(builder):
     """Test if an empty graph has a proper format after conversion to JSON."""
     graph = builder.create_graph()
@@ -210,6 +219,37 @@ def single_connection_graph(
     }
 
     return builder, graph, expected
+
+
+def test_node_width_height_instantiation(builder_with_shape):
+    """Test if an node is added correctly to a dataflow graph."""
+    graph = builder_with_shape.create_graph()
+    node = graph.create_node(
+        name="SmallBox",
+        position=Vector2(0, 0),
+        two_column=False,
+    )
+
+    assert graph.to_json(as_str=False) == {
+        "id": f"{graph._id}",
+        "nodes": [
+            {
+                "name": "SmallBox",
+                "id": node.id,
+                "position": {
+                    "x": 0,
+                    "y": 0,
+                },
+                "width": 30,
+                "height": 30,
+                "twoColumn": False,
+                "interfaces": [],
+                "properties": [],
+                "enabledInterfaceGroups": [],
+            },
+        ],
+        "connections": [],
+    }
 
 
 @pytest.fixture
