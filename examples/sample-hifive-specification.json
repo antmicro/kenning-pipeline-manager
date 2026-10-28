@@ -8,6 +8,7 @@
             "hw-icon": "https://openhardware.antmicro.com",
             "renodepedia": "https://renodepedia.renode.io/board_images/"
         },
+        "hideAnchors": true,
         "twoColumn": true,
         "urls": {
             "coverage": {
@@ -78,7 +79,44 @@
         },
         "styles": {
             "renodeStyle": {
-                "color": "#2094F3"
+                "color": "#2e303e",
+                "interfaces": {
+                    "*": {
+                        "--baklava-control-color-primary": "#96979e"
+                    }
+                },
+                "properties": {
+                    "multiline": {
+                        "--baklava-control-color-hover": "#2e303e44",
+                        "--baklava-control-color-background": "transparent",
+                        "--baklava-control-color-foreground": "#FFFFFF",
+                        "--kpm-property-display-label": "none"
+                    },
+                    "*": {
+                        "display": "none"
+                    }
+                },
+                "nodes": {
+                    "title": {
+                        "justify-content": "center",
+                        "margin-bottom": "calc(var(--kpm-node-title-height) * -1)",
+                        "padding": "0 5em",
+                        "color": "#FFFFFF",
+                        "background-color": "transparent"
+                    },
+                    "content": {
+                        "border": "2px",
+                        "border-style": "solid",
+                        "border-color": "#FFFFFF",
+                        "border-radius": "10px"
+                    },
+                    "body": {
+                        "min-width": "150px",
+                        "width": "auto",
+                        "--baklava-node-color-background": "#2e303e",
+                        "background-color": "#2e303e"
+                    }
+                }
             }
         },
         "movementStep": 50
