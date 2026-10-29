@@ -101,6 +101,7 @@ export default function createPipelineManagerGraph(graph) {
             color,
             name,
             nodes: nodeIds,
+            padding: 0,
         });
         this.events.addGroup.emit(this.groups[this.groups.length - 1]);
         return this.groups[this.groups.length - 1];

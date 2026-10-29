@@ -49,6 +49,7 @@ export default defineComponent({
         max: { type: Object, required: true },
         visible: { type: Boolean, default: true },
         color: { type: String, default: '#00aaff' },
+        padding: { type: Object, required: true },
     },
 
     emits: ['update:modelValue'],
@@ -80,19 +81,29 @@ export default defineComponent({
             localName.value = props.modelValue;
         };
 
+        const minWithPadding = computed(() => ({
+            x: (props.min?.x ?? 0) - (props.padding?.left ?? 0),
+            y: (props.min?.y ?? 0) - (props.padding?.top ?? 0),
+        }));
+
+        const maxWithPadding = computed(() => ({
+            x: (props.max?.x ?? 0) + (props.padding?.right ?? 0),
+            y: (props.max?.y ?? 0) + (props.padding?.bottom ?? 0),
+        }));
+
         const width = computed(() =>
-            Math.max(0, (props.max?.x ?? 0) - (props.min?.x ?? 0)),
+            Math.max(0, maxWithPadding.value.x - minWithPadding.value.x),
         );
 
         const height = computed(() =>
-            Math.max(0, (props.max?.y ?? 0) - (props.min?.y ?? 0)),
+            Math.max(0, maxWithPadding.value.y - minWithPadding.value.y),
         );
 
         const styles = computed(() => ({
             position: 'absolute',
             visibility: props.visible ? 'visible' : 'hidden',
-            top: `${props.min?.y ?? 0}px`,
-            left: `${props.min?.x ?? 0}px`,
+            top: `${minWithPadding.value.y}px`,
+            left: `${minWithPadding.value.x}px`,
             width: `${width.value}px`,
             height: `${height.value}px`,
             border: `10px solid ${props.color}`,

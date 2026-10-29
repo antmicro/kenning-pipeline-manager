@@ -61,6 +61,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     :min="group.min"
                     :max="group.max"
                     :color="group.color"
+                    :padding="group.padding"
                 />
             </div>
 
