@@ -355,7 +355,7 @@ export async function addSubgraph(node, page) {
     await title.click({ button: 'right' });
     const contextMenuOption = getContextMenu(page).getByText('Add subgraph');
     await contextMenuOption.click({ force: true });
-    expect(await title.locator('.__subgraph-icon')).toHaveCount(1);
+    await expect(title.locator('.__subgraph-icon')).toHaveCount(1);
 }
 
 /**
