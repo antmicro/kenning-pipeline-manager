@@ -72,11 +72,13 @@ myst_substitutions = {
 
 pipeline_manager_assets_directory = str(Path("./_static").absolute())
 
-EXCLUDED_EXAMPLES = ["sample-huge"]
-CUSTOM_DATAFLOW_SPECS_PAIRS = {
-    "sample-shape-add-interface": "sample-with-shape"
-}
-EXAMPLES_ADDITIONAL_PARAMS = {"sample-network": [":center_at_top:"]}
+EXCLUDED_EXAMPLES = [
+    "sample-huge",
+    "sample-inheritance",
+    "sample-loopback",
+    "sample-multiple-io",
+]
+EXAMPLES_ADDITIONAL_PARAMS = {"network": [":center_at_top:"]}
 exampleentries = [
     "To see the work of the frontend check one of the below examples:\n"
 ]  # noqa: E501
@@ -84,8 +86,6 @@ for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
     graphname = graph.stem.replace("-dataflow", "")
     if graphname in EXCLUDED_EXAMPLES:
         continue
-    if graphname in CUSTOM_DATAFLOW_SPECS_PAIRS.keys():
-        graphname = CUSTOM_DATAFLOW_SPECS_PAIRS[graphname]
     spec_filename = f"{graphname}-specification.json"
     spec = graph.parent / f"{graphname}-specification.json"
     title = graph.stem.replace("-dataflow", "")
