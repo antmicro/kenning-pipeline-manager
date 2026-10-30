@@ -82,5 +82,34 @@
         "npm": ">=10.8.0"
     },
     "type": "module",
-    "main": "index.js"
+    "main": "index.js",
+    "overrides": {
+        "@vue/cli-plugin-router": {
+            "shell-quote": "1.9.0"
+        },
+        "@vue/cli-plugin-typescript": {
+            "shell-quote": "1.9.0"
+        },
+        "@vue/cli-plugin-vuex": {
+            "shell-quote": "1.9.0"
+        },
+        "@vue/cli-service": {
+            "shell-quote": "1.9.0"
+        },
+        "@vue/cli-shared-utils": {
+            "shell-quote": "1.9.0"
+        },
+        "launch-editor": {
+            "shell-quote": "1.9.0"
+        },
+        "launch-editor-middleware": {
+            "shell-quote": "1.9.0"
+        },
+        "shell-quote": {
+            "shell-quote": "1.9.0"
+        },
+        "webpack-dev-server": {
+            "shell-quote": "1.9.0"
+        }
+    }
 }
