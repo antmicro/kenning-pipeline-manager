@@ -1026,7 +1026,14 @@ const getRows = (sockets) => {
     return rows;
 };
 
-const fitTitle = computed(() => viewModel.value.editor.getNodeStyleFitTitle(props.node.type));
+const fitTitle = computed(() => viewModel.value.editor.getNodeStyleFitTitle(props.node));
+
+const getTitlePadding = computed(() => viewModel.value.editor
+    .getNodeStyleTitlePadding(props.node) ?? {
+    x: 0,
+    y: 0,
+},
+);
 
 const path = viewModel.value.editor.getNodeIconPath(props.node.type);
 const iconPath = viewModel.value.cache[`./${path}`] ?? path;
@@ -1055,7 +1062,7 @@ const minimalWidth = computed(() => {
         const paddingLeft = Number.parseInt(titleStyle?.paddingLeft ?? 0, 10);
         const paddingRight = Number.parseInt(titleStyle?.paddingRight ?? 0, 10);
 
-        return titleSize.value.width + paddingLeft + paddingRight;
+        return titleSize.value.width + paddingLeft + paddingRight + getTitlePadding.value.x;
     };
     const titleWidth = getTitleSize();
 
@@ -1082,13 +1089,27 @@ const minimalWidth = computed(() => {
         return Math.max(nodeRequiredSize, titleWidth);
     }
     const nodeRequiredSize = Math.max(LeftInterfaceSize, RightInterfaceSize);
-
     return Math.max(nodeRequiredSize, titleWidth);
+});
+
+const minimalHeight = computed(() => {
+    if (props.node.height > 0) {
+        return props.node.height;
+    }
+    if (titleTextRef.value === null || titleRef.value === null) {
+        return 0;
+    }
+    const titleStyle = getComputedStyle(titleRef.value);
+    const paddingTop = Number.parseInt(titleStyle?.paddingTop ?? 0, 10);
+    const paddingBottom = Number.parseInt(titleStyle?.paddingBottom ?? 0, 10);
+
+    return titleSize.value.height + paddingTop + paddingBottom + getTitlePadding.value.y;
 });
 
 const width = computed(() => {
     if (props.node.width !== undefined) {
-        if (props.node.width < minimalWidth.value && customShape.value === undefined) {
+        if (props.node.width < minimalWidth.value &&
+            (customShape.value === undefined || fitTitle.value)) {
             return `${minimalWidth.value}px`;
         }
         return `${props.node.width}px`;
@@ -1101,7 +1122,7 @@ const width = computed(() => {
 
 const height = computed(() => {
     if (props.node.height !== undefined) {
-        return `${props.node.height}px`;
+        return `${minimalHeight.value}px`;
     }
     return 'auto';
 });
@@ -1124,8 +1145,8 @@ const customShapeStyle = computed(() => {
         return {};
     }
     return {
-        width: props.node.width,
-        height: props.node.height,
+        width: width.value,
+        height: height.value,
         display: 'block',
         objectFit: 'fill',
     };
