@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import errno
 import os
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
+from threading import Thread
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -19,11 +21,13 @@ from docutils.parsers.rst.directives import flag, path, unchanged
 from sphinx.addnodes import download_reference
 from sphinx.application import Sphinx
 from sphinx.errors import ExtensionError
+from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective
 from sphinx.writers.html5 import HTML5Translator
 
 KPM_PATH = "_static/pipeline-manager.html"
 DEFAULT_ALT_TEXT = "An interactive KPM frame, where you can explore the block design for this section, is available here in the HTML version of this documentation."  # noqa: E501
+LOGGER = logging.getLogger(__name__)
 
 
 class KPMNode(nodes.container):
@@ -211,11 +215,9 @@ class KPMDirective(SphinxDirective):
         ) as file:
             graph_path = Path(file.name).resolve()
 
-        # Render image
+        # Render image by loading spec and dataflow via URL params
         out_html = (workspace_dir / "frontend/dist/index.html").resolve()
         try:
-            from http.server import HTTPServer, SimpleHTTPRequestHandler
-            from threading import Thread
 
             class Handler(SimpleHTTPRequestHandler):
                 def __init__(self, *args, **kwargs):
@@ -223,17 +225,34 @@ class KPMDirective(SphinxDirective):
                         *args, directory=out_html.parent, **kwargs
                     )
 
-            httpd = HTTPServer(("localhost", 8080), Handler)
+            port = 1024
+            found = False
+            while not found:
+                # Find first unused port
+                if port > 65535:
+                    break
+                try:
+                    httpd = HTTPServer(("localhost", port), Handler)
+                except OSError:
+                    port += 1
+                    continue
+                found = True
+            if not found:
+                raise ExtensionError("Cannot find available port")
+            LOGGER.info(f"Serving Pipeline Manager on port {port}")
 
             def serve_forever(httpd):
-                with httpd:  # to make sure httpd.server_close is called
+                # Ensure httpd.server_close is called
+                with httpd:
                     try:
                         httpd.serve_forever()
-                    except Exception:
+                    except Exception as e:
+                        LOGGER.warn(
+                            f"Exception when serving Pipeline Manager: {e}"
+                        )
                         return
 
-            thread = Thread(target=serve_forever, args=(httpd,))
-            thread.setDaemon(True)
+            thread = Thread(target=serve_forever, daemon=True, args=(httpd,))
             thread.start()
 
             def symlink_force(target, link_name):
@@ -248,7 +267,7 @@ class KPMDirective(SphinxDirective):
             symlink_force(dataflow_path, out_html.parent / dataflow_path.name)
 
             html_to_png(
-                "localhost:8080",
+                f"localhost:{port}",
                 graph_path,
                 spec_path.name,
                 dataflow_path.name,
