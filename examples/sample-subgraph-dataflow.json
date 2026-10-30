@@ -3,7 +3,7 @@
     "graphs": [
         {
             "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
-            "name": "Example of a graph with graph nodes",
+            "name": "Graph with nested subgraphs",
             "nodes": [
                 {
                     "id": "79a96644-9ff1-47e4-8226-335614efd103",

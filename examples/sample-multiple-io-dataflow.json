@@ -2,7 +2,7 @@
     "graphs": [
         {
             "id": "79040424-1464-40a0-ba97-cc0ba6a1944f",
-            "name": "Example of Multiple Input-Output node",
+            "name": "Graph with a node featuring multiple input-output interfaces",
             "nodes": [
                 {
                     "id": "8011d349-622d-459d-b8f1-90fae362f50b",

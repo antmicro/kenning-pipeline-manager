@@ -2,7 +2,7 @@
     "graphs": [
         {
             "id": "cc9e70c2-2357-4368-b36c-f1a8058a5a74",
-            "name": "Example of a graph with custom shape node",
+            "name": "Graph with custom shape nodes",
             "nodes": [
                 {
                     "id": "b17d5150-c159-471e-a1e7-a84f7c5eadc1",

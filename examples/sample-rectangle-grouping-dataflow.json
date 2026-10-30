@@ -2,7 +2,7 @@
     "graphs": [
         {
             "id": "70caab08-6e11-4fbd-9bfa-4250c35d6351",
-            "name": "Example of the graph with rectangle groupings",
+            "name": "Graph with rectangular node groups",
             "nodes": [
                 {
                     "id": "959695f6-3d4c-4455-913f-e72913ef7dc3",

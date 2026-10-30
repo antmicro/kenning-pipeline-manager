@@ -1,7 +1,7 @@
 {
     "graphs": [
         {
-            "name": "Example of the graph with top-level interfaces exposed",
+            "name": "Graph with exposed interfaces",
             "id": "0f3b7564-3294-42bf-ab1d-d5d3d80f015d",
             "nodes": [
                 {

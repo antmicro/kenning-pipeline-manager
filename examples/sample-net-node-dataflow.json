@@ -2,7 +2,7 @@
     "graphs": [
         {
             "id": "74ab20f3-b775-43a7-beda-08b30657afbe",
-            "name": "Example of a graph with port like nodes",
+            "name": "Graph with port-like nodes",
             "nodes": [
                 {
                     "id": "d738ab91-7958-41b2-b5e8-153b2c2f8867",

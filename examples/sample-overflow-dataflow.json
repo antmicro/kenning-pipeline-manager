@@ -2,7 +2,7 @@
     "graphs": [
         {
             "id": "11b05eac-c230-4b9f-b692-15e325ed0e86",
-            "name": "Example of a graph with different node width",
+            "name": "Graph with different node widths",
             "nodes": [
                 {
                     "id": "5fc6a994-401a-45e8-9e0e-860f6b9482b7",
