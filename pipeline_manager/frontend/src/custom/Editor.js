@@ -1467,15 +1467,15 @@ export default class PipelineManagerEditor extends Editor {
         });
 
         const state = this.graph.save();
+        const ignoredNodeSet = this.getIgnoredNodes(this.graph.id);
+        const ignoredInterfacesSet = this.getIgnoredInterfaces(this.graph.id);
+
+        state.nodes = state.nodes.filter((n) => !ignoredNodeSet.has(nodeToLayers.get(n.name)));
         if (resetLocations) {
             state.nodes.forEach((node) => {
                 node.position = undefined;
             });
         }
-        const ignoredNodeSet = this.getIgnoredNodes(this.graph.id);
-        const ignoredInterfacesSet = this.getIgnoredInterfaces(this.graph.id);
-
-        state.nodes = state.nodes.filter((n) => !ignoredNodeSet.has(nodeToLayers.get(n.name)));
         state.nodes.forEach((n) => {
             n.interfaces = n.interfaces.filter((inf) => !ignoredInterfacesSet
                 .has(infToType.get(inf.name)));
@@ -1484,6 +1484,8 @@ export default class PipelineManagerEditor extends Editor {
         this.layoutManager.registerGraph(state);
         const updatedGraph = await this.layoutManager.computeLayout(state);
         this.updateNodesPosition(updatedGraph);
+        this.graph.nodes.filter((n) => !n.position)
+            .forEach((n) => { n.position = { x: 0, y: 0 }; });
 
         if (swapInterfaces) {
             await this.swapInterfaces();
