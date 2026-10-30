@@ -80,8 +80,8 @@ EXCLUDED_EXAMPLES = [
 ]
 EXAMPLES_ADDITIONAL_PARAMS = {"network": [":center_at_top:"]}
 exampleentries = [
-    "To see the work of the frontend check one of the below examples:\n"
-]  # noqa: E501
+    "Take a look at the examples below which demonstrate different Pipeline Manager features and use cases:\n"  # noqa: E501
+]
 for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
     graphname = graph.stem.replace("-dataflow", "")
     if graphname in EXCLUDED_EXAMPLES:
