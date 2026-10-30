@@ -61,7 +61,7 @@ Hovered connections are calculated and rendered with an appropriate `isHighlight
                     :min="group.min"
                     :max="group.max"
                     :color="group.color"
-                    :padding="group.padding"
+                    :padding="group?.padding ?? {}"
                 />
             </div>
 
@@ -238,6 +238,7 @@ export default defineComponent({
         const highlightConnections = ref([]);
         const groups = computed(() => graph.value.groups ?? []);
         const groupsOfNode = ref({});
+        const intersectedGroups = ref({});
         const visibleGroups = ref([]);
         const draggedNode = ref(null);
 
@@ -622,6 +623,29 @@ export default defineComponent({
                 max: { x: maxX + RECTANGLE_GROUP_PADDING, y: maxY + RECTANGLE_GROUP_PADDING },
             };
         }
+
+        const checkGroupIntersection = (groupA, groupB) => {
+            if (groupA.id === groupB.id) {
+                return;
+            }
+
+            if (groupA.min.x - groupA.padding.left === groupB.min.x - groupB.padding.left) {
+                groupB.padding.left += 40;
+            }
+
+            if (groupA.min.y - groupA.padding.top === groupB.min.y - groupB.padding.top) {
+                groupB.padding.top += 40;
+            }
+
+            if (groupA.max.x + groupA.padding.right === groupB.max.x + groupB.padding.right) {
+                groupB.padding.right += 40;
+            }
+
+            if (groupA.max.y + groupA.padding.bottom === groupB.max.y + groupB.padding.bottom) {
+                groupB.padding.bottom += 40;
+            }
+        };
+
         const updateGroupsOf = (nodeId) => {
             if (!(nodeId in groupsOfNode.value)) {
                 groupsOfNode.value[nodeId] = [];
@@ -639,8 +663,20 @@ export default defineComponent({
                 updatedNodes = [...updatedNodes, ...group.nodes];
             });
 
+            // Update padding between nodes
+            groupsOfNode.value[nodeId].forEach((group) => {
+                const groupsToUpdate = intersectedGroups.value[group.id];
+
+                if (groupsToUpdate !== undefined) {
+                    groupsToUpdate.forEach((g) => {
+                        checkGroupIntersection(group, g);
+                    });
+                }
+            });
+
             return updatedNodes;
         };
+
         const updateVisibleGroups = useThrottleFn(() => {
             groupsOfNode.value = {};
             visibleGroups.value = groups.value.map((group) => {
@@ -663,6 +699,43 @@ export default defineComponent({
                     }
                     groupsOfNode.value[id].push(group);
                 });
+            });
+            intersectedGroups.value = {};
+            // Collect groups and their inner groups
+            visibleGroups.value.reverse().forEach((group) => {
+                if (intersectedGroups.value[group.id] === undefined) {
+                    intersectedGroups.value[group.id] = new Set([]);
+                }
+                group.nodes.forEach((n) => {
+                    const innerGroups = groupsOfNode.value[n];
+                    if (innerGroups !== undefined && innerGroups.length > 1) {
+                        innerGroups.filter((g) => g.id !== group.id).forEach((g) => {
+                            intersectedGroups.value[group.id].add(g);
+                        });
+                    }
+                });
+            });
+
+            // Reset paddings
+            visibleGroups.value.forEach((group) => {
+                group.padding = {
+                    left: 0,
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                };
+            });
+
+            // Update groups padding, detected collisions between
+            // inner groups
+            visibleGroups.value.forEach((group) => {
+                const groupsToUpdate = intersectedGroups.value[group.id];
+
+                if (groupsToUpdate !== undefined && groupsToUpdate.size !== 0) {
+                    groupsToUpdate.forEach((g) => {
+                        checkGroupIntersection(group, g);
+                    });
+                }
             });
         }, 50); // 20fps
 
