@@ -10,7 +10,7 @@
                         "x": 100,
                         "y": 600
                     },
-                    "width": 298,
+                    "width": 0,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -33,7 +33,7 @@
                     "views": [],
                     "name": "Label",
                     "instanceName": "Input 1",
-                    "height": 98
+                    "height": 0
                 },
                 {
                     "id": "f79f4457-9fa8-49a4-a946-9325a49407b4",
@@ -71,7 +71,7 @@
                         "x": 1100,
                         "y": 800
                     },
-                    "width": 298,
+                    "width": 0,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -94,7 +94,7 @@
                     "views": [],
                     "name": "Label",
                     "instanceName": "Output",
-                    "height": 98
+                    "height": 0
                 },
                 {
                     "id": "a8523ccf-429b-47f4-9f11-fe494af2b1b0",
@@ -102,7 +102,7 @@
                         "x": 100,
                         "y": 900
                     },
-                    "width": 298,
+                    "width": 0,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -125,7 +125,7 @@
                     "views": [],
                     "name": "Label",
                     "instanceName": "Input 2",
-                    "height": 98
+                    "height": 0
                 },
                 {
                     "id": "c122cc6b-7bbc-4d5d-bf8a-f7ee7511d85d",
@@ -133,7 +133,7 @@
                         "x": 100,
                         "y": 1200
                     },
-                    "width": 298,
+                    "width": 0,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -156,7 +156,7 @@
                     "views": [],
                     "name": "Label",
                     "instanceName": "Output",
-                    "height": 98
+                    "height": 0
                 },
                 {
                     "id": "f5036abc-d359-4f0d-9cfe-51c2aa5e58c1",
@@ -164,7 +164,7 @@
                         "x": 1100,
                         "y": 1200
                     },
-                    "width": 298,
+                    "width": 0,
                     "twoColumn": true,
                     "interfaces": [
                         {
@@ -187,7 +187,7 @@
                     "views": [],
                     "name": "Label",
                     "instanceName": "!Output",
-                    "height": 98
+                    "height": 0
                 },
                 {
                     "id": "de39d7e5-3837-4616-a2cb-776322cb6bdd",

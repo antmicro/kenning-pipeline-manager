@@ -156,8 +156,7 @@
                 {"name": "a", "direction": "inout", "side": "left"},
                 {"name": "b", "direction": "inout", "side": "right"}
             ],
-            "width": 298,
-            "height": 98,
+            "height": 50,
             "style": "LabelStyle"
         },
         {
@@ -295,17 +294,18 @@
                 "shape": "svgs/label.svg",
                 "title":{
                     "fit": true,
+                    "hideSubTitle": true,
                     "position": {
                         "x": 25,
                         "y": 25
                     },
                     "offset": {
-                        "x": 25,
+                        "x": 0,
                         "y": 5
                     },
                     "padding": {
-                        "x": 50,
-                        "y": 10
+                        "x": 100,
+                        "y": 25
                     }
                 },
                 "positions": {
