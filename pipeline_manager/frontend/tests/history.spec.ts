@@ -50,7 +50,7 @@ test('test history by removing subgraph', async ({ page }) => {
     // now subgraph node should have no exposed outputs
     await assertOutputCount(subgraphNode, 0);
 
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
 
     // Undo subgraph removal
     await page.keyboard.press('Control+KeyZ');

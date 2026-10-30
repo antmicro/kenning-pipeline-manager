@@ -88,7 +88,7 @@ test('test preserving changes to subgraph', async ({ page }) => {
     await verifyNodeCount(page, 3);
 
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
     await enterSubgraph(subgraphNode, page);
     await waitForSubgraph(page, 'Test subgraph #1');
     await verifyNodeCount(page, 3);
@@ -188,7 +188,7 @@ test('test hiding and exposing subgraphs interface', async ({ page }) => {
 
     // Get back to the main graph.
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
     expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface - 1);
 
     // Re-expose the currently hidden interface:
@@ -201,7 +201,7 @@ test('test hiding and exposing subgraphs interface', async ({ page }) => {
 
     // Get back to the main graph.
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
     expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface);
 });
 
@@ -223,7 +223,7 @@ test('test renaming exposed interface', async ({ page }) => {
 
     // Verify if the exposed interface's name has been changed.
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
     await verifyNodeCount(page, 4);
     await expect(page.locator('#container')).toContainText(newName);
 });
@@ -265,7 +265,7 @@ test('test adding exposed property', async ({ page }) => {
     await privatizeContextMenuOption.click();
 
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
     await expect(page.locator('#container')).toContainText('New property');
     await verifyPropertyCount(subgraphNode, 2);
 
@@ -297,7 +297,7 @@ test('test hiding and exposing subgraphs property', async ({ page }) => {
     await privatizeContextMenuOption.click();
 
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
     expect(await propertyCount.count()).toBe(countOfInitiallyExposedProperties - 1);
 
     await enterSubgraph(subgraphNode, page);
@@ -308,7 +308,7 @@ test('test hiding and exposing subgraphs property', async ({ page }) => {
     await exposeContextMenuOption.click();
 
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
     expect(await propertyCount.count()).toBe(countOfInitiallyExposedProperties);
 });
 
@@ -351,7 +351,7 @@ test('test add subgraph, with sub-node', async ({ page }) => {
     await contextMenuOption.click();
 
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
 
     // Check if the newly exposed interface is present.
     expect(await exposedInterfaces.count()).toBe(2);
@@ -375,7 +375,7 @@ test('test remove node with exposed interface', async ({ page }) => {
     await verifyNodeCount(page, 1);
 
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
 
     expect(await exposedInterfaces.count()).toBe(countOfInitiallyExposedInterface - 2);
 });
@@ -396,7 +396,7 @@ test('test remove node with exposed properties', async ({ page }) => {
     await verifyNodeCount(page, 4);
 
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
 
     expect(await exposedProperties.count()).toBe(0);
 });
@@ -442,7 +442,7 @@ test('test new graph node creation', async ({ page }) => {
     await contextMenuOption.click();
 
     await leaveSubgraph(page);
-    await waitForSubgraph(page, 'Example of a graph with graph nodes');
+    await waitForSubgraph(page, 'Graph with nested subgraphs');
 
     await verifyInterfaceCount(1, subgraphNode);
 });

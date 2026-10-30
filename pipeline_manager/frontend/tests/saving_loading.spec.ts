@@ -212,7 +212,7 @@ test('save and load graph partially', async ({ page }, testInfo) => {
     await loadDataflow(page, 'sample-subgraph-dataflow.json');
     const savedSub = 'Test subgraph #1';
     const filepath = await saveDataflowAs(page, testInfo, 'temp', [
-        'Example of a graph with graph nodes',
+        'Graph with nested subgraphs',
         savedSub,
     ]);
     await expectNoErrors(page);
