@@ -100,6 +100,24 @@ test('group creation', async ({ page }) => {
 
     expect(compareRects(nodeRect, groupRect)).toBeLessThanOrEqual(10);
 });
+test('check groups overlapping', async ({ page }) => {
+    await page.goto(getUrl());
+
+    await loadSpecification(page, 'sample-rectangle-grouping-specification.json');
+    await loadDataflow(page, 'sample-rectangle-grouping-dataflow.json');
+
+    const group = getGroup(page, 'Dataset Wrapper');
+    const nodeA = getNode(page, 'Dataset');
+    const nodeB = getNode(page, 'I/O processing - Dataset');
+    const nodeC = getNode(page, 'Model evaluation');
+
+    await createGroup([nodeB, nodeA, nodeC], page);
+
+    const newGroup = getGroup(page, 'New Group');
+    await expect(newGroup).toBeVisible();
+
+    expect(compareRects(group, newGroup)).not.toBeLessThanOrEqual(10);
+});
 test('remove from group', async ({ page }) => {
     await page.goto(getUrl());
 
