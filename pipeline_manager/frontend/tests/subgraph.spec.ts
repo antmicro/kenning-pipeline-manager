@@ -116,7 +116,24 @@ test('test disable expose interfaces metadata option',async ({page}) => {
     await expect(page.getByText('Expose interface')).toBeVisible();
 
     // Load specification with disabled expose interface option
-    await loadSpecification(page, 'test-disabled-interface-expose.json');
+    const specification = {
+        "version": "20250623.14",
+        "include": [
+            {
+                "url": "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-specification.json"
+            }
+        ],
+        "nodes": [],
+        "metadata": {
+            "disableInterfaceExpose": true
+        }
+    }
+    const outputPath = path.join(temporaryDir, 'modified-specification.json');
+    await fs.writeFile(outputPath, JSON.stringify(specification, null, 2), 'utf-8');
+
+    const fileChooserSpec = await openFileChooser(page, 'specification');
+    await fileChooserSpec.setFiles(outputPath);
+
     await loadDataflow(page, 'sample-dataflow.json');
 
     await interfacePort.click({button: 'right'});
