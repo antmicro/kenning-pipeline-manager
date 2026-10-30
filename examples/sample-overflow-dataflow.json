@@ -76,7 +76,7 @@
                         {
                             "name": "Sample option",
                             "id": "67f08fa6-28ba-4fa8-ad00-59d9d2d757ec",
-                            "value": "Option 2",
+                            "value": "Option with very long name #4560395402495030492039 #4560395402495030492039 #4560395402495030492039",
                             "hidden": false
                         }
                     ],
@@ -120,7 +120,7 @@
                         {
                             "name": "Sample option",
                             "id": "52c1d7b3-7ac8-4244-9b47-43600c221bfc",
-                            "value": "Option 2",
+                            "value": "Option with very long name #4560395402495030492039 #4560395402495030492039 #4560395402495030492039",
                             "hidden": false
                         }
                     ],

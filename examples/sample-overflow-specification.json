@@ -57,11 +57,11 @@
                     "type": "select",
                     "values": [
                         "Option 1",
-                        "Option 2",
+                        "Option with very long name #4560395402495030492039 #4560395402495030492039 #4560395402495030492039",
                         "Option 3",
                         "Option 4"
                     ],
-                    "default": "Option 2"
+                    "default": "Option with very long name #4560395402495030492039 #4560395402495030492039 #4560395402495030492039"
                 }
             ],
             "interfaces": [
