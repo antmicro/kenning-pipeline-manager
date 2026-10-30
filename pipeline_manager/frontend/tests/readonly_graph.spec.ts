@@ -29,7 +29,7 @@ async function enableReadOnly(spec)
 test('empty settings panel', async ({ page }) => {
     await page.goto(getUrl());
 
-    const fileName = await enableReadOnly('sample-inout-specification.json');
+    const fileName = await enableReadOnly('sample-bus-specification.json');
 
     const fileChooser = await openFileChooser(page, 'specification');
     await fileChooser.setFiles(fileName);

@@ -74,7 +74,6 @@ const examples = [
     { specification: 'sample-include-specification.json',            dataflow: 'sample-include-dataflow.json'             },
     { specification: 'sample-include-subgraph-specification.json',   dataflow: 'sample-include-subgraph-dataflow.json',   graphCount: 2 },
     { specification: 'sample-inheritance-specification.json',        dataflow: 'sample-inheritance-dataflow.json'         },
-    { specification: 'sample-inout-specification.json',              dataflow: 'sample-inout-dataflow.json'               },
     { specification: 'sample-interface-groups-specification.json',   dataflow: 'sample-interface-groups-dataflow.json'    },
     { specification: 'sample-loopback-specification.json',           dataflow: 'sample-loopback-dataflow.json'            },
     { specification: 'sample-multiple-io-specification.json',        dataflow: 'sample-multiple-io-dataflow.json'         },
