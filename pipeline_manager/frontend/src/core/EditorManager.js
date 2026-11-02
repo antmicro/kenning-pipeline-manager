@@ -27,6 +27,7 @@ import { CustomNodeFactory, GraphFactory } from './NodeFactory.js';
 import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' with {type: 'json'};
 import specificationSchema from '../../../resources/schemas/specification_schema.json' with {type: 'json'};
 import metadataSchema from '../../../resources/schemas/metadata_schema.json' with {type: 'json'};
+import commonTypesSchema from '../../../resources/api_specification/common_types.json' with {type: 'json'};
 import dataflowSchema from '../../../resources/schemas/dataflow_schema.json' with {type: 'json'};
 import graphSchema from '../../../resources/schemas/graph_schema.json' with {type: 'json'};
 import messageSchema from '../../../resources/schemas/message_schema.json' with {type: 'json'};
@@ -2876,6 +2877,7 @@ export default class EditorManager {
                 unresolvedSpecificationSchema,
                 specificationSchema,
                 metadataSchema,
+                commonTypesSchema,
                 dataflowSchema,
                 graphSchema,
             ],
