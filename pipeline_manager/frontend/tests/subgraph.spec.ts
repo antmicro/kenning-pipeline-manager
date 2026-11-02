@@ -22,16 +22,15 @@ async function prepareSubgraphPage(page: Page) {
     await page.goto(getUrl());
     await loadSpecification(page,'sample-subgraph-specification.json');
     await loadDataflow(page,'sample-subgraph-dataflow.json');
+    await verifyNodeCount(page, 5);
 }
 
 test('test loading subgraph dataflow', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
 });
 
 test('test entering subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enterSubgraph(getNode(page, 'Test subgraph #1'), page);
     await waitForSubgraph(page, 'Test subgraph #1');
     await verifyNodeCount(page, 2);
@@ -39,14 +38,13 @@ test('test entering subgraph', async ({ page }) => {
 
 test('test coming back from subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
 
     await enterSubgraph(getNode(page, 'Test subgraph #1'), page);
     await waitForSubgraph(page, 'Test subgraph #1');
     await verifyNodeCount(page, 2);
 
     await leaveSubgraph(page);
-    await verifyNodeCount(page, 4);
+    await verifyNodeCount(page, 5);
 });
 
 async function placeNewNode(page: Page, location: { x: number; y: number }) {
@@ -77,7 +75,6 @@ async function createNewGraphNode(page: Page, location: { x: number; y: number }
 
 test('test preserving changes to subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
 
     const subgraphNode = getNode(page, 'Test subgraph #1');
     await enterSubgraph(subgraphNode, page);
@@ -207,7 +204,6 @@ test('test hiding and exposing subgraphs interface', async ({ page }) => {
 
 test('test renaming exposed interface', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
 
     const subgraphNode = getNode(page, 'Test subgraph #1');
     await enterSubgraph(subgraphNode, page);
@@ -224,13 +220,12 @@ test('test renaming exposed interface', async ({ page }) => {
     // Verify if the exposed interface's name has been changed.
     await leaveSubgraph(page);
     await waitForSubgraph(page, 'Graph with nested subgraphs');
-    await verifyNodeCount(page, 4);
+    await verifyNodeCount(page, 5);
     await expect(page.locator('#container')).toContainText(newName);
 });
 
 test('modifying subgraph interfaces correctly reflected in yaml editor', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
     const subgraphNode = getNode(page, 'Test subgraph #1');
     await addInterface(page, subgraphNode);
@@ -240,7 +235,6 @@ test('modifying subgraph interfaces correctly reflected in yaml editor', async (
 
 test('modifying subgraph properties correctly reflected in yaml editor', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
     const subgraphNode = getNode(page, 'Test subgraph #1');
     await addProperty(page, subgraphNode);
@@ -250,7 +244,6 @@ test('modifying subgraph properties correctly reflected in yaml editor', async (
 
 test('test adding exposed property', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
     const subgraphNode = getNode(page, 'Test subgraph #1');
     await enterSubgraph(subgraphNode, page);
@@ -279,7 +272,6 @@ test('test adding exposed property', async ({ page }) => {
 
 test('test hiding and exposing subgraphs property', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     const subgraphNode = getNode(page, 'Test subgraph #2');
     const propertyCount =
         await verifyPropertyCount(subgraphNode, countOfInitiallyExposedProperties);
@@ -314,7 +306,6 @@ test('test hiding and exposing subgraphs property', async ({ page }) => {
 
 test('test add subgraph', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
 
     const node = getNode(page, 'Test node #1');
@@ -325,7 +316,6 @@ test('test add subgraph', async ({ page }) => {
 
 test('test add subgraph, with sub-node', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
     const subgraphNode = getNode(page, 'Test node #2');
     const exposedInterfaces = await verifyInterfaceCount(1, subgraphNode);
@@ -359,7 +349,6 @@ test('test add subgraph, with sub-node', async ({ page }) => {
 
 test('test remove node with exposed interface', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
     const subgraphNode = getNode(page, 'Test subgraph #1');
     const exposedInterfaces =
@@ -382,7 +371,6 @@ test('test remove node with exposed interface', async ({ page }) => {
 
 test('test remove node with exposed properties', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
     const subgraphNode = getNode(page, 'Test subgraph #2');
     const exposedProperties = await verifyPropertyCount(subgraphNode, 1);
@@ -403,24 +391,22 @@ test('test remove node with exposed properties', async ({ page }) => {
 
 test('test new node type creation', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
 
     await createNewNode(page, { x: 400, y: 400 });
 
     // check if a new node type has been added
-    await verifyNodeCount(page, 5);
+    await verifyNodeCount(page, 6);
 });
 
 test('test new graph node creation', async ({ page }) => {
     await prepareSubgraphPage(page);
-    await verifyNodeCount(page, 4);
     await enableEditingNodes(page);
 
     await createNewGraphNode(page, { x: 400, y: 400 });
 
     // check if a new node type has been added
-    await verifyNodeCount(page, 5);
+    await verifyNodeCount(page, 6);
 
     // enter into a new graph node
     const subgraphNode = getNode(page, 'New Graph Node');
@@ -626,7 +612,7 @@ test('test connecting to an inout interface of a graph node with its graph in th
 
     const fileChooser = await openFileChooser(page, 'dataflow');
     await fileChooser.setFiles(outputPath);
-    await verifyNodeCount(page, 4);
+    await verifyNodeCount(page, 5);
 
     const connections = page.locator('.custom-connections-container > g');
     await expect(connections).toHaveCount(3);

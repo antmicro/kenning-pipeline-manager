@@ -61,7 +61,7 @@ def execute_enter_subgraph_scenario(context: BrowserContext, port: int):
     upload_dataflow_file(page)
 
     nodes = page.locator(".node-container > div")
-    expect(nodes).to_have_count(4)
+    expect(nodes).to_have_count(5)
 
     enter_subgraph_node(page)
 
