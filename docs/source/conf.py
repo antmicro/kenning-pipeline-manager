@@ -39,6 +39,52 @@ def figure_wrapper(directive, node, caption):
 
 mermaid.figure_wrapper = figure_wrapper
 
+
+def add_example_entry(graph: Path):
+    """
+    Adds a new entry to the list of sample graphs.
+    """
+    graphname = graph.stem.replace("-dataflow", "")
+    if graphname in EXCLUDED_EXAMPLES:
+        return
+    spec = graph.parent / f"{graphname}-specification.json"
+    title = graph.stem.replace("-dataflow", "")
+    description = ""
+
+    if graphname == "sample-include":
+        description = "This graph includes nodes from other specifications added with the `include` keyword."  # noqa: E501
+    if graphname == "sample-interface-groups":
+        description = "This graph contains [interface groups](project:specification-format.md#interface-groups)."  # noqa: E501
+    if graphname == "sample-views":
+        description = "Go to settings to switch between different preconfigured views for this graph."  # noqa: E501
+
+    with open(graph, "r") as f:
+        try:
+            data = json.load(f)
+            graph_data = data["graphs"][0]
+            if "entryGraph" in data:
+                entrygraph = data["entryGraph"]
+                for graph_data in data["graphs"]:
+                    if graph_data["id"] == entrygraph:
+                        break
+            title = graph_data["name"]
+        except KeyError:
+            raise Exception(
+                f"Pair {graph} {spec} does not have base graph name provided"  # noqa: E501
+            )
+    exampleentries.extend(
+        [
+            f"## {title}",
+            description,
+            "```{pipeline_manager}",
+            f":spec: {spec}",
+            f":graph: {graph}",
+            *EXAMPLES_ADDITIONAL_PARAMS.get(graphname, []),
+            "```",
+        ]
+    )
+
+
 # -- General configuration ----------------------------------------------------
 
 # General information about the project.
@@ -78,41 +124,26 @@ EXCLUDED_EXAMPLES = [
     "sample-loopback",
     "sample-multiple-io",
 ]
-EXAMPLES_ADDITIONAL_PARAMS = {"network": [":center_at_top:"]}
+FEATURED_EXAMPLES = [
+    "sample",
+    "sample-subgraph",
+    "sample-include-subgraph",
+    "sample-with-shape",
+]
+EXAMPLES_ADDITIONAL_PARAMS = {"sample-network": [":center_at_top:"]}
 exampleentries = [
     "Take a look at the examples below which demonstrate different Pipeline Manager features and use cases:\n"  # noqa: E501
 ]
+
+# Add featured examples first, then the rest in alphabetical order
+for graphname in FEATURED_EXAMPLES:
+    add_example_entry(Path(f"../../examples/{graphname}-dataflow.json"))
 for graph in sorted(Path("../../examples").glob("*-dataflow.json")):
     graphname = graph.stem.replace("-dataflow", "")
-    if graphname in EXCLUDED_EXAMPLES:
+    if graphname in FEATURED_EXAMPLES:
         continue
-    spec_filename = f"{graphname}-specification.json"
-    spec = graph.parent / f"{graphname}-specification.json"
-    title = graph.stem.replace("-dataflow", "")
-    with open(graph, "r") as f:
-        try:
-            data = json.load(f)
-            graph_data = data["graphs"][0]
-            if "entryGraph" in data:
-                entrygraph = data["entryGraph"]
-                for graph_data in data["graphs"]:
-                    if graph_data["id"] == entrygraph:
-                        break
-            title = graph_data["name"]
-        except KeyError:
-            raise Exception(
-                f"Pair {graph} {spec} does not have base graph name provided"  # noqa: E501
-            )
-    exampleentries.extend(
-        [
-            f"## {title}",
-            "```{pipeline_manager}",
-            f":spec: {spec}",
-            f":graph: {graph}",
-            *EXAMPLES_ADDITIONAL_PARAMS.get(graphname, []),
-            "```",
-        ]
-    )
+    add_example_entry(graph)
+
 myst_substitutions["examples"] = "\n".join(exampleentries)
 
 today_fmt = "%Y-%m-%d"
