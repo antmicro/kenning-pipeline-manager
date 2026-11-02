@@ -127,6 +127,13 @@
             "color": "#4e096f",
             "twoColumn": true,
             "subgraphId": "129c6246-d874-48cd-a33c-2927961d42e8"
+        },
+        {
+            "name": "Comment",
+            "category": "Comment",
+            "properties": [
+                {"name": "comment", "type": "multiline", "default": "Write a comment here in Markdown format"}
+            ]
         }
     ],
     "graphs": [

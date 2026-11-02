@@ -6,6 +6,26 @@
             "name": "Graph with nested subgraphs",
             "nodes": [
                 {
+                    "id": "723c2d49-945d-451c-93c2-768b4ea19b91",
+                    "position": {
+                        "x": 600,
+                        "y": -400
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [],
+                    "properties": [
+                        {
+                            "name": "comment",
+                            "id": "82f5aedb-aafb-42e7-b8a1-e7252edd9e50",
+                            "value": "### Right-click on one of the graph nodes and choose `Go to graph` from the node menu."
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Comment",
+                    "instanceName": "Note"
+                },
+                {
                     "id": "79a96644-9ff1-47e4-8226-335614efd103",
                     "position": {
                         "x": 572,
