@@ -42,7 +42,7 @@ def html_to_png(
     hti = Html2Image(
         size=(1920, 1080),
         custom_flags=[
-            "--virtual-time-budget=10000",
+            "--virtual-time-budget=50000",
             "--hide-scrollbars",
             "--disable-gpu",
             "--no-sandbox",
