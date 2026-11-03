@@ -12,5 +12,6 @@ This documentation contains the following chapters:
 * [Sample third-party server](example-server) - describes how to configure server for testing frontend features
 * [Specification Builder](specification-builder) - describes the Python's `SpecificationBuilder` module for constructing the specification.
 * [Graph Builder](graph-builder) - describes the Python's `GraphBuilder` class for constructing and manipulating the dataflow graph.
+* [Schema Fuzzer](schema-fuzzer) - description of the `schema_fuzzer` module.
 * [Dataflow and specification format changelog](changelogs) - lists changes and versions in the format of dataflow and specification files
 * [Front end demo](demo) - {{project}}'s front end demonstration.

@@ -14,6 +14,7 @@ example-server
 specification-builder
 graph-builder
 custom-shaped-node
+schema-fuzzer
 sphinx-extension
 changelogs
 demo
