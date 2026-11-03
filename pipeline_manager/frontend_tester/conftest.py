@@ -9,12 +9,15 @@ import signal
 import subprocess
 import tempfile
 import time
+from pathlib import Path
 
 import pytest
 
 SERVER_ADDRESS = "127.0.0.1"
 SERVER_PORT = 5000
 PROCESS_SHUTDOWN_TIME = 5
+
+REPOSITORY_ROOT = Path(__file__).parents[2]
 
 
 def pytest_addoption(parser: pytest.Parser):
@@ -38,7 +41,7 @@ def rpc_server(build_server_app: str):
     process = None
     try:
         args = [
-            "./run",
+            str(REPOSITORY_ROOT / "run"),
             "--frontend-directory",
             str(build_server_app),
             "--backend-host",
@@ -81,12 +84,12 @@ def build_server_app(request: pytest.FixtureRequest):
         with tempfile.TemporaryDirectory() as tmp_dir:
             os.sync()
             args = [
-                "./build",
+                str(REPOSITORY_ROOT / "build"),
                 "server-app",
                 "--output-directory",
                 tmp_dir,
             ]
-            process = subprocess.Popen(args)
+            process = subprocess.Popen(args, cwd=REPOSITORY_ROOT)
             return_code = process.wait(timeout=100)
             assert not return_code, (
                 "Building a server app failed."

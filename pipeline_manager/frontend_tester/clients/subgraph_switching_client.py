@@ -13,6 +13,7 @@ from pipeline_manager_backend_communication.misc_structures import MessageType
 
 host = "127.0.0.1"
 port = 9876
+EXAMPLES_DIRECTORY = Path(__file__).parents[3] / "examples"
 
 
 class RPCMethods:
@@ -22,7 +23,7 @@ class RPCMethods:
         self.client = client
 
     def specification_get(self) -> dict:
-        path = Path("./examples/sample-subgraph-specification.json")
+        path = EXAMPLES_DIRECTORY / "sample-subgraph-specification.json"
         specification = {}
         with open(path, "rt") as fd:
             specification = json.load(fd)

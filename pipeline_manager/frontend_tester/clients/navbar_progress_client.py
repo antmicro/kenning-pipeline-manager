@@ -17,6 +17,7 @@ from pipeline_manager_backend_communication.misc_structures import MessageType
 
 host = "127.0.0.1"
 port = 9876
+EXAMPLES_DIRECTORY = Path(__file__).parents[3] / "examples"
 
 
 class RPCMethods:
@@ -27,7 +28,7 @@ class RPCMethods:
         self.release = asyncio.Event()
 
     def specification_get(self) -> dict:
-        path = Path("./examples/sample-specification.json")
+        path = EXAMPLES_DIRECTORY / "sample-specification.json"
         with open(path, "rt") as fd:
             specification = json.load(fd)
         return {"type": MessageType.OK.value, "content": specification}

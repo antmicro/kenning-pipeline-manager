@@ -17,6 +17,7 @@ PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
 SERVER_PORT = 5000
 PROCESS_SHUTDOWN_TIME = 5
+CLIENTS_DIRECTORY = Path(__file__).parent / "clients"
 
 TASK_NAME = "Foo"
 
@@ -63,8 +64,7 @@ def test_custom_dialog(
     """
     args = [
         "python3",
-        "pipeline_manager/frontend_tester/clients/"
-        "subgraph_switching_client.py",
+        str(CLIENTS_DIRECTORY / "subgraph_switching_client.py"),
     ]
     client_process = None
 

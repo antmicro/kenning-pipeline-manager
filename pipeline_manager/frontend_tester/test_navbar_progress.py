@@ -7,6 +7,7 @@
 import re
 import subprocess
 import time
+from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -14,6 +15,7 @@ PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
 SERVER_PORT = 5000
 PROCESS_SHUTDOWN_TIME = 5
+CLIENTS_DIRECTORY = Path(__file__).parent / "clients"
 
 
 def test_navbar_progress(rpc_server):
@@ -24,7 +26,7 @@ def test_navbar_progress(rpc_server):
     """
     args = [
         "python3",
-        "pipeline_manager/frontend_tester/clients/navbar_progress_client.py",
+        str(CLIENTS_DIRECTORY / "navbar_progress_client.py"),
     ]
     client_process = subprocess.Popen(args)
     try:

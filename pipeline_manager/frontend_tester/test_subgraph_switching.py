@@ -13,6 +13,8 @@ PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
 SERVER_PORT = 5000
 PROCESS_SHUTDOWN_TIME = 5
+CLIENTS_DIRECTORY = Path(__file__).parent / "clients"
+EXAMPLES_DIRECTORY = Path(__file__).parents[2] / "examples"
 
 
 def upload_dataflow_file(
@@ -25,7 +27,7 @@ def upload_dataflow_file(
         page.get_by_text(text).click()
 
     file_chooser = fc_info.value
-    file_path = Path("./examples/sample-subgraph-dataflow.json")
+    file_path = EXAMPLES_DIRECTORY / "sample-subgraph-dataflow.json"
     file_chooser.set_files(str(file_path))
 
 
@@ -76,8 +78,7 @@ def test_subgraph_switching(
     """
     args = [
         "python3",
-        "pipeline_manager/frontend_tester/clients/"
-        "subgraph_switching_client.py",
+        str(CLIENTS_DIRECTORY / "subgraph_switching_client.py"),
     ]
     client_process = None
 
