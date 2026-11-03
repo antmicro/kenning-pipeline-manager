@@ -14,7 +14,7 @@ import {
     getPathToJsonFile,
     enableNavigationBar,
     getNode,
-    openNodePalette,
+    openSettingsPanel,
     expectNoErrors,
     saveFileAs,
     waitForSubgraph,
@@ -22,9 +22,7 @@ import {
 } from './config.js';
 
 async function deepCleanEditor(page: Page) {
-    const settings = page.locator('.settings-panel');
-    expect(settings).toBeVisible();
-    await settings.hover({ force: true });
+    await openSettingsPanel(page);
 
     const button = page.getByText('Clean editor');
     expect(button).toBeVisible();
@@ -274,6 +272,7 @@ test(`entryGraph ${exampleNested.specification} in middle of structure`, async (
     const fileChooserSpec = await openFileChooser(page, 'dataflow');
     await fileChooserSpec.setFiles(outputPath);
     expect(getNode(page, 'MultipleIOGraphNode')).not.toBeVisible();
+    await page.locator(".logo ~ .hoverbox").hover();
     await page.locator('span').getByText('Graphs').click();
     const entryCount = await page.locator('.entries').locator('.__entry').count();
     expect(entryCount).toBe(2);

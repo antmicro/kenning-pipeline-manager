@@ -772,10 +772,7 @@ export async function enableSubgraphRemoval(page) {
     const addNodeButton = logo.locator('#create-new-node-type-button');
     expect(addNodeButton).toBeHidden();
 
-    // Enable modifying node types.
-    const settings = page.locator('.settings-panel');
-    expect(settings).toBeVisible();
-    await settings.hover({ force: true });
+    openSettingsPanel(page);
 
     const checkbox = page.getByText('Remove empty subgraphs');
     expect(checkbox).toBeVisible();

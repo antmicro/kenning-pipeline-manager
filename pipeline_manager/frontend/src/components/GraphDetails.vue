@@ -106,12 +106,12 @@ export default {
     $settings-width: 435px;
     $settings-maxwidth: calc(100vw - 2 * $spacing-l);
 
-    position: absolute;
+    position: fixed;
     padding: 0;
     top: calc($navbar-height + 1px);
     right: -495px;
 
-    height: calc(100% - $navbar-height - $terminal-container-height);
+    height: calc(100vh - $navbar-height - $terminal-container-height);
     width: $settings-width;
     max-width: $settings-maxwidth;
 

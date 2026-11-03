@@ -109,7 +109,7 @@ export default {
     display: flex;
     flex-direction: column;
     position: fixed;
-    z-index: 3;
+    z-index: 5;
     align-items: center;
     gap: 22px;
 

@@ -1,6 +1,8 @@
 import { test, expect, Locator } from '@playwright/test';
-import { getUrl, loadVideoNodeId, closeTerminal, getContextMenu,
-    getNode, getElementStyleAttribute, loadSpecification, loadDataflow, openSettingsPanel } from './config.js';
+import {
+    getUrl, getNode, getElementStyleAttribute,
+    loadSpecification, loadDataflow, openSettingsPanel,
+} from './config.js';
 
 
 async function getNodePositions(node: Locator)
@@ -24,11 +26,12 @@ test('test node position across views', async ({ page }) => {
     // get node position
     const node = await getNode(page,"Source").first();
     const nodeStartPosition = await node.boundingBox();
+    expect(nodeStartPosition !== null).toBeTruthy();
 
     // move node
     await node.click();
     await page.mouse.down();
-    await page.mouse.move(nodeStartPosition.x + 100,nodeStartPosition.y);
+    await page.mouse.move(nodeStartPosition!.x + 100,nodeStartPosition!.y);
     await page.mouse.up();
 
     await zoomButton.dispatchEvent('click');
@@ -51,7 +54,9 @@ test('test node position across views', async ({ page }) => {
         (nodeBoxDefaultView.y !== nodeTreePosition.y)).toBeTruthy();
 
     // Switch views to default
+    await openSettingsPanel(page);
     await selectedView.dispatchEvent('click');
+    await dropdown.scrollIntoViewIfNeeded();
     await dropdown.getByText('default').click({ force: true });
     await zoomButton.dispatchEvent('click');
 

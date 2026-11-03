@@ -70,7 +70,7 @@ export default {
     $notification-maxwidth: calc(100vw - 2 * $spacing-xxl);
     /* Set height to 100 view port minus height of navigation bar and paddings
     and minus the terminal panel */
-    height: calc(100% - 120px - $terminal-container-height);
+    height: calc(100vh - 120px - $terminal-container-height);
     width: 435px;
     max-width: $notification-maxwidth;
     background-color: $gray-600;

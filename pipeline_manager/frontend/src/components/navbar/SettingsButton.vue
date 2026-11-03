@@ -43,6 +43,7 @@ export default {
 <template>
     <div
         ref="container"
+        id="settings-button"
         :class="['hoverbox', mobileClasses]"
         role="button"
         @click="() => this.$emit('onClicked')"

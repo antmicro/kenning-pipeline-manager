@@ -277,8 +277,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .terminal-wrapper {
-    z-index: 3;
-    position: absolute;
+    z-index: 5;
+    position: fixed;
     min-height: $terminal-container-height;
     border-top: 1px solid $gray-500;
     bottom: 0;

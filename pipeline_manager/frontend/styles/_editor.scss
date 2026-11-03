@@ -74,9 +74,24 @@
     pointer-events: none;
 }
 
-.baklava-editor .background {
-    background-image: linear-gradient($gray-700 2%, transparent 2%),
-        linear-gradient(90deg, $gray-700 2%, transparent 2%);
+.baklava-editor.inner-editor {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+}
+
+.baklava-editor {
+    .background {
+        background-image: linear-gradient($gray-700 2%, transparent 2%),
+            linear-gradient(90deg, $gray-700 2%, transparent 2%);
+    }
+    .baklava-node-palette {
+        position: fixed;
+        // NavBar height + its boarder
+        top: calc($navbar-height + 2px);
+        left: 0;
+    }
 }
 
 .baklava-slider > .__slider {

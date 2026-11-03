@@ -410,7 +410,8 @@ export default {
     right: -495px;
     width: $settings-width;
     // viewport - terminal - navbar - padding
-    max-height: calc(100% - $navbar-height - $terminal-container-height - 2 * $spacing-l);
+    max-height: calc(100vh - $navbar-height - $terminal-container-height - 2 * $spacing-l);
+    min-height: min-content;
     max-width: $settings-maxwidth;
     z-index: 4;
     overflow-y: auto;

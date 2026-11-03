@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getUrl, loadVideoNodeId, closeTerminal, getContextMenu, getNode, getElementStyleAttribute } from './config.js';
+import { getUrl, openSettingsPanel, getNode, getElementStyleAttribute } from './config.js';
 
 test('test zoom', async ({ page }) => {
     await page.goto(getUrl());
@@ -14,9 +14,7 @@ test('test zoom', async ({ page }) => {
 
     const scaleBefore = await getElementStyleAttribute(editor,'--scale');
 
-    const settings = page.locator('.settings-panel');
-    expect(settings).toBeVisible();
-    await settings.hover({ force: true });
+    await openSettingsPanel(page);
     // get layers section
     const layers = page.getByText("Hide Layers:").locator('..');
 
