@@ -3,6 +3,7 @@
         {
             "id": "9c25e441-12e9-4579-a27f-610676639df8",
             "name": "Graph with bus interfaces",
+            "additionalData": "This graph includes [bus interfaces](project:specification-format.md#interface).",
             "nodes": [
                 {
                     "id": "63344ed8-20e6-4943-94a5-10fb856ca590",

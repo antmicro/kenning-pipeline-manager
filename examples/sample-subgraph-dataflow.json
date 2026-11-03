@@ -4,6 +4,7 @@
         {
             "id": "9c4d5349-9d3b-401f-86bb-021b7b3e5b81",
             "name": "Graph with nested subgraphs",
+            "additionalData": "This graph illustrates a multi-level [subgraph](project:dataflow-format.md#graph) hierarchy.",
             "nodes": [
                 {
                     "id": "723c2d49-945d-451c-93c2-768b4ea19b91",

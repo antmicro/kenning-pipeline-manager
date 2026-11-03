@@ -49,14 +49,6 @@ def add_example_entry(graph: Path):
         return
     spec = graph.parent / f"{graphname}-specification.json"
     title = graph.stem.replace("-dataflow", "")
-    description = ""
-
-    if graphname == "sample-include":
-        description = "This graph includes nodes from other specifications added with the `include` keyword."  # noqa: E501
-    if graphname == "sample-interface-groups":
-        description = "This graph contains [interface groups](project:specification-format.md#interface-groups)."  # noqa: E501
-    if graphname == "sample-views":
-        description = "Go to settings to switch between different preconfigured views for this graph."  # noqa: E501
 
     with open(graph, "r") as f:
         try:
@@ -68,6 +60,7 @@ def add_example_entry(graph: Path):
                     if graph_data["id"] == entrygraph:
                         break
             title = graph_data["name"]
+            description = graph_data.get("additionalData", "")
         except KeyError:
             raise Exception(
                 f"Pair {graph} {spec} does not have base graph name provided"  # noqa: E501

@@ -2,6 +2,7 @@
     "graphs": [
         {
             "name": "Graph with dynamic number of interfaces",
+            "additionalData": "This graph includes [dynamic interfaces](project:specification-format.md#interface). Interfaces can be added or removed by changing the value of the corresponding property, within specified limits.",
             "id": "4b507b03-4c77-4d00-8a2a-c225b984377b",
             "nodes": [
                 {

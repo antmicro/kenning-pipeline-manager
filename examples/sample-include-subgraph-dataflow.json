@@ -2,6 +2,7 @@
     "graphs": [
         {
             "name": "Graph with exposed interfaces",
+            "additionalData": "This graph illustrates [exposed interfaces](project:dataflow-format.md#interface) in subgraphs.",
             "id": "0f3b7564-3294-42bf-ab1d-d5d3d80f015d",
             "nodes": [
                 {

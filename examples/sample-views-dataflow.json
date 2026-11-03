@@ -841,7 +841,8 @@
                     "to": "75c52a55-2852-4de7-b693-c1660282c4c4"
                 }
             ],
-            "name": "Graph with alternative views"
+            "name": "Graph with alternative views",
+            "additionalData": "Go to settings to switch between different preconfigured views for this graph."
         }
     ],
     "entryGraph": "8282a458-a6b4-444e-908e-2032528f15d3",

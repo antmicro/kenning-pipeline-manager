@@ -3,6 +3,7 @@
         {
             "id": "70caab08-6e11-4fbd-9bfa-4250c35d6351",
             "name": "Graph with rectangular node groups",
+            "additionalData": "This graph includes [node groups](project:dataflow-format.md#group).",
             "nodes": [
                 {
                     "id": "959695f6-3d4c-4455-913f-e72913ef7dc3",

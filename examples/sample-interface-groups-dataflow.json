@@ -3,6 +3,7 @@
         {
             "id": "68957efd-6ced-4756-86d4-e4bca26ea536",
             "name": "Graph with interface grouping",
+            "additionalData": "This graph includes [interface groups](project:specification-format.md#interface-groups).",
             "nodes": [
                 {
                     "name": "TestNode",
