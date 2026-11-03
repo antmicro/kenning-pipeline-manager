@@ -7,10 +7,8 @@ from pathlib import Path
 from typing import Optional
 
 import pytest
-from playwright.sync_api import BrowserContext, Page, expect, sync_playwright
+from playwright.sync_api import Page, expect
 
-PROTOCOL = "http"
-SERVER_ADDRESS = "127.0.0.1"
 PROCESS_SHUTDOWN_TIME = 5
 CLIENTS_DIRECTORY = Path(__file__).parent / "clients"
 EXAMPLES_DIRECTORY = Path(__file__).parents[2] / "examples"
@@ -42,22 +40,17 @@ def enter_subgraph_node(page: Page):
     contextMenuOption.click()
 
 
-def execute_enter_subgraph_scenario(context: BrowserContext, port: int):
+def execute_enter_subgraph_scenario(page: Page):
     """
     Execute a Playwright scenario, when an agents enters a subgraph,
     utilizing the frontend.
 
     Parameters
     ----------
-    context : BrowserContext
-        An instance of Playwright context,
+    page : Page
+        An instance of Playwright page,
         on which the scenario will be performed.
-    port : int
-        Port of the Pipeline Manager backend.
     """
-    page = context.new_page()
-    page.set_viewport_size({"width": 1920, "height": 1080})
-    page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{port}")
     upload_dataflow_file(page)
 
     nodes = page.locator(".node-container > div")
@@ -72,7 +65,7 @@ def execute_enter_subgraph_scenario(context: BrowserContext, port: int):
 def test_subgraph_switching(
     request: pytest.FixtureRequest,
     rpc_server,
-    backend_port: int,
+    page: Page,
     tcp_server_port: int,
 ):
     """
@@ -96,24 +89,18 @@ def test_subgraph_switching(
 
     try:
         client_process = subprocess.Popen(args)
-        with sync_playwright() as playwright:
-            browser = playwright.firefox.launch()
-            context = browser.new_context(
-                viewport={"width": 1920, "height": 1080}
+        if trace_name:
+            page.context.tracing.start(
+                screenshots=True,
+                snapshots=True,
+                sources=True,
             )
+        try:
+            execute_enter_subgraph_scenario(page)
+        finally:
             if trace_name:
-                context.tracing.start(
-                    screenshots=True,
-                    snapshots=True,
-                    sources=True,
-                )
-            try:
-                execute_enter_subgraph_scenario(context, backend_port)
-            finally:
-                if trace_name:
-                    ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-                    context.tracing.stop(path=f"{trace_name}-{ts}.zip")
-                    browser.close()
+                ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+                page.context.tracing.stop(path=f"{trace_name}-{ts}.zip")
     except Exception as e:
         assert False, str(e)
     finally:

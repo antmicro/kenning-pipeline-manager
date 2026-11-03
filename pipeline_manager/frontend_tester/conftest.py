@@ -12,9 +12,11 @@ import time
 from pathlib import Path
 
 import pytest
+from playwright.sync_api import sync_playwright
 
 from pipeline_manager.utils.ports import get_free_port
 
+PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
 PROCESS_SHUTDOWN_TIME = 5
 BUILD_TIMEOUT = 300
@@ -46,6 +48,19 @@ def backend_port() -> int:
 def tcp_server_port() -> int:
     """Free port for the Pipeline Manager TCP server."""
     return get_free_port(SERVER_ADDRESS)
+
+
+@pytest.fixture
+def page(rpc_server, backend_port: int):
+    """Fixture to provide a Firefox page with the frontend opened."""
+    with sync_playwright() as playwright:
+        browser = playwright.firefox.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1920, "height": 1080})
+            page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{backend_port}")
+            yield page
+        finally:
+            browser.close()
 
 
 @pytest.fixture

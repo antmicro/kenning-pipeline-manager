@@ -11,10 +11,8 @@ from pathlib import Path
 from typing import Optional
 
 import pytest
-from playwright.sync_api import BrowserContext, expect, sync_playwright
+from playwright.sync_api import Page, expect
 
-PROTOCOL = "http"
-SERVER_ADDRESS = "127.0.0.1"
 PROCESS_SHUTDOWN_TIME = 5
 CLIENTS_DIRECTORY = Path(__file__).parent / "clients"
 
@@ -22,22 +20,16 @@ TASK_NAME = "Foo"
 ANOTHER_TASK_NAME = "Boo"
 
 
-def open_and_override_dialog_box(context: BrowserContext, port: int):
+def open_and_override_dialog_box(page: Page):
     """
     Execute a Playwright scenario, when an agents use
     custom user dialog.
 
     Parameters
     ----------
-    context : BrowserContext
-        An instance of Playwright context,
-        on which the scenario will be performed.
-    port : int
-        Port of the Pipeline Manager backend.
+    page : Page
+        An instance of Playwright page.
     """
-    page = context.new_page()
-    page.set_viewport_size({"width": 1920, "height": 1080})
-    page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{port}")
     open_box = page.locator("#navbar-button-custom_open_user_dialog_box")
     open_box.click()
 
@@ -80,22 +72,16 @@ def open_and_override_dialog_box(context: BrowserContext, port: int):
     popup_menu.wait_for(state="hidden")
 
 
-def add_remove_dialog_box(context: BrowserContext, port: int):
+def add_remove_dialog_box(page: Page):
     """
     Execute a Playwright scenario, when an agents add and
     removes dialog box.
 
     Parameters
     ----------
-    context : BrowserContext
-        An instance of Playwright context,
-        on which the scenario will be performed.
-    port : int
-        Port of the Pipeline Manager backend.
+    page : Page
+        An instance of Playwright page.
     """
-    page = context.new_page()
-    page.set_viewport_size({"width": 1920, "height": 1080})
-    page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{port}")
     # Try to open dialog box and make sure it is not added
     open_box = page.locator("#navbar-button-custom_open_user_dialog_box")
     open_box.click()
@@ -133,7 +119,7 @@ def add_remove_dialog_box(context: BrowserContext, port: int):
 def test_custom_dialog(
     request: pytest.FixtureRequest,
     rpc_server,
-    backend_port: int,
+    page: Page,
     tcp_server_port: int,
 ):
     """
@@ -160,30 +146,21 @@ def test_custom_dialog(
         client_process = subprocess.Popen(
             args, stdout=subprocess_output, bufsize=1, text=True
         )
-        with sync_playwright() as playwright:
-            browser = playwright.firefox.launch()
-            context = browser.new_context(
-                viewport={"width": 1920, "height": 1080}
+        if trace_name:
+            page.context.tracing.start(
+                screenshots=True,
+                snapshots=True,
+                sources=True,
             )
+        try:
+            open_and_override_dialog_box(page)
+            subprocess_output.seek(0)
+            proc_output = subprocess_output.readline().decode()
+            assert proc_output == f"Task: {TASK_NAME}Task: {ANOTHER_TASK_NAME}"
+        finally:
             if trace_name:
-                context.tracing.start(
-                    screenshots=True,
-                    snapshots=True,
-                    sources=True,
-                )
-            try:
-                open_and_override_dialog_box(context, backend_port)
-                subprocess_output.seek(0)
-                proc_output = subprocess_output.readline().decode()
-                assert (
-                    proc_output
-                    == f"Task: {TASK_NAME}Task: {ANOTHER_TASK_NAME}"
-                )
-            finally:
-                if trace_name:
-                    ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-                    context.tracing.stop(path=f"{trace_name}-{ts}.zip")
-                    browser.close()
+                ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+                page.context.tracing.stop(path=f"{trace_name}-{ts}.zip")
     except Exception as e:
         assert False, str(e)
     finally:
@@ -199,7 +176,7 @@ def test_custom_dialog(
 def test_custom_dialog_add_and_rm(
     request: pytest.FixtureRequest,
     rpc_server,
-    backend_port: int,
+    page: Page,
     tcp_server_port: int,
 ):
     """
@@ -226,27 +203,21 @@ def test_custom_dialog_add_and_rm(
         client_process = subprocess.Popen(
             args, stdout=subprocess_output, bufsize=1, text=True
         )
-        with sync_playwright() as playwright:
-            browser = playwright.firefox.launch()
-            context = browser.new_context(
-                viewport={"width": 1920, "height": 1080}
+        if trace_name:
+            page.context.tracing.start(
+                screenshots=True,
+                snapshots=True,
+                sources=True,
             )
+        try:
+            add_remove_dialog_box(page)
+            subprocess_output.seek(0)
+            proc_output = subprocess_output.readline().decode()
+            assert proc_output == f"Task: {TASK_NAME}"
+        finally:
             if trace_name:
-                context.tracing.start(
-                    screenshots=True,
-                    snapshots=True,
-                    sources=True,
-                )
-            try:
-                add_remove_dialog_box(context, backend_port)
-                subprocess_output.seek(0)
-                proc_output = subprocess_output.readline().decode()
-                assert proc_output == f"Task: {TASK_NAME}"
-            finally:
-                if trace_name:
-                    ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-                    context.tracing.stop(path=f"{trace_name}-{ts}.zip")
-                    browser.close()
+                ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+                page.context.tracing.stop(path=f"{trace_name}-{ts}.zip")
     except Exception as e:
         assert False, str(e)
     finally:
