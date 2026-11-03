@@ -9,6 +9,7 @@ export default defineConfig({
               ['json', {  outputFile: 'test-results.json' }]
             ],
   retries: 3,
+  outputDir: 'editor-test-traces',
 
   webServer: {
       command: 'npx --no-install --yes serve --cors -p 7001 ../../examples',

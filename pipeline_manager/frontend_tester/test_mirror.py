@@ -97,9 +97,9 @@ def mirrored_pages(
     open_pipeline_manager(original, mirror_ports[0])
     # Wait until the connection with the mirroring application is fully
     # initialized.
-    expect(
-        original.locator(".external-app-status .connected")
-    ).to_be_attached(timeout=15000)
+    expect(original.locator(".external-app-status .connected")).to_be_attached(
+        timeout=15000
+    )
 
     upload_dataflow_file(original)
     expect_position(

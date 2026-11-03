@@ -35,7 +35,7 @@ def pytest_addoption(parser: pytest.Parser):
     )
     parser.addoption(
         "--playwright-trace-dir",
-        default="playwright-traces",
+        default="frontend-tester-traces",
         help="Directory where playwright traces are saved as "
         "'<TEST_NAME>-<TIMESTAMP>.zip'",
     )
