@@ -28,7 +28,10 @@
                         "text",
                         "number",
                         "int",
-                        "bool"
+                        "bool",
+                        "select",
+                        "dynamic",
+                        "nested"
                     ]
                 },
                 "default": {
@@ -36,7 +39,9 @@
                     "type": [
                         "string",
                         "number",
-                        "boolean"
+                        "boolean",
+                        "array",
+                        "object"
                     ]
                 },
                 "min": {
@@ -46,6 +51,14 @@
                 "max": {
                     "description": "A maximum value for numerical types",
                     "type": "number"
+                },
+                "template": {
+                    "description": "A generic dialog box template used with dynamic and nested type.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "common_types#/$defs/dialog_box_template"
+                    },
+                    "properties": {}
                 }
             },
             "required": [
@@ -68,11 +81,9 @@
                 "template": {
                     "description": "A template of the dialog box",
                     "type": "object",
-                    "allOf": [
-                        {
-                            "$ref": "common_types#/$defs/dialog_box_template"
-                        }
-                    ],
+                    "additionalProperties": {
+                        "$ref": "common_types#/$defs/dialog_box_template"
+                    },
                     "properties": {}
                 }
             }
@@ -80,11 +91,9 @@
         "dialog_boxes": {
             "description": "Schema that defines dialog boxes template",
             "type": "object",
-            "allOf": [
-                {
-                    "$ref": "common_types#/$defs/dialog_box"
-                }
-            ],
+            "additionalProperties": {
+                "$ref": "common_types#/$defs/dialog_box"
+            },
             "properties": {}
         },
         "dialog_box_output": {

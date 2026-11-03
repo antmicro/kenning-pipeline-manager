@@ -43,12 +43,56 @@
                 "$ref": "common_types#/$defs/specification_object"
             }
         },
-        "open_dialog_request": {
+        "dialog_template_add": {
+            "description": "Request to register user dialog box or override existing one.",
+            "params": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name of the dialog box",
+                        "type": "string"
+                    },
+                    "box": {
+                        "$ref": "common_types#/$defs/dialog_box"
+                    }
+                }
+            },
+            "returns": {
+                "type": "object",
+                "properties": {
+                    "added": {
+                        "description": "List of added dialog boxes.",
+                        "type": "array",
+                        "items": {
+                            "description": "Name of the dialog box",
+                            "type": "string"
+                        }
+                    },
+                    "removed": {
+                        "description": "List of removed dialog boxes.",
+                        "type": "array",
+                        "items": {
+                            "description": "Name of the dialog box",
+                            "type": "string"
+                        }
+                    },
+                    "overridden": {
+                        "description": "List of overridden dialog boxes.",
+                        "type": "array",
+                        "items": {
+                            "description": "Name of the dialog box",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "dialog_open": {
             "description": "Request opening dialog box by frontend.",
             "params": {
                 "type": "object",
                 "properties": {
-                    "title": {
+                    "name": {
                         "description": "Name of the dialog box",
                         "type": "string"
                     },
@@ -59,7 +103,7 @@
                     }
                 },
                 "required": [
-                    "title"
+                    "name"
                 ],
                 "additionalProperties": false
             },
@@ -1161,7 +1205,7 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "user_dialog_read": {
+        "dialog_on_submit": {
             "description": "Request sent by the frontend when custom user dialog is closed",
             "params": {
                 "$ref": "common_types#/$defs/dialog_box_output"
