@@ -12,7 +12,11 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from schema_fuzzer.generator.context import BaseGenerator, Context, Schema
+from pipeline_manager.schema_fuzzer.generator.context import (
+    BaseGenerator,
+    Context,
+    Schema,
+)
 
 
 class UnionSchema(BaseModel):

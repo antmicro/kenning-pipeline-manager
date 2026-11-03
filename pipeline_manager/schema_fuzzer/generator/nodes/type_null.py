@@ -6,7 +6,10 @@ Module that provides implementation of the BaseGenerator, that handles objects
 of type `null`.
 """
 
-from schema_fuzzer.generator.context import BaseGenerator, Schema
+from pipeline_manager.schema_fuzzer.generator.context import (
+    BaseGenerator,
+    Schema,
+)
 
 
 class NullGenerator(BaseGenerator):

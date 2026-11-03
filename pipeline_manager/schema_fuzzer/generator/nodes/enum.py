@@ -11,7 +11,11 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from schema_fuzzer.generator.context import BaseGenerator, Context, Schema
+from pipeline_manager.schema_fuzzer.generator.context import (
+    BaseGenerator,
+    Context,
+    Schema,
+)
 
 
 class EnumSchema(BaseModel):

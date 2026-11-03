@@ -10,11 +10,11 @@ from pathlib import Path
 
 import jsonschema
 
-from schema_fuzzer.generator import Context
-from schema_fuzzer.resolver import resolve_references
+from pipeline_manager.schema_fuzzer.generator import Context
+from pipeline_manager.schema_fuzzer.resolver import resolve_references
 
 METADATA_SCHEMA_PATH = (
-    Path(__file__).parent / "../../../resources/schemas/metadata_schema.json"
+    Path(__file__).parent / "../resources/schemas/metadata_schema.json"
 )
 COMMON_TYPES_PATH = (
     Path(__file__).parent / "../resources/api_specification/common_types.json"

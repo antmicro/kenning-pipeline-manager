@@ -13,7 +13,11 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-from schema_fuzzer.generator.context import BaseGenerator, Context, Schema
+from pipeline_manager.schema_fuzzer.generator.context import (
+    BaseGenerator,
+    Context,
+    Schema,
+)
 
 
 class StringSchema(BaseModel):

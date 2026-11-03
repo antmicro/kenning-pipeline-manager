@@ -8,7 +8,11 @@ Module that provides implementation of the BaseGenerator, that handles the
 
 from typing import Any
 
-from schema_fuzzer.generator.context import BaseGenerator, Context, Schema
+from pipeline_manager.schema_fuzzer.generator.context import (
+    BaseGenerator,
+    Context,
+    Schema,
+)
 
 
 class ConstGenerator(BaseGenerator):

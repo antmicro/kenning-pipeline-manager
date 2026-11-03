@@ -8,7 +8,10 @@ of type `boolean`.
 
 import random
 
-from schema_fuzzer.generator.context import BaseGenerator, Schema
+from pipeline_manager.schema_fuzzer.generator.context import (
+    BaseGenerator,
+    Schema,
+)
 
 
 class BooleanGenerator(BaseGenerator):

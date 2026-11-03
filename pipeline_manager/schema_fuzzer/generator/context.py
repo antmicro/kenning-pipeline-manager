@@ -91,7 +91,7 @@ class Context:
 
     @classmethod
     def load_generators(cls) -> list[type[BaseGenerator]]:
-        from schema_fuzzer.generator.nodes import GENERATORS
+        from pipeline_manager.schema_fuzzer.generator.nodes import GENERATORS
 
         return GENERATORS
 

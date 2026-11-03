@@ -66,6 +66,13 @@ mirror = [
 to-image = [
     "html2image",
 ]
+schema_fuzzer = [
+    "cyclopts>=5.2.0",
+    "hypothesis>=6.165.0",
+    "jsonschema>=4.26.0",
+    "pydantic>=2.13.4",
+    "rich>=15.0.0",
+]
 
 [project.urls]
 homepage = "https://antmicro.github.io/kenning-pipeline-manager/"
@@ -73,6 +80,7 @@ repository = "https://github.com/antmicro/kenning-pipeline-manager"
 
 [project.scripts]
 pipeline_manager = "pipeline_manager.__main__:main"
+schema_fuzzer = "pipeline_manager.schema_fuzzer.cli:app"
 
 [tool.setuptools.packages.find]
 include = [
@@ -80,7 +88,6 @@ include = [
 ]
 exclude = [
     "examples*",
-    "pipeline-manager/schema_fuzzer"
 ]
 namespaces = false
 

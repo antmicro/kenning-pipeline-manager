@@ -11,8 +11,11 @@ from pathlib import Path
 from cyclopts import App
 from rich.console import Console
 
-from schema_fuzzer.generator.context import Context
-from schema_fuzzer.resolver import get_schema_symbols, resolve_references
+from pipeline_manager.schema_fuzzer.generator.context import Context
+from pipeline_manager.schema_fuzzer.resolver import (
+    get_schema_symbols,
+    resolve_references,
+)
 
 app = App()
 console = Console()
