@@ -9,10 +9,11 @@ import os
 import signal
 import subprocess
 import time
+from datetime import datetime
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import BrowserContext, sync_playwright
 
 from pipeline_manager.utils.ports import get_free_port
 
@@ -28,13 +29,21 @@ def pytest_addoption(parser: pytest.Parser):
     """Adds `pytest` parser options."""
     parser.addoption(
         "--frontend-directory",
+        default=None,
         help="Server app frontend directory. By default, "
         "temporary directory is created",
     )
     parser.addoption(
-        "--playwright-trace",
-        help="If provided, playwright trace will be saved in a "
-        "'<NAME>-<TIMESTAMP>.zip'",
+        "--playwright-trace-dir",
+        default="playwright-traces",
+        help="Directory where playwright traces are saved as "
+        "'<TEST_NAME>-<TIMESTAMP>.zip'",
+    )
+    parser.addoption(
+        "--no-playwright-trace",
+        action="store_true",
+        default=False,
+        help="Disable collecting playwright traces",
     )
 
 
@@ -51,16 +60,44 @@ def tcp_server_port() -> int:
 
 
 @pytest.fixture
-def page(rpc_server, backend_port: int):
-    """Fixture to provide a Firefox page with the frontend opened."""
+def browser_context(request: pytest.FixtureRequest):
+    """
+    Fixture to provide a Firefox browser context.
+    """
+    trace = not request.config.getoption("--no-playwright-trace")
     with sync_playwright() as playwright:
         browser = playwright.firefox.launch()
         try:
-            page = browser.new_page(viewport={"width": 1920, "height": 1080})
-            page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{backend_port}")
-            yield page
+            context = browser.new_context(
+                viewport={"width": 1920, "height": 1080}
+            )
+            if trace:
+                context.tracing.start(
+                    screenshots=True,
+                    snapshots=True,
+                    sources=True,
+                )
+            try:
+                yield context
+            finally:
+                if trace:
+                    trace_dir = Path(
+                        request.config.getoption("--playwright-trace-dir")
+                    )
+                    ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+                    context.tracing.stop(
+                        path=trace_dir / f"{request.node.name}-{ts}.zip"
+                    )
         finally:
             browser.close()
+
+
+@pytest.fixture
+def page(rpc_server, browser_context: BrowserContext, backend_port: int):
+    """Fixture to provide a Firefox page with the frontend opened."""
+    page = browser_context.new_page()
+    page.goto(f"{PROTOCOL}://{SERVER_ADDRESS}:{backend_port}")
+    return page
 
 
 @pytest.fixture

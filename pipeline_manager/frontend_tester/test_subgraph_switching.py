@@ -2,9 +2,7 @@
 
 import subprocess
 import time
-from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import pytest
 from playwright.sync_api import Page, expect
@@ -63,7 +61,6 @@ def execute_enter_subgraph_scenario(page: Page):
 
 @pytest.mark.flaky(retries=3, delay=1)
 def test_subgraph_switching(
-    request: pytest.FixtureRequest,
     rpc_server,
     page: Page,
     tcp_server_port: int,
@@ -79,28 +76,9 @@ def test_subgraph_switching(
     ]
     client_process = None
 
-    trace_name: Optional[str] = None
-    tracing_path = request.config.getoption("--playwright-trace", default=None)
-    if tracing_path:
-        assert isinstance(tracing_path, str)
-        path = Path(tracing_path)
-        assert path.suffix == ".zip" or path.suffix == ""
-        trace_name = path.stem
-
     try:
         client_process = subprocess.Popen(args)
-        if trace_name:
-            page.context.tracing.start(
-                screenshots=True,
-                snapshots=True,
-                sources=True,
-            )
-        try:
-            execute_enter_subgraph_scenario(page)
-        finally:
-            if trace_name:
-                ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-                page.context.tracing.stop(path=f"{trace_name}-{ts}.zip")
+        execute_enter_subgraph_scenario(page)
     except Exception as e:
         assert False, str(e)
     finally:

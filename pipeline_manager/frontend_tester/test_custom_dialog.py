@@ -6,9 +6,7 @@
 import subprocess
 import tempfile
 import time
-from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import pytest
 from playwright.sync_api import Page, expect
@@ -117,7 +115,6 @@ def add_remove_dialog_box(page: Page):
 
 @pytest.mark.flaky(retries=3, delay=1)
 def test_custom_dialog(
-    request: pytest.FixtureRequest,
     rpc_server,
     page: Page,
     tcp_server_port: int,
@@ -132,35 +129,16 @@ def test_custom_dialog(
     ]
     client_process = None
 
-    trace_name: Optional[str] = None
-    tracing_path = request.config.getoption("--playwright-trace", default=None)
-    if tracing_path:
-        assert isinstance(tracing_path, str)
-        path = Path(tracing_path)
-        assert path.suffix == ".zip" or path.suffix == ""
-        trace_name = path.stem
-
     subprocess_output = tempfile.TemporaryFile("wb+", 0)
 
     try:
         client_process = subprocess.Popen(
             args, stdout=subprocess_output, bufsize=1, text=True
         )
-        if trace_name:
-            page.context.tracing.start(
-                screenshots=True,
-                snapshots=True,
-                sources=True,
-            )
-        try:
-            open_and_override_dialog_box(page)
-            subprocess_output.seek(0)
-            proc_output = subprocess_output.readline().decode()
-            assert proc_output == f"Task: {TASK_NAME}Task: {ANOTHER_TASK_NAME}"
-        finally:
-            if trace_name:
-                ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-                page.context.tracing.stop(path=f"{trace_name}-{ts}.zip")
+        open_and_override_dialog_box(page)
+        subprocess_output.seek(0)
+        proc_output = subprocess_output.readline().decode()
+        assert proc_output == f"Task: {TASK_NAME}Task: {ANOTHER_TASK_NAME}"
     except Exception as e:
         assert False, str(e)
     finally:
@@ -174,7 +152,6 @@ def test_custom_dialog(
 
 @pytest.mark.flaky(retries=3, delay=1)
 def test_custom_dialog_add_and_rm(
-    request: pytest.FixtureRequest,
     rpc_server,
     page: Page,
     tcp_server_port: int,
@@ -189,35 +166,16 @@ def test_custom_dialog_add_and_rm(
     ]
     client_process = None
 
-    trace_name: Optional[str] = None
-    tracing_path = request.config.getoption("--playwright-trace", default=None)
-    if tracing_path:
-        assert isinstance(tracing_path, str)
-        path = Path(tracing_path)
-        assert path.suffix == ".zip" or path.suffix == ""
-        trace_name = path.stem
-
     subprocess_output = tempfile.TemporaryFile("wb+", 0)
 
     try:
         client_process = subprocess.Popen(
             args, stdout=subprocess_output, bufsize=1, text=True
         )
-        if trace_name:
-            page.context.tracing.start(
-                screenshots=True,
-                snapshots=True,
-                sources=True,
-            )
-        try:
-            add_remove_dialog_box(page)
-            subprocess_output.seek(0)
-            proc_output = subprocess_output.readline().decode()
-            assert proc_output == f"Task: {TASK_NAME}"
-        finally:
-            if trace_name:
-                ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-                page.context.tracing.stop(path=f"{trace_name}-{ts}.zip")
+        add_remove_dialog_box(page)
+        subprocess_output.seek(0)
+        proc_output = subprocess_output.readline().decode()
+        assert proc_output == f"Task: {TASK_NAME}"
     except Exception as e:
         assert False, str(e)
     finally:

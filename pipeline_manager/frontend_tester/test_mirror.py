@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Optional
 
 import pytest
-from playwright.sync_api import Locator, Page, expect, sync_playwright
+from playwright.sync_api import BrowserContext, Locator, Page, expect
 
 from pipeline_manager.utils.ports import get_free_port
 
@@ -82,27 +82,33 @@ def mirror_server(
 
 
 @pytest.fixture
-def mirrored_pages(mirror_server, mirror_ports: tuple[int, int]):
+def mirrored_pages(
+    mirror_server,
+    browser_context: BrowserContext,
+    mirror_ports: tuple[int, int],
+):
     """
     Fixture providing the original Pipeline Manager and its copy,
     both with the dataflow loaded.
     """
-    with sync_playwright() as playwright:
-        browser = playwright.firefox.launch()
-        context = browser.new_context(viewport={"width": 1920, "height": 1080})
-        copy = context.new_page()
-        open_pipeline_manager(copy, mirror_ports[1])
-        original = context.new_page()
-        open_pipeline_manager(original, mirror_ports[0])
+    copy = browser_context.new_page()
+    open_pipeline_manager(copy, mirror_ports[1])
+    original = browser_context.new_page()
+    open_pipeline_manager(original, mirror_ports[0])
+    # Wait until the connection with the mirroring application is fully
+    # initialized.
+    expect(
+        original.locator(".external-app-status .connected")
+    ).to_be_attached(timeout=15000)
 
-        upload_dataflow_file(original)
-        expect_position(
-            get_node(original), NODE_POSITION, timeout=DATAFLOW_LOAD_TIMEOUT
-        )
-        expect_position(
-            get_node(copy), NODE_POSITION, timeout=DATAFLOW_LOAD_TIMEOUT
-        )
-        yield original, copy
+    upload_dataflow_file(original)
+    expect_position(
+        get_node(original), NODE_POSITION, timeout=DATAFLOW_LOAD_TIMEOUT
+    )
+    expect_position(
+        get_node(copy), NODE_POSITION, timeout=DATAFLOW_LOAD_TIMEOUT
+    )
+    return original, copy
 
 
 def open_pipeline_manager(page: Page, port: int):
