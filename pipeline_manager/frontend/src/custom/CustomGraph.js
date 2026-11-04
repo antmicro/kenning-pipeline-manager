@@ -149,8 +149,16 @@ export default function createPipelineManagerGraph(graph) {
         const fromNode = this.findNodeById(from.nodeId);
         const toNode = this.findNodeById(to.nodeId);
 
-        if (fromNode && toNode && fromNode === toNode && !this.editor.allowLoopbacks) {
-            return { connectionAllowed: false, error: 'Loopbacks are not allowed.' };
+        const isComposite = from.isCompositeInterface?.() || from?.parentComposite
+            || to.isCompositeInterface?.() || to?.parentComposite;
+        // Disable loopbacks for composite interfaces
+        if (fromNode && toNode && fromNode === toNode
+            && (!this.editor.allowLoopbacks || isComposite)
+        ) {
+            return {
+                connectionAllowed: false,
+                error: isComposite ? 'Composite interfaces does not support loopback connections' : 'Loopbacks are not allowed.',
+            };
         }
 
         // reverse connection so that 'from' is input and 'to' is output

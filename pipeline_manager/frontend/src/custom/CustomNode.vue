@@ -1486,7 +1486,9 @@ const createContextMenuInterfaceItems = () => {
     const items = [];
     const posMap = interfacePositions.value;
 
-    if (chosenInterface.value !== undefined && !viewModel.value.settings.disableInterfaceExpose) {
+    if (chosenInterface.value !== undefined && !viewModel.value.settings.disableInterfaceExpose
+        && !chosenInterface.value.isCompositeInterface()
+    ) {
         const intfMode = (chosenInterface.value.externalName === undefined ?
             { value: 'SetExternalName', label: 'Expose Interface', icon: icons.Subgraph } :
             { value: 'UnsetExternalName', label: 'Privatize Interface', icon: icons.Subgraph }

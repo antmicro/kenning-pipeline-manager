@@ -108,6 +108,10 @@ export function propagateSideEffects(intf, val) {
  */
 
 /**
+ * @typedef {{type: 'oneSided' | 'twoSided' | undefined, size: number, stubs: Array}} BusInterface
+ */
+
+/**
  * Returns a new class that extends `Base` and carries the custom node interface behavior: a
  * reactive `side` property plus the utility methods and lifecycle methods.
  *
@@ -123,6 +127,46 @@ export function propagateSideEffects(intf, val) {
  */
 export function withCustomNodeFunctions(Base) {
     class Custom extends Base {
+        /**
+         * Stores information about a bus interface.
+         * @type {BusInterface | undefined}
+         */
+        bus = undefined;
+
+        /**
+         * Stores sub-interfaces for a composite interface.
+         * @type {Array | undefined}
+         */
+        composite = undefined;
+
+        /**
+         * If interface is one of sub-interface of composite interface.
+         * Defined only for interfaces in composite interface.
+         * @type {boolean | undefined}
+         */
+        isCompositeSub = undefined;
+
+        /**
+         * Points to parent interface.
+         * Defined only for interfaces in composite interface.
+         * @type {CustomNodeInterface | undefined}
+         */
+        parentComposite = undefined;
+
+        /**
+         * Whether composite interface is expanded.
+         * Defined only for interfaces in composite interface.
+         * @type {boolean | undefined}
+         */
+        compositeExpanded = undefined;
+
+        /**
+         * Stores saved composite interface.
+         * Defined only for interfaces in composite interface.
+         * @type {boolean | undefined}
+         */
+        compositeSaved = undefined;
+
         /**
          * Creates a new interface instance.
          *
@@ -202,6 +246,8 @@ export function withCustomNodeFunctions(Base) {
          * @returns {boolean} True if the interface holds no connections.
          */
         isInterfaceHidable() {
+            // Disable hiding composite interfaces
+            if (this.isCompositeInterface()) return false;
             if (this.bus === undefined) {
                 const subPortsConnected = (this.compositePorts ?? []).some(
                     (port) => (port?.connectionCount ?? 0) > 0,
