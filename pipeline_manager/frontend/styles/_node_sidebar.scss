@@ -6,7 +6,7 @@
 
 .baklava-sidebar {
     position: fixed;
-    min-width: min-content;
+    min-width: 300px;
     max-width: 50vw;
     z-index: 3;
     padding: 0;
@@ -65,10 +65,9 @@
         }
 
         & > .__header {
-            min-height: 4em;
             display: flex;
             gap: 1em;
-            padding: 0 1em;
+            padding: 1.3em 1em;
             width: auto;
 
 
@@ -89,9 +88,10 @@
             & > .__node-name {
                 margin: 0;
                 flex-grow: 1;
-                white-space: nowrap;
-                word-break: break-all;
-                text-wrap: wrap;
+                flex-shrink: 1;
+                white-space: normal;
+                word-break: break-word;
+                overflow-wrap: break-word;
             }
 
             & > .__url {
