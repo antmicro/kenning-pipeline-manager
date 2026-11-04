@@ -20,6 +20,7 @@ The normal (non-positioned) port of a node interface.
             picked: picked,
             '__square': isExposed,
         }"
+        :style="nested >= 1 ? { [intf.side]: `${-1.4 - (nested - 1)*0.3}em` } : {}"
     >
         <ExternalNameInput
             :intf="intf"
@@ -57,5 +58,6 @@ defineProps({
     startHoverWrapper: { type: Function, required: true },
     endHoverWrapper: { type: Function, required: true },
     onMouseDown: { type: Function, required: true },
+    nested: { default: undefined, required: false },
 });
 </script>

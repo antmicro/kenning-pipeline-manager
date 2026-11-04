@@ -22,6 +22,7 @@ created out of an `interfaceComposites` specification entry.
                 '__square': isExposed,
                 '__port_composite_port_hidden': expanded,
             }"
+            :style="nested >= 1 ? { [intf.side]: `${-1.4 - (nested - 1)*0.3}em` } : {}"
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
@@ -66,6 +67,7 @@ created out of an `interfaceComposites` specification entry.
                 :node="node"
                 :picked="picked"
                 :switch-sides="noop"
+                :nested="nested + 1"
             />
         </template>
     </div>
@@ -94,6 +96,7 @@ const props = defineProps({
     endHoverWrapper: { type: Function, required: true },
     onMouseDown: { type: Function, required: true },
     graph: { type: Object, required: true },
+    nested: { default: 0, required: false },
 });
 
 const noop = () => {};

@@ -54,6 +54,7 @@ the root element, and picks the right one for the given interface.
             :start-hover-wrapper="startHoverWrapper"
             :end-hover-wrapper="endHoverWrapper"
             :on-mouse-down="onMouseDown"
+            :nested="nested"
         />
         <InterfacePositioned
             v-if="intf.port && !intf.bus?.size && !hidePort && positioned"
@@ -95,6 +96,7 @@ the root element, and picks the right one for the given interface.
             :start-hover-wrapper="startHoverWrapper"
             :end-hover-wrapper="endHoverWrapper"
             :on-mouse-down="onMouseDown"
+            :nested="nested"
         />
     </div>
 </template>
@@ -134,6 +136,7 @@ export default defineComponent({
         sidebar: { default: false, required: false },
         hidePort: { default: false, required: false },
         tabindexValue: { default: -1, required: false },
+        nested: { default: 0, required: false },
     },
     setup(props) {
         const {
