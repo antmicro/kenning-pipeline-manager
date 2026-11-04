@@ -168,6 +168,22 @@
             & > .__property:last-child {
                 padding-bottom: 1.25em;
             }
+
+            .baklava-select {
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+
+                & > .__selected {
+                    min-width: 0;
+                    width: 100%;
+
+                    & > .__text {
+                        min-width: 0;
+                        white-space: normal;
+                    }
+                }
+            }
         }
 
         & > .__interface_groups {
