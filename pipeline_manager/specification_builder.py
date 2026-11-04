@@ -1377,7 +1377,10 @@ class SpecificationBuilder(object):
         self._nodes[name]["tag"] = tag
 
     def add_node_type_size(
-        self, name: str, width: int, height: Optional[int] = None
+        self,
+        name: str,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
     ):
         """
         Sets node's width and height.
@@ -1386,17 +1389,16 @@ class SpecificationBuilder(object):
         ----------
         name: str
             Name of the node
-        width: int
+        width: Optional[int]
             Width of the node
         height: Optional[int]
             Height of the node
         """
-        self._nodes[name]["width"] = width
-
-        if height is not None:
-            self._nodes[name]["height"] = height
-        elif "height" in self._nodes:
-            del self._nodes[name]["height"]
+        for dim, value in {"width": width, "height": height}.items():
+            if value is not None:
+                self._nodes[name][dim] = value
+            elif dim in self._nodes:
+                del self._nodes[name][dim]
 
     def add_node_type_style(self, name: str, style: Style):
         """
