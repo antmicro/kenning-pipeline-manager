@@ -353,6 +353,7 @@ class RPCMethods:
                 "name": "Validate",
                 "iconName": "Validate",
                 "procedureName": "dataflow_validate",
+                "openUrl": "https://json-schema.org/",
             },
             {
                 "name": "Create writable terminal",
@@ -363,6 +364,11 @@ class RPCMethods:
                 "name": "Open user dialog",
                 "iconName": "Run",
                 "procedureName": "custom_open_user_dialog_box",
+            },
+            {
+                "name": "Go to Kenning website",
+                "iconName": "Backend",
+                "openUrl": "https://antmicro.com/kenning/",
             },
         ]
 
