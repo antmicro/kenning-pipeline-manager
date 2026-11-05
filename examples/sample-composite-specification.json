@@ -29,7 +29,7 @@
                 },
                 {
                     "name": "monitor",
-                    "type": "channel",
+                    "type": "signal",
                     "direction": "input"
                 }
             ],
@@ -102,19 +102,19 @@
             },
             {
                 "name": "W",
-                "type": "signal"
+                "type": "wsig"
             },
             {
                 "name": "B",
-                "type": "signal"
+                "type": "bsig"
             },
             {
                 "name": "AR",
-                "type": "signal"
+                "type": "arsig"
             },
             {
                 "name": "R",
-                "type": "signal"
+                "type": "rsig"
             }
         ],
         "aw": [
@@ -144,7 +144,7 @@
             },
             {
                 "name": "LOCK",
-                "type": "signal"
+                "type": "awlocksig"
             },
             {
                 "name": "CACHE",
@@ -160,15 +160,15 @@
             },
             {
                 "name": "USER",
-                "type": "signal"
+                "type": "awusersig"
             },
             {
                 "name": "VALID",
-                "type": "signal"
+                "type": "awvalidsig"
             },
             {
                 "name": "READY",
-                "type": "awready"
+                "type": "awreadysig"
             }
         ],
         "awid": [
