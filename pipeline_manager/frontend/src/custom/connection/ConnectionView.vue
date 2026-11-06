@@ -58,6 +58,9 @@ import { Components, useGraph, useViewModel } from '@baklavajs/renderer-vue';
 import doubleClick from '../../core/doubleClick';
 import Anchor from '../../components/Anchor.vue';
 import EditorManager from '../../core/EditorManager';
+import {
+    startTransaction, commitTransaction,
+} from '../../core/History.ts';
 
 /* eslint-disable vue/no-mutating-props,no-param-reassign */
 export default defineComponent({
@@ -138,7 +141,12 @@ export default defineComponent({
         const onMouseDown = doubleClick(700, (ev) => {
             if (!viewModel.value.editor.readonly) {
                 ev.preventDefault();
-                graph.value.removeConnection(props.connection);
+                startTransaction();
+                const { from, to } = props.connection;
+                graph.value.connections
+                    .filter((c) => c.from.id === from.id && c.to.id === to.id)
+                    .forEach((c) => graph.value.removeConnection(c));
+                commitTransaction();
             }
         });
 
