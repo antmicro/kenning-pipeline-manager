@@ -136,15 +136,17 @@ function expandCompositeInterfaces(intf, graph) {
 
     const remembered = intf.compositeReturn ?? {};
     Object.entries(remembered).forEach(([connectionId, subId]) => {
+        delete remembered[connectionId];
         const connection = graph?.connections.find((c) => c.id === connectionId);
         const port = (intf.compositePorts ?? []).find((p) => p?.id === subId);
-        const side = connection === undefined ? undefined : endpointSide(connection, intf);
-        if (connection === undefined || port === undefined || side === undefined) {
-            delete remembered[connectionId];
-            return;
-        }
+        if (connection === undefined) return;
+        let side = endpointSide(connection, intf);
+        if (side === undefined) return;
         rehomeEndpoint(connection, side, port);
-        delete remembered[connectionId];
+        // if loopback
+        side = endpointSide(connection, intf);
+        if (side === undefined) return;
+        rehomeEndpoint(connection, side, port);
     });
 
     // eslint-disable-next-line no-param-reassign
@@ -173,9 +175,13 @@ function collapseCompositeInterfaces(intf, graph) {
     (intf.compositePorts ?? []).forEach((port) => {
         if (port === undefined) return;
         [...connections].forEach((connection) => {
-            const side = endpointSide(connection, port);
+            let side = endpointSide(connection, port);
             if (side === undefined) return;
             remembered[connection.id] = port.id;
+            rehomeEndpoint(connection, side, intf);
+            // check if loopback
+            side = endpointSide(connection, port);
+            if (side === undefined) return;
             rehomeEndpoint(connection, side, intf);
         });
     });
