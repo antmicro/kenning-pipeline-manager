@@ -133,6 +133,10 @@
                             "array"
                         ]
                     },
+                    "array": {
+                        "description": "Used to define multiple similar interfaces using only one entry",
+                        "$ref": "#/$defs/interfacesRangeArray"
+                    },
                     "direction": {
                         "description": "Tells whether the connector is input, output, or both",
                         "enum": [

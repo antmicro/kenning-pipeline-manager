@@ -1711,7 +1711,12 @@ export default class EditorManager {
             });
         }
 
-        setInterfaceCompositeTypes(dataflowSpecification.interfaceComposites);
+        try {
+            setInterfaceCompositeTypes(dataflowSpecification.interfaceComposites);
+        } catch (e) {
+            errors.push(e);
+            return { errors, warnings };
+        }
 
         resolvedNodes.forEach((node) => {
             errors.push(...this.validateNodeStyle(node));

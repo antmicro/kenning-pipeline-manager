@@ -18,6 +18,32 @@ import { v4 as uuidv4 } from 'uuid';
 const interfaceCompositeTypes = new Map();
 
 /**
+ * Parses the composite type definition.
+ *
+ * @param {Object} composite - A composite type definition.
+ * @returns {Object | Array} The single definition, or the list of definitions
+ * expanded from the type.
+ * @throws {Error} When the `array` field is present but is not a list of
+ * exactly two elements.
+ */
+function parseCompositeTypeDefinition(composite) {
+    if (composite.array) {
+        const compArr = [];
+        const ogName = composite.name;
+        if (!Array.isArray(composite.array) || composite.array.length !== 2) {
+            throw new Error(`Composite type 'array' should have exactly two elements`);
+        }
+        const [left, right] = composite.array;
+
+        for (let j = left; j < right; j += 1) {
+            const name = `${ogName}[${j}]`;
+            compArr.push({ ...composite, name });
+        }
+        return compArr;
+    }
+    return composite;
+}
+/**
  * (Re)loads the composite interface definitions from the specification.
  *
  * @param {Object | undefined} composites Contents of the specification's
@@ -28,7 +54,8 @@ export function setInterfaceCompositeTypes(composites) {
     interfaceCompositeTypes.clear();
     Object.entries(composites ?? {}).forEach(([name, definition]) => {
         if (Array.isArray(definition) && definition.length > 0) {
-            interfaceCompositeTypes.set(name, definition);
+            const parsedDefinition = definition.flatMap((d) => parseCompositeTypeDefinition(d));
+            interfaceCompositeTypes.set(name, parsedDefinition);
         }
     });
 }
