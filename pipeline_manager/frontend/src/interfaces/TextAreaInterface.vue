@@ -38,6 +38,7 @@ import {
     computed, defineComponent, ref, reactive, nextTick,
 } from 'vue';
 import showdown from 'showdown';
+import DOMPurify from 'dompurify';
 import { useResizeObserver } from '@vueuse/core';
 import { useViewModel } from '@baklavajs/renderer-vue';
 
@@ -72,7 +73,7 @@ export default defineComponent({
         });
 
         const renderedMarkdown = computed(() => {
-            let html = converter.makeHtml(props.modelValue);
+            let html = DOMPurify.sanitize(converter.makeHtml(props.modelValue));
             const aTagRe = /<a href="[a-zA-Z0-9-$_.+!*'()/&?=:%]+">/gm;
             html.match(aTagRe)?.forEach((match) => {
                 const hrefParts = match.split('"');

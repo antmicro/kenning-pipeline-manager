@@ -197,6 +197,7 @@ SPDX-License-Identifier: Apache-2.0
 import { computed, defineComponent, watch, ref, nextTick } from 'vue'; // eslint-disable-line object-curly-newline
 import { CheckboxInterface, ButtonInterface } from '@baklavajs/renderer-vue'; // eslint-disable-line object-curly-newline
 import showdown from 'showdown';
+import DOMPurify from 'dompurify';
 import CustomInterface from './CustomInterface.vue';
 import Cross from '../icons/Cross.vue';
 import Visible from '../icons/Visible.vue';
@@ -247,7 +248,7 @@ export default defineComponent({
         ).subgraphId);
 
         const desc = computed(() => {
-            let html = converter.makeHtml(node.value?.description ?? '');
+            let html = DOMPurify.sanitize(converter.makeHtml(node.value?.description ?? ''));
             const aTagRe = /<a href="[a-zA-Z0-9-$_.+!*'()/&?=:%]+">/gm;
             html.match(aTagRe)?.forEach((match) => {
                 const hrefParts = match.split('"');
