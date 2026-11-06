@@ -164,7 +164,7 @@ function getConnection(graph_id: string, from: string, to: string): any {
  *
  * @param title
  */
-export async function open_dialog_request(params: { title: string, wait: boolean }) {
+export async function dialog_open(params: { title: string, wait: boolean }) {
     const { viewModel } = useViewModel();
     const { userMenus } = viewModel.value.editor as unknown as PipelineManagerEditor;
 
