@@ -388,8 +388,7 @@
                     "type": "string"
                 },
                 "connectionStyle": {
-                    "description": "Connection style for graph",
-                    "type": "string"
+                    "$ref": "metadata_schema.json#/$defs/connection_style"
                 }
             },
             "additionalProperties": true

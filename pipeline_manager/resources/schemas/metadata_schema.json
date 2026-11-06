@@ -75,14 +75,7 @@
             "default": false
         },
         "connectionStyle": {
-            "enum": [
-                "curved",
-                "orthogonal",
-                "alternativeOrthogonal",
-                "switchableOrthogonal",
-                "straight"
-            ],
-            "description": "Defines connection style",
+            "$ref": "#/$defs/connection_style",
             "default": "curved"
         },
         "hideHud": {
@@ -417,6 +410,17 @@
                 "procedureName"
             ],
             "additionalProperties": false
+        },
+        "connection_style": {
+            "enum": [
+                "curved",
+                "orthogonal",
+                "alternativeOrthogonal",
+                "switchableOrthogonal",
+                "straight"
+            ],
+            "description": "Defines connection style",
+            "default": "curved"
         }
     },
     "additionalProperties": false
