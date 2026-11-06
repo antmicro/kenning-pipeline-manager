@@ -173,272 +173,65 @@
         ],
         "awid": [
             {
-                "name": "ID[0]",
-                "type": "signal"
-            },
-            {
-                "name": "ID[1]",
-                "type": "signal"
-            },
-            {
-                "name": "ID[2]",
-                "type": "signal"
-            },
-            {
-                "name": "ID[3]",
-                "type": "signal"
+                "name": "ID",
+                "type": "signal",
+                "array": [0, 4]
             }
         ],
         "awaddr": [
             {
-                "name": "ADDR[0]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[1]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[2]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[3]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[4]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[5]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[6]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[7]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[8]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[9]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[10]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[11]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[12]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[13]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[14]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[15]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[16]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[17]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[18]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[19]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[20]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[21]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[22]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[23]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[24]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[25]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[26]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[27]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[28]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[29]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[30]",
-                "type": "signal"
-            },
-            {
-                "name": "ADDR[31]",
-                "type": "signal"
+                "name": "ADDR",
+                "type": "signal",
+                "array": [0, 32]
             }
         ],
         "awregion": [
             {
-                "name": "REGION[0]",
-                "type": "signal"
-            },
-            {
-                "name": "REGION[1]",
-                "type": "signal"
-            },
-            {
-                "name": "REGION[2]",
-                "type": "signal"
-            },
-            {
-                "name": "REGION[3]",
-                "type": "signal"
+                "name": "REGION",
+                "type": "signal",
+                "array": [0, 4]
             }
         ],
         "awlen": [
             {
-                "name": "LEN[0]",
-                "type": "signal"
-            },
-            {
-                "name": "LEN[1]",
-                "type": "signal"
-            },
-            {
-                "name": "LEN[2]",
-                "type": "signal"
-            },
-            {
-                "name": "LEN[3]",
-                "type": "signal"
-            },
-            {
-                "name": "LEN[4]",
-                "type": "signal"
-            },
-            {
-                "name": "LEN[5]",
-                "type": "signal"
-            },
-            {
-                "name": "LEN[6]",
-                "type": "signal"
-            },
-            {
-                "name": "LEN[7]",
-                "type": "signal"
+                "name": "LEN",
+                "type": "signal",
+                "array": [0, 8]
             }
         ],
         "awsize": [
             {
-                "name": "SIZE[0]",
-                "type": "signal"
-            },
-            {
-                "name": "SIZE[1]",
-                "type": "signal"
-            },
-            {
-                "name": "SIZE[2]",
-                "type": "signal"
+                "name": "SIZE",
+                "type": "signal",
+                "array": [0, 3]
             }
         ],
         "awburst": [
             {
-                "name": "BURST[0]",
-                "type": "signal"
-            },
-            {
-                "name": "BURST[1]",
-                "type": "signal"
+                "name": "BURST",
+                "type": "signal",
+                "array": [0, 2]
             }
         ],
         "awcache": [
             {
-                "name": "CACHE[0]",
-                "type": "signal"
-            },
-            {
-                "name": "CACHE[1]",
-                "type": "signal"
-            },
-            {
-                "name": "CACHE[2]",
-                "type": "signal"
-            },
-            {
-                "name": "CACHE[3]",
-                "type": "signal"
+                "name": "CACHE",
+                "type": "signal",
+                "array": [0, 4]
             }
         ],
         "awprot": [
             {
-                "name": "PROT[0]",
-                "type": "signal"
-            },
-            {
-                "name": "PROT[1]",
-                "type": "signal"
-            },
-            {
-                "name": "PROT[2]",
-                "type": "signal"
+                "name": "PROT",
+                "type": "signal",
+                "array": [0, 3]
             }
         ],
         "awqos": [
             {
-                "name": "QOS[0]",
-                "type": "signal"
-            },
-            {
-                "name": "QOS[1]",
-                "type": "signal"
-            },
-            {
-                "name": "QOS[2]",
-                "type": "signal"
+                "name": "QOS",
+                "type": "signal",
+                "array": [0, 3]
             }
         ]
     },
