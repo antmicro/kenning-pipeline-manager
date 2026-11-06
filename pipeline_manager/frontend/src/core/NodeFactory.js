@@ -1477,6 +1477,7 @@ export function updateSubgraphInterfaces(nodes, inputs = [], outputs = []) {
                 side: checkInterfaceSide(intf.side),
                 direction: intf.direction,
                 sidePosition: undefined,
+                ...(intf.isCompositeInterface() && { composite: intf.composite }),
             });
         } else {
             container[idx].name = intf.externalName;

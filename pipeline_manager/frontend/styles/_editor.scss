@@ -161,7 +161,8 @@
         }
     }
 
-    & > .__square {
+    & > .__square,
+    .__port_composite > .__square {
         border-radius: 10%;
     }
     .__port_name_left,
