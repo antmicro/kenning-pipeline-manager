@@ -391,7 +391,7 @@ export default function createPipelineManagerGraph(graph) {
         );
 
         connections.forEach((conn) => {
-            this.removeConnection(conn, false);
+            this.removeConnection(conn, true);
         });
 
         const connectionsToRestore = [];
@@ -553,7 +553,7 @@ export default function createPipelineManagerGraph(graph) {
         this._nodes = [];
         this.clearNodeViews();
     };
-    graph.removeConnection = function removeConnection(connection, deleteOrphanStubs = true) {
+    graph.removeConnection = function removeConnection(connection, skipBusEndpoints = false) {
         if (!this.connections.includes(connection)) {
             return;
         }
@@ -561,11 +561,11 @@ export default function createPipelineManagerGraph(graph) {
             return;
         }
         // Handling bus endpoints
-        Object.values([connection.to, connection.from]).forEach((intf) => {
-            if (intf.parent) {
-                intf.parent.removeStub(intf, !deleteOrphanStubs);
-            }
-        });
+        if (!skipBusEndpoints) {
+            Object.values([connection.to, connection.from]).forEach((intf) => {
+                intf.onConnectionRemove();
+            });
+        }
         connection.destruct();
         this._connections.splice(this.connections.indexOf(connection), 1);
         this.events.removeConnection.emit(connection);

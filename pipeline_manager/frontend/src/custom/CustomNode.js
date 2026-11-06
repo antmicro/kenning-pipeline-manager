@@ -29,7 +29,7 @@ export function hideUnconnectedInterfaces(interfaces) {
     });
     const filtered = interfaces.filter((intf) =>
         (!intf.isBusInterface() || intf.getBusStubs().length === 0)
-        && !intf.isGrouped() && !intf.isCompositeInterface());
+        && !intf.isGrouped());
     filtered.forEach(
         (i) => {
             if (i.connectionCount === 0 && i.port === true) {

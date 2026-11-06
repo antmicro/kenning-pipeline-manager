@@ -79,6 +79,7 @@ export function createStub(intf, offset = undefined, stubID = undefined, stubSid
     stub.parent = intf;
     // needed for when the connection creation succeeds
     stub.postConnectionCheck = intf.postConnectionCheck.bind(stub);
+    stub.onConnectionRemove = intf.onConnectionRemove.bind(stub);
     return stub;
 }
 
@@ -429,6 +430,24 @@ export function withCustomNodeFunctions(Base) {
                 // eslint-disable-next-line no-param-reassign
                 this.parent.connectionCount += 1;
                 this.parent.bus.stubs.push(this);
+            }
+            if (this.parentComposite) {
+                this.parentComposite.connectionCount += 1;
+                this.parentComposite.postConnectionCheck();
+            }
+        }
+
+        /**
+         * Runs cleanup when connection is removed.
+         */
+        onConnectionRemove() {
+            if (this.parent) {
+                this.parent.removeStub(this);
+            }
+            if (this.parentComposite) {
+                this.parentComposite.connectionCount =
+                    Math.max(this.parentComposite.connectionCount - 1, 0);
+                this.parentComposite.onConnectionRemove();
             }
         }
 

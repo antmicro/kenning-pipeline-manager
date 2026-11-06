@@ -115,11 +115,13 @@ function rehomeEndpoint(connection, side, endpoint) {
                 (c) => c.id !== connection.id,
             );
         }
+        previous.onConnectionRemove();
     }
     target.connectionCount = (target.connectionCount ?? 0) + 1;
     if (!Array.isArray(target.connections)) {
         target.connections = [];
     }
+    target.postConnectionCheck();
     target.connections.push(connection);
 }
 
