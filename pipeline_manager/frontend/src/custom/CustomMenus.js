@@ -36,6 +36,9 @@ export default class CustomMenusManager {
         ],
     );
 
+    // reference to editor manager
+    editorManager = undefined;
+
     /**
     * A setter which is a wrapper for a navbar components.
     * @param {boolean} val Whether to close user dialog box,
@@ -43,8 +46,15 @@ export default class CustomMenusManager {
     */
     set showCustomDialogWithReset(val) {
         if (!val) {
-            this.resetUserDialog();
-            this.showCustomDialog = false;
+            const appManager = this.editorManager?.externalApplicationManager;
+            if (appManager !== undefined) {
+                appManager.requestUserDialogRead({}).then(() => {
+                    this.showCustomDialog = false;
+                });
+            } else {
+                this.showCustomDialog = false;
+                this.resetUserDialog();
+            }
         }
     }
 

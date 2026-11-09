@@ -182,6 +182,7 @@ export default class EditorManager {
 
     constructor() {
         this.editor.editorManager = this;
+        this.editor.userMenus.editorManager = this;
 
         // Baklava's view registers subgraph input and output nodes
         // This call un-registers them as obsolete
