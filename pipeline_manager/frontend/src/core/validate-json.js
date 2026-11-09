@@ -7,6 +7,7 @@
 import { stringify } from 'ajv';
 import jsonMap from 'json-source-map';
 import jsonlint from 'jsonlint';
+import CombinedError from './errors.js';
 
 export const parseJSON = (json) => {
     let result;
@@ -34,7 +35,7 @@ export default function validateJSON(ajv, schema, data, reference = '') {
     ajv.removeSchema('root').removeSchema(schema.$id).addSchema(schema, 'root');
     const validate = ajv.getSchema(`root${reference}`);
     if (validate === undefined) {
-        return [`Invalid value of "reference" parameter: ${reference}`];
+        return [new Error(`Invalid value of "reference" parameter: ${reference}`)];
     }
 
     const isTextFormat = typeof data === 'string';
@@ -43,7 +44,7 @@ export default function validateJSON(ajv, schema, data, reference = '') {
     try {
         dataJSON = isTextFormat ? parseJSON(data) : data;
     } catch (exception) {
-        return [`Not a proper JSON file: ${exception.toString()}`];
+        return [new CombinedError('Not a proper JSON file', [exception])];
     }
 
     const valid = validate(dataJSON);
@@ -99,5 +100,5 @@ export default function validateJSON(ajv, schema, data, reference = '') {
         }
     }) ?? [];
 
-    return errors.filter((err) => err !== '');
+    return errors.filter((err) => err !== '').map((err) => new Error(err));
 }

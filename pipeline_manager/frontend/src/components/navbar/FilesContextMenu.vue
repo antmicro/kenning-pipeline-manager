@@ -136,13 +136,13 @@ export default {
                         NotificationHandler.terminalLog(
                             'error',
                             'Not a proper JSON file',
-                            exception.toString(),
+                            exception,
                         );
                     } else {
                         NotificationHandler.terminalLog(
                             'error',
                             'Unknown error',
-                            exception.toString(),
+                            exception,
                         );
                     }
                     return;
@@ -161,7 +161,7 @@ export default {
             renderGraphImage('svg')
                 .then((dataUrl) => saveDataUrl(dataUrl, 'dataflow.svg'))
                 .catch((error) => {
-                    NotificationHandler.showToast('error', `Export to SVG failed: ${error}`);
+                    NotificationHandler.terminalLog('error', 'Export to SVG failed', error);
                 });
         },
         /**

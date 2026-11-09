@@ -365,11 +365,11 @@ export const exportGraph = {
 
     exportCallback() {
         if (this.width < 0) {
-            NotificationHandler.showToast('error', `Negative width. The image could not be saved.`);
+            NotificationHandler.terminalLog('error', `Negative width. The image could not be saved.`);
             return;
         }
         if (this.height < 0) {
-            NotificationHandler.showToast('error', `Negative height. The image could not be saved.`);
+            NotificationHandler.terminalLog('error', `Negative height. The image could not be saved.`);
             return;
         }
         if (this.width > this.maxWidth) {
@@ -384,7 +384,7 @@ export const exportGraph = {
         renderGraphImage('png', this.width, this.height)
             .then((dataUrl) => saveDataUrl(dataUrl, this.saveName))
             .catch((error) => {
-                NotificationHandler.showToast('error', `Export to PNG failed: ${error}`);
+                NotificationHandler.terminalLog('error', `Export to PNG failed`, error);
             });
     },
 

@@ -372,8 +372,7 @@ export default defineComponent({
                     editorManager,
                 });
             } catch (error) {
-                const messages = Array.isArray(error) ? error : [error];
-                NotificationHandler.terminalLog('error', 'Validation failed', messages);
+                NotificationHandler.terminalLog('error', 'Validation failed', error);
             }
         };
 

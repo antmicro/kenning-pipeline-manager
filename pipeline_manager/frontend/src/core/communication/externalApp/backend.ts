@@ -95,7 +95,7 @@ export default class ExternalBackendApp implements ExternalApp {
                             .map(async (chunk) => {
                                 const ack = await this.socket.emitWithAck('external-api', chunk);
                                 if (ack !== undefined && !ack) {
-                                    NotificationHandler.terminalLog('error', 'Response to external app was not sent', null);
+                                    NotificationHandler.terminalLog('error', 'Response to external app was not sent');
                                 }
                             }));
                     } catch (error) {
@@ -104,7 +104,7 @@ export default class ExternalBackendApp implements ExternalApp {
                 } else {
                     const ack = await this.socket.emitWithAck('external-api', response);
                     if (ack !== undefined && !ack) {
-                        NotificationHandler.terminalLog('error', 'Response to external app was not sent', null);
+                        NotificationHandler.terminalLog('error', 'Response to external app was not sent');
                     }
                 }
             }
@@ -184,7 +184,7 @@ export default class ExternalBackendApp implements ExternalApp {
             const error = unknownError as JSONRPCError;
             const errorCode = error.code ?? JSONRPCCustomErrorCode.EXCEPTION_RAISED;
             const messageType = (errorCode !== JSONRPCCustomErrorCode.NEWER_SESSION_AVAILABLE) ? 'warning' : 'info';
-            NotificationHandler.terminalLog(messageType, error.message, undefined);
+            NotificationHandler.terminalLog(messageType, 'Error on external_app_connect', error);
             return false;
         }
     }

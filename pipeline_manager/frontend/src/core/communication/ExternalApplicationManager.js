@@ -490,7 +490,7 @@ class ExternalApplicationManager {
         }
         const dataflow = await readerPromise;
         if (!dataflow) {
-            NotificationHandler.showToast('error', 'File cannot be loaded');
+            NotificationHandler.terminalLog('error', 'File cannot be loaded');
             return;
         }
 

@@ -217,11 +217,11 @@ export function validateInterfaceGroups(enabledInterfaceGroups, inputs, outputs)
     const errorMessages = [];
 
     errors.forEach(([parsedIntfName, intfDirection, groupName, groupDirection]) => {
-        errorMessages.push(
+        errorMessages.push(new Error(
             `Interface of name '${parsedIntfName}' and direction '${intfDirection}' has been reused ` +
                 `by interface group named '${groupName}' of direction '${groupDirection}'. ` +
                 `Make sure your interface groups are disjoint.`,
-        );
+        ));
     });
 
     return errorMessages;

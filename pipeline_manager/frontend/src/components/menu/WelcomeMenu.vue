@@ -161,6 +161,7 @@ export default defineComponent({
         top: auto !important;
         width: 100% !important;
         height: 100% !important;
+        max-height: 100vh !important;
         padding: 0rem !important;
         margin: 0 !important;
         border: none !important;

@@ -683,9 +683,10 @@ const onContextMenuTitleClick = async (action) => {
             openSidebar();
             break;
         case 'editSubgraph': {
-            const errors = viewModel.value.editor.switchToSubgraph(props.node);
-            if (Array.isArray(errors) && errors.length) {
-                NotificationHandler.terminalLog('error', 'Dataflow is invalid', errors);
+            try {
+                viewModel.value.editor.switchToSubgraph(props.node);
+            } catch (exception) {
+                NotificationHandler.terminalLog('error', 'Dataflow is invalid', exception);
             }
             if (props.node.extending?.length) {
                 NotificationHandler.terminalLog('warning', 'Subgraph restricted', 'Editing extending subgraph is not currently supported');

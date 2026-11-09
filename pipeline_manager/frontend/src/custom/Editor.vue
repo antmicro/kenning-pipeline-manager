@@ -1021,11 +1021,8 @@ export default defineComponent({
                 if (status === false) {
                     NotificationHandler.terminalLog(
                         'error',
-                        ret,
-                    );
-                    NotificationHandler.terminalLog(
-                        'error',
                         `Failed to load the specification file from: ${urlParams.get('spec')}`,
+                        ret,
                     );
                 } else {
                     specText = ret;
@@ -1059,11 +1056,8 @@ export default defineComponent({
                     if (status === false) {
                         NotificationHandler.terminalLog(
                             'error',
-                            ret,
-                        );
-                        NotificationHandler.terminalLog(
-                            'error',
                             `Failed to load the graph file from: ${urlParams.get('graph')}`,
+                            ret,
                         );
                     } else {
                         dataflow = ret;
@@ -1084,7 +1078,7 @@ export default defineComponent({
         };
 
         const loadFiles = async (files) => loadingScreen(async () => {
-            const notify = NotificationHandler.showToast;
+            const notify = NotificationHandler.terminalLog;
 
             if (files.length > 3) {
                 notify('error', `Up to three files supported, inserted: ${files.length}`);

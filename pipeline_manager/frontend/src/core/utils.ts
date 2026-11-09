@@ -69,7 +69,7 @@ export const loadingScreen = async (
         await callback();
     } catch (error) {
         if (log) {
-            NotificationHandler.terminalLog('error', 'Unexpected error', (error as Error).message);
+            NotificationHandler.terminalLog('error', 'Unexpected error', error as Error);
         }
     } finally {
         loadEvent.emit(false);

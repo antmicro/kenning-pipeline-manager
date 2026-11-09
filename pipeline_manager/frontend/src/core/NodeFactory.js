@@ -46,6 +46,7 @@ import GraphTemplate from '../custom/CustomGraphTemplate.js';
 import globalProperties from '../globalProperties.ts';
 
 import { ir } from './interfaceRegistry.ts';
+import CombinedError from './errors.js';
 
 import { terminalStore } from './stores.js';
 
@@ -151,7 +152,7 @@ export function parseProperties(properties) {
         return errors;
     }
     if (errors.length) {
-        terminalStore.addParsed('Error during parse properties', errors.toString());
+        terminalStore.addParsed('Error during parse properties', errors.map((error) => error.message));
     }
 
     return parsedProperties;
@@ -509,7 +510,7 @@ function resolveDiscrepancies(parsedState, inputs, outputs) {
     newState.outputs = Object.fromEntries(parsedOutputs);
 
     if (errors.length) {
-        terminalStore.addParsed('Error during discrepancies resolvement', errors.toString());
+        terminalStore.addParsed('Error during discrepancies resolvement', errors.map((error) => error.message));
     }
 
     return newState;
@@ -765,7 +766,7 @@ export class CustomNode extends Node {
 
         const out = parseInterfaces(interfaces, [], []);
         if (Array.isArray(out) && out.length) {
-            throw new Error(`Internal error, node ${this.type} invalid. Reason: ${out.join(' ')}`);
+            throw new CombinedError(`Internal error, node ${this.type} invalid.`, out);
         }
         const { inputs: newInputs, outputs: newOutputs } = out;
 
@@ -1327,20 +1328,20 @@ export function CustomNodeFactory(
 ) {
     const generatedProperties = generateProperties(interfaces);
     if (!generatedProperties.success) {
-        return generatedProperties.value.map((error) => `Node ${name} invalid. ${error}`);
+        return [new CombinedError(`Node ${name} invalid.`, generatedProperties.value)];
     }
 
     const parsedInterfaces = parseInterfaces(interfaces, interfaceGroups, defaultInterfaceGroups);
     // If parsedInterfaces returns an array, it is an array of errors
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        return parsedInterfaces.map((error) => `Node ${name} invalid. ${error}`);
+        return [new CombinedError(`Node ${name} invalid.`, parsedInterfaces)];
     }
     const [inputs, newOutputs] = createBaklavaInterfaces(parsedInterfaces);
 
     const parsedProperties = parseProperties([...properties, ...generatedProperties.value]);
     // If parsedProperties returns an array, it is an array of errors
     if (Array.isArray(parsedProperties) && parsedProperties.length) {
-        return parsedProperties.map((error) => `Node ${name} invalid. ${error}`);
+        return [new CombinedError(`Node ${name} invalid.`, parsedProperties)];
     }
     const createdProperties = createProperties(parsedProperties);
 
@@ -1554,7 +1555,8 @@ export function updateSubgraphProperties(nodes) {
  */
 export function GraphFactory(nodes, connections, name, editor) {
     const parsedState = nodes.map((node) => parseNodeState(node));
-    const errorMessages = parsedState.filter((n) => typeof n === 'string');
+    // parseNodeState returns an array of errors on failure, not a single error
+    const errorMessages = parsedState.filter((n) => Array.isArray(n)).flat();
     if (errorMessages.length) {
         return errorMessages;
     }

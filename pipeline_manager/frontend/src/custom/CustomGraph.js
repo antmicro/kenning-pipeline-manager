@@ -21,6 +21,7 @@ import {
     findPortInHierarchy,
 } from './compositeInterfaces.js';
 import GraphTemplate from './CustomGraphTemplate.js';
+import CombinedError from '../core/errors.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -714,7 +715,7 @@ export default function createPipelineManagerGraph(graph) {
                 }
                 const nodeErrors = node.load(n);
                 if (Array.isArray(nodeErrors) && nodeErrors.length) {
-                    nodesErrors.push(new Error(`Node '${node.type}' with id ${specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, n.id)} is invalid:`), ...nodeErrors);
+                    nodesErrors.push(new CombinedError(`Node '${node.type}' with id ${specOrGenerated(state.graphLoadingState?.newToSpecNodeIds, n.id)} is invalid:`, nodeErrors));
                 }
                 // check for bus stubs not connected to anything
                 n.interfaces?.filter((i) => i.bus?.stubs !== undefined).forEach((intf) => {
@@ -770,7 +771,7 @@ export default function createPipelineManagerGraph(graph) {
 
                 const connIdLabel =
                     specOrGenerated(state.graphLoadingState?.newToSpecConnIds, c.id);
-                connectionsErrors.push(new Error(`Connection ${connIdLabel} is invalid:`), ...connectionErrors);
+                connectionsErrors.push(new CombinedError(`Connection ${connIdLabel} is invalid:`, connectionErrors));
             } else {
                 // Manually adding connections instead of using `addConnection` from baklavajs
                 // as we want to get a feedback message from `checkConnection` function
@@ -819,7 +820,7 @@ export default function createPipelineManagerGraph(graph) {
             }
         });
 
-        if (connectionsErrors.length) errors.push(new Error('Connection errors:'), ...connectionsErrors);
+        if (connectionsErrors.length) errors.push(new CombinedError('Connection errors:', connectionsErrors));
 
         this.hooks.load.execute(state);
         return errors;

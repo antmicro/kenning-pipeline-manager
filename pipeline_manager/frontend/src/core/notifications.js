@@ -14,6 +14,7 @@ import { createToastInterface, POSITION } from 'vue-toastification';
 import { notificationStore, terminalStore } from './stores.js';
 import Notification from '../components/Notification.vue';
 import EditorManager from './EditorManager';
+import CombinedError from './errors.js';
 
 const toast = createToastInterface({
     timeout: 5000,
@@ -32,6 +33,8 @@ export default class NotificationHandler {
     static NotificationHandler = true;
 
     static defaultShowOption = true;
+
+    static showNotifications = true;
 
     /**
      * Sets the showNotification flag. If set to false, no popup
@@ -71,7 +74,7 @@ export default class NotificationHandler {
     }
 
     static showToast(type, message, timestamp = null, showPopUp = false) {
-        const timestampCurrent = timestamp ?? this.#currentTimestamp();
+        const timestampCurrent = timestamp ?? NotificationHandler.#currentTimestamp();
 
         const content = {
             component: Notification,
@@ -109,34 +112,52 @@ export default class NotificationHandler {
      * messages messages that are displayed in the terminal
      * @param {string | null} timestamp timestamp that is displayed alongside messages
      */
-    static terminalLog(type, title, messages, timestamp = null) {
+    static terminalLog(type, title, messages = undefined, timestamp = null) {
         function flatten(arr) {
             return arr.reduce((flat, toFlatten) =>
                 flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten), []);
         }
 
         NotificationHandler.showToast(type, title, timestamp);
-        let timestampCurrent = timestamp ?? `[${this.#currentTimestamp()}]`;
+        let timestampCurrent = timestamp ?? `[${NotificationHandler.#currentTimestamp()}]`;
         if (timestampCurrent) {
             timestampCurrent += ' ';
         }
         let messagesArray;
-        if (!Array.isArray(messages)) {
+        if (messages === undefined) {
+            messagesArray = [title];
+        } else if (!Array.isArray(messages)) {
             messagesArray = [messages];
         } else {
             messagesArray = messages;
         }
+        const isDev = process.env.NODE_ENV === 'development';
+        if (isDev && type === 'error' && !messagesArray.some((m) => (m instanceof Error))) {
+            // If errors weren't passed to the terminalLog create one
+            messagesArray[0] = new Error(messagesArray[0]);
+            // and remove first entry (with the terminalLog function) from the stack
+            messagesArray[0].stack = messagesArray[0].stack.split('\n').slice(1).join('\n');
+        }
         messagesArray = flatten(messagesArray);
         if (messagesArray.length > 0) {
             messagesArray.forEach((mess) => {
-                if (typeof mess === 'string') {
-                    terminalStore.addParsed(timestampCurrent + title, mess);
-                } else {
-                    if (process.env.NODE_ENV === 'development') {
+                let description = mess;
+                if (isDev) {
+                    if (mess instanceof CombinedError) {
+                        mess.errors.forEach((e) => console.error(e));
+                    } else if (mess instanceof Error) {
                         console.error(mess);
                     }
-                    terminalStore.addParsed(timestampCurrent + title, mess.message);
                 }
+                if (mess instanceof Error) {
+                    // A CombinedError renders its full traceback (summary plus every
+                    // combined error's stack) so no traceback information is lost.
+                    description = mess instanceof CombinedError ?
+                        mess.fullMessage : mess.message;
+                    // Prevent from repeating the message
+                    if (description === title) description = undefined;
+                }
+                terminalStore.addParsed(timestampCurrent + title, description);
             });
         }
     }

@@ -24,6 +24,7 @@ import NodeStyler from './NodeStyler.js';
 import InterfaceStyler from './InterfaceStyler.js';
 
 import { CustomNodeFactory, GraphFactory } from './NodeFactory.js';
+import CombinedError from './errors.js';
 import unresolvedSpecificationSchema from '../../../resources/schemas/unresolved_specification_schema.json' with {type: 'json'};
 import specificationSchema from '../../../resources/schemas/specification_schema.json' with {type: 'json'};
 import metadataSchema from '../../../resources/schemas/metadata_schema.json' with {type: 'json'};
@@ -113,19 +114,19 @@ function parseLocation(loc) {
 export async function loadJsonFromRemoteLocation(customLocation) {
     const location = parseLocation(customLocation);
     if (location === undefined) {
-        return [false, `Could not download the resource from:  ${customLocation}.`];
+        return [false, new Error(`Could not download the resource from:  ${customLocation}.`)];
     }
     let fetchedContent;
     try {
         fetchedContent = await fetch(location, { mode: 'cors' });
     } catch (error) {
-        return [false, error.message];
+        return [false, error];
     }
     try {
         const jsonContent = await fetchedContent.json();
         return [true, jsonContent];
     } catch (error) {
-        return [false, error.message];
+        return [false, error];
     }
 }
 
@@ -964,7 +965,7 @@ export default class EditorManager {
         if (validationErrors.length) return { errors: validationErrors };
 
         if (this.specification.currentSpecification === undefined) {
-            return { errors: ['Current specification cannot be empty'] };
+            return { errors: [new Error('Current specification cannot be empty')] };
         }
         const invalidParent = Object.values(nodeSpecification.extends ?? []).some((parent) => {
             const nodeSpec = this.specification.currentSpecification.nodes.find(
@@ -974,7 +975,7 @@ export default class EditorManager {
         });
 
         if (invalidParent) {
-            return { errors: ['Extending subgraphs dynamically is not currently supported.'] };
+            return { errors: [new Error('Extending subgraphs dynamically is not currently supported.')] };
         }
 
         this.specification.unresolvedSpecification.nodes ??= [];
@@ -1272,7 +1273,7 @@ export default class EditorManager {
      */
     _registerNodeType(node) {
         if (this.baklavaView.editor.nodeTypes.has(node.name)) {
-            return [`Node of type ${node.name} is already registered`];
+            return [new Error(`Node of type ${node.name} is already registered`)];
         }
 
         // eliminate duplicates from two 'branching' inheritance paths,
@@ -1364,7 +1365,7 @@ export default class EditorManager {
             this.baklavaView.editor.unregisterNodeType(nodeType);
             return [];
         }
-        return [`Node of type ${nodeType} is not registered`];
+        return [new Error(`Node of type ${nodeType} is not registered`)];
     }
 
     /**
@@ -1500,7 +1501,7 @@ export default class EditorManager {
 
         if (layout === undefined) {
             return [
-                'Invalid format, no layout section.',
+                new Error('Invalid format, no layout section.'),
             ];
         }
 
@@ -1654,7 +1655,7 @@ export default class EditorManager {
         try {
             resolvedNodes = EditorManager.preprocessNodes(nodes ?? []);
         } catch (e) {
-            return { errors: [e.message], warnings };
+            return { errors: [e], warnings };
         }
 
         resolvedNodes.forEach((node) => {
@@ -1779,7 +1780,7 @@ export default class EditorManager {
                 this.baklavaView.editor.cleanEditor();
 
                 if (loadingWarnings.length) warnings.push(`Graph '${graph.name ?? graph.id}' is invalid:`, ...loadingWarnings.map((w) => `    ${w}`));
-                if (loadingErrors.length) errors.push(new Error(`Graph '${graph.name ?? graph.id}' is invalid:`), ...loadingErrors.map((w) => `    ${w}`));
+                if (loadingErrors.length) errors.push(new CombinedError(`Graph '${graph.name ?? graph.id}' is invalid:`, loadingErrors));
             };
 
             // Validate subgraphs
@@ -1930,7 +1931,7 @@ export default class EditorManager {
             metadata = this.specification.currentSpecification.metadata ?? {};
         }
 
-        if (!metadata) return ['No specification to load provided.'];
+        if (!metadata) return [new Error('No specification to load provided.')];
 
         if (overriding) {
             // this.specification.currentSpecification?.metadata should not
@@ -2602,12 +2603,12 @@ export default class EditorManager {
 
                 return status;
             } catch (err) {
-                const msg = `Unrecognized format. Make sure that the passed dataflow is correct.${err.toString()}`;
+                const message = 'Unrecognized format. Make sure that the passed dataflow is correct.';
 
                 if (globalProperties.softLoad) {
-                    status.warnings.push(msg);
+                    status.warnings.push(`${message}${err}`);
                 } else {
-                    status.errors.push(new Error(msg), err);
+                    status.errors.push(new CombinedError(message, [err]));
                 }
 
                 return status;

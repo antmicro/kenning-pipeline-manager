@@ -400,7 +400,7 @@ export default class PipelineManagerEditor extends Editor {
         };
 
         if (!state.graphs.length) {
-            return ['No graphs found'];
+            return [new Error('No graphs found')];
         }
 
         let entryGraph;
@@ -410,7 +410,7 @@ export default class PipelineManagerEditor extends Editor {
             );
 
             if (!entryGraph) {
-                return [`No entry graph found of id '${state.entryGraph}'`];
+                return [new Error(`No entry graph found of id '${state.entryGraph}'`)];
             }
         } else {
             entryGraph = state.graphs[0]; // eslint-disable-line prefer-destructuring

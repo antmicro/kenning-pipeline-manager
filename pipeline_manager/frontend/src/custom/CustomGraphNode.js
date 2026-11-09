@@ -24,6 +24,7 @@ import { ir } from '../core/interfaceRegistry.ts';
 import globalProperties from '../globalProperties.ts';
 
 import { terminalStore } from '../core/stores.js';
+import CombinedError from '../core/errors.js';
 
 /**
   * Function used to update properties of the graph node based on its specification.
@@ -37,7 +38,7 @@ function prepareProperties(prop) {
 
     const parsedProperties = parseProperties(properties);
     if (Array.isArray(parsedProperties) && parsedProperties.length) {
-        return parsedProperties.map((error) => `Graph node invalid. ${error}`);
+        return [new CombinedError('Graph node invalid.', parsedProperties)];
     }
     return createProperties(parsedProperties);
 }
@@ -55,7 +56,7 @@ function prepareInterfaces(intfs) {
 
     const parsedInterfaces = parseInterfaces(interfaces, [], []);
     if (Array.isArray(parsedInterfaces) && parsedInterfaces.length) {
-        return parsedInterfaces.map((error) => `Graph node invalid. ${error}`);
+        return [new CombinedError('Graph node invalid.', parsedInterfaces)];
     }
     return createBaklavaInterfaces(parsedInterfaces);
 }
@@ -322,9 +323,9 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
                 outputs ?? Object.values(this.outputs),
             );
             if (Array.isArray(evaluatedIntf) && evaluatedIntf.length) {
-                throw new Error(
-                    `Internal error occurred while exposing an interface.\n` +
-                    `Reason: ${evaluatedIntf.join('. ')}`,
+                throw new CombinedError(
+                    'Internal error occurred while exposing an interface.',
+                    evaluatedIntf,
                 );
             }
             const evaluatedProp = updateSubgraphProperties(
@@ -369,9 +370,9 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
             }
             // When soft load is enabled ignore it
             if (errors.length && !globalProperties.softLoad) {
-                throw new Error(
-                    `Internal error occurred while initializing ${graph.type} graph. ` +
-                    `Reason: ${errors.join('. ')}`,
+                throw new CombinedError(
+                    `Internal error occurred while initializing ${graph.type} graph.`,
+                    errors,
                 );
             } else if (errors.length) {
                 terminalStore.addParsed(`Internal error occurred while initializing ${graph.type} graph.`,
