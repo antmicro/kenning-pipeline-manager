@@ -154,18 +154,6 @@ export default defineComponent({
     right: 0 !important;
     bottom: 0 !important;
 
-    .blur-panel {
-        position: static !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        background-color: transparent !important;
-        backdrop-filter: none !important;
-    }
-
     .popup-menu {
         position: static !important;
         transform: none !important;
@@ -177,8 +165,7 @@ export default defineComponent({
         margin: 0 !important;
         border: none !important;
         border-radius: 0 !important;
-        background: #00000045 !important;
-        backdrop-filter: blur(10px) !important;
+        background: transparent !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
