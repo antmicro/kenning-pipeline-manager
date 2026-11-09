@@ -102,11 +102,6 @@
                     "name": {
                         "description": "Name of the dialog box",
                         "type": "string"
-                    },
-                    "wait": {
-                        "description": "Wait for data from dialog box",
-                        "type": "boolean",
-                        "default": false
                     }
                 },
                 "required": [
