@@ -1,470 +1,217 @@
-import { test as base, expect } from "@playwright/test";
-import { getUrl } from "./config.js";
+import { test, expect, Page } from "@playwright/test";
+import { getUrl, loadSpecification, loadDataflow } from "./config.js";
+import { callFrontendRPC } from "./utils/endpoints.js";
 
-import sampleSpecification from "../../../examples/sample-specification.json" with { type: "json" };
-import sampleDataflow from "../../../examples/sample-dataflow.json" with { type: "json" };
-
-import sampleMultipleIoSpecification from "../../../examples/sample-multiple-io-specification.json" with { type: "json" };
-import sampleMultipleIoDataflow from "../../../examples/sample-multiple-io-dataflow.json" with { type: "json" };
-
-const test = base.extend<{
-    pmId: string,
-    sendMessage:  (Any) => Promise<void>
-    receiveMessage: (Any) => Promise<void>
-    loadSpecification: (string) => Promise<void>
-    loadDataflow: (string) => Promise<void>
-}>({
-    page: async ({ page, pmId }, use) => {
-        await page.setContent(`<iframe id="${pmId}" name="${pmId}" src="${getUrl()}" style="width: 80%; height: 80%"></iframe>`, { waitUntil: "load" });
-
-        use(page);
-    },
-    pmId: ["pm", { option: true }],
-    sendMessage: async ({ page, pmId }, use) => {
-        const sendMessage = async (data) => {
-            await page.evaluate(([data, targetOrigin, pmId]) => {
-                document.getElementById(pmId).contentWindow.postMessage(data, targetOrigin);
-            }, [data, getUrl(), pmId]);
-        };
-
-        await use(sendMessage);
-    },
-    receiveMessage: async ({ page }, use) => {
-        const receiveMessage = async (callback) => {
-            await page.exposeFunction("messageCallback", callback)
-            await page.evaluate(() => {
-                window.addEventListener("message", async (event) => {
-                    const data = event.data;
-                    await window.messageCallback(data);
-                });
-            });
-        };
-
-        await use(receiveMessage);
-    },
-
-    loadSpecification: async ({ sendMessage }, use) => {
-        const loadSpecification = async (specification) => {
-            await sendMessage({
-                method: "specification_change",
-                params: {
-                    specification: specification
-                }
-            });
-        };
-        await use(loadSpecification);
-    },
-
-    loadDataflow: async ({ sendMessage }, use) => {
-        const loadDataflow = async (dataflow) => {
-            await sendMessage({
-                method: "graph_change",
-                params: {
-                    dataflow: dataflow
-                }
-            });
-        };
-        await use(loadDataflow);
-    },
-
-})
-
-test.beforeEach(async ({sendMessage, loadSpecification, loadDataflow}) => {
-        await sendMessage({
-            method: "register_external_frontend"
-        });
-
-        await loadSpecification(sampleSpecification);
-        await loadDataflow(sampleDataflow);
+test.beforeEach(async ({ page }: { page: Page }) => {
+    await page.goto(getUrl());
 });
 
-test("test notifications verbosity endpoints", async ({ page, pmId, sendMessage, receiveMessage }) => {
-    const frameLocator = page.frameLocator("#" + pmId);
+test("test notifications verbosity endpoints", async ({ page }) => {
+    const data = await callFrontendRPC(page, "notifications_get_verbosity", {all: true});
+    const possibleValues = data.result;
 
-    let possibleValues = null;
-    let currentValue = null;
-
-    await receiveMessage(async (data) => {
-        if (data.id === "possibleValues") {
-            possibleValues = data.result;
-        } else if (data.id === "currentValue") {
-            currentValue = data.result.verbosity;
-        }
-    })
-
-    await frameLocator.getByLabel("settings").click();
-
-    await sendMessage({
-        id: "possibleValues",
-        method: "notifications_get_verbosity",
-        params: {
-            all: true,
-        }
-    });
-
-    await expect(async () => {
-        await expect(possibleValues).not.toBeNull();
-    }).toPass();
-
-    await expect(possibleValues.length).toBeTruthy();
+    expect(possibleValues?.length === 3).toBeTruthy();
+    await page.getByLabel("settings").click();
 
     for (const value of possibleValues) {
-        await sendMessage({
-            method: "notifications_set_verbosity",
-            params: {
-                verbosity: value,
-            }
-        });
+        const response = await callFrontendRPC(page, "notifications_set_verbosity", {verbosity: value});
+        expect(response?.error).toBeUndefined();
 
-        await sendMessage({
-            id: "currentValue",
-            method: "notifications_get_verbosity",
-            params: {}
-        });
+        const getVerbosity = await callFrontendRPC(page, "notifications_get_verbosity");
+        expect(getVerbosity?.result?.verbosity).toBe(value);
 
-        await expect(async () => {
-            await expect(currentValue).toBe(value);
-        }).toPass();
-
-        await expect(frameLocator.getByTitle("Verbosity of notifications")).toContainText(value);
+        await expect(page.getByTitle("Verbosity of notifications")).toContainText(value);
     }
-})
+});
 
-test("test connections style endpoints", async ({ page, pmId, sendMessage, receiveMessage }) => {
-    const frameLocator = page.frameLocator("#" + pmId);
+test("test connections style endpoints", async ({ page }) => {
+    const data = await callFrontendRPC(page, "connections_get_style", {all: true});
+    const possibleValues = data.result;
 
-    let possibleValues = null;
-    let currentValue = null;
-
-    await receiveMessage(async (data) => {
-        if (data.id === "possibleValues") {
-            possibleValues = data.result;
-        } else if (data.id === "currentValue") {
-            currentValue = data.result.style;
-        }
-    })
-
-    await frameLocator.getByLabel("settings").click();
-
-    await sendMessage({
-        id: "possibleValues",
-        method: "connections_get_style",
-        params: {
-            all: true,
-        }
-    });
-
-    await expect(async () => {
-        await expect(possibleValues).not.toBeNull();
-    }).toPass();
-
-    await expect(possibleValues.length).toBeTruthy();
+    expect(possibleValues?.length > 0).toBeTruthy();
+    await page.getByLabel("settings").click();
 
     for (const value of possibleValues) {
-        await sendMessage({
-            method: "connections_set_style",
-            params: {
-                style: value,
-            }
-        });
+        const response = await callFrontendRPC(page, "connections_set_style", {style: value});
+        expect(response?.error).toBeUndefined();
 
-        await sendMessage({
-            id: "currentValue",
-            method: "connections_get_style",
-        });
+        const getVerbosity = await callFrontendRPC(page, "connections_get_style");
+        expect(getVerbosity?.result?.style).toBe(value);
 
-        await expect(async () => {
-            await expect(currentValue).toBe(value);
-        }).toPass();
-
-        await expect(frameLocator.getByTitle("Connection style")).toContainText(value);
+        await expect(page.getByTitle("Connection style")).toContainText(value);
     }
-})
+});
 
-test("test background grid size endpoints", async ({ page, pmId, sendMessage, receiveMessage }) => {
-    const frameLocator = page.frameLocator("#" + pmId);
+test("test background grid size endpoints", async ({ page }) => {
+    const data = await callFrontendRPC(page, "background_get_grid_size");
+    const currentValue = data?.result?.size;
+    expect(currentValue || currentValue === 0).toBeTruthy();
 
-    let currentValue = null;
-
-    await receiveMessage(async (data) => {
-        if (data.id === "currentValue") {
-            currentValue = data.result.size;
-        }
-    })
-
-    await frameLocator.getByLabel("settings").click();
-
-    await sendMessage({
-        id: "currentValue",
-        method: "background_get_grid_size",
-    });
-
-    await expect(async () => {
-        await expect(currentValue).not.toBeNull();
-    }).toPass();
-
-    const valueSelector = await frameLocator
+    const valueSelector = page
         .locator(".__content")
         .filter({ has: page.getByTitle("background grid size") })
-        .locator(".__value")
+        .locator(".__value");
 
-    await expect(async () => {
-        await expect(valueSelector).toHaveText(currentValue.toString());
-    }).toPass();
+    expect(valueSelector).toHaveText(currentValue.toString());
 
-    for (let value = currentValue; value >= 50; value -= 50) {
-        await sendMessage({
-            method: "background_set_grid_size",
-            params: {
-                size: value,
-            }
-        });
+    await page.getByLabel("settings").click();
+    for (let value = currentValue; value >= 30; value -= 30) {
+        const response = await callFrontendRPC(page, "background_set_grid_size", { size: value });
+        expect(response?.error).toBeUndefined();
 
-        await sendMessage({
-            id: "currentValue",
-            method: "background_get_grid_size",
-        });
-
-        await expect(async () => {
-            await expect(currentValue).toBe(value);
-        }).toPass();
+        const getSize = await callFrontendRPC(page, "background_get_grid_size");
+        expect(getSize?.result?.size).toBe(value);
 
         await expect(valueSelector).toHaveText(value.toString());
 
     }
 });
 
-test("test autolayout apply endpoint", async ({ page, pmId, sendMessage }) => {
-    const frameLocator = page.frameLocator("#" + pmId);
+test("test autolayout apply endpoint", async ({ page }) => {
+    const nodes = await page.locator(".baklava-node").all();
 
-    const nodes = await frameLocator.locator(".baklava-node").all();
-
-    const positions = new Map<string, Any>();
+    const positions = new Map<string, any>();
 
     for (const node of nodes) {
-        const node_id = await node.getAttribute("node-id");
+        const node_id = await node.getAttribute("id");
         const boundingBox = await node.boundingBox();
-        positions.set(node_id, boundingBox);
+        if (node_id)
+            positions.set(node_id, boundingBox);
     }
 
-    await sendMessage({
-        method: "autolayout_trigger",
-    })
+    const call = await callFrontendRPC(page, "autolayout_apply");
+    expect(call?.error).toBeUndefined();
 
     let different = false;
     for (const node of nodes) {
-        const node_id = await node.getAttribute("node-id");
+        const node_id = await node.getAttribute("id");
         const boundingBox = await node.boundingBox();
+        if (node_id === null) continue;
         const position = positions.get(node_id);
         if (JSON.stringify(position) !== JSON.stringify(boundingBox)) {
             different = true;
+            break;
         }
     }
 
-    await expect(different).toBe(true);
+    expect(different).toBe(true);
 });
 
-test("test interfaces hiding endpoints", async ({ page, pmId, sendMessage, loadSpecification, loadDataflow }) => {
-    await loadSpecification(sampleMultipleIoSpecification);
-    await loadDataflow(sampleMultipleIoDataflow);
+test("test interfaces hiding endpoints", async ({ page }) => {
+    await loadSpecification(page, 'sample-multiple-io-specification.json');
+    await loadDataflow(page, 'sample-multiple-io-dataflow.json');
+    await page.locator(".loading-screen").waitFor({ state: 'detached' });
 
-    const frameLocator = page.frameLocator("#" + pmId);
+    const portsInitial = await page.locator(".__port:visible").count();
+    expect(portsInitial).not.toBe(0);
 
-    const portsInitial = await frameLocator.locator(".__port:visible").count();
-    await expect(portsInitial).not.toBe(0);
+    const hideResponse = await callFrontendRPC(page, "interfaces_hide_unconnected");
+    expect(hideResponse?.error).toBeUndefined();
 
-    await sendMessage({
-        method: "interfaces_hide_unconnected"
-    })
+    const portsHidden = await page.locator(".__port:visible").count();
+    expect(portsHidden).toBeLessThan(portsInitial);
 
-    const portsHidden = await frameLocator.locator(".__port:visible").count();
-    await expect(portsHidden).toBeLessThan(portsInitial);
+    const showResponse = await callFrontendRPC(page, "interfaces_show_hidden");
+    expect(showResponse?.error).toBeUndefined();
 
-    await sendMessage({
-        method: "interfaces_show_hidden"
-    })
-
-    const portsFinal = await frameLocator.locator(".__port:visible").count();
-    await expect(portsFinal).toBe(portsInitial);
+    const portsFinal = await page.locator(".__port:visible").count();
+    expect(portsFinal).toBe(portsInitial);
 });
 
 
-test("test editor clear endpoint", async ({ page, pmId, sendMessage }) => {
-    const frameLocator = page.frameLocator("#" + pmId);
-
-    const nodes = await frameLocator.locator(".baklava-node");
+test("test editor clear endpoint", async ({ page }) => {
+    const nodes = page.locator(".baklava-node");
     await expect(nodes).not.toHaveCount(0);
 
-    await sendMessage({
-        method: "editor_clear",
-    })
+    const response = await callFrontendRPC(page, "editor_clear");
+    expect(response?.error).toBeUndefined();
 
     await expect(nodes).toHaveCount(0);
 });
 
-test("test layers endpoints", async ({ page, pmId, sendMessage, receiveMessage }) => {
-    const frameLocator = page.frameLocator("#" + pmId);
+test("test layers endpoints", async ({ page }) => {
+    await page.getByLabel("settings").click();
 
-    await frameLocator.getByLabel("settings").click();
-
-    let layerList = null;
-    let currentValue = null;
-
-    await receiveMessage(async (data) => {
-        if (data.id === "layerList") {
-            layerList = data.result;
-        } else if (data.id === "currentValue") {
-            currentValue = data.result.hidden;
-        }
-    })
-
-    await sendMessage({
-        id: "layerList",
-        method: "layers_get_list",
-    })
-
-    await expect(async () => {
-        await expect(layerList).not.toBeNull();
-        await expect(layerList.length).toBeTruthy();
-    }).toPass();
+    const listResponse = await callFrontendRPC(page, "layers_get_list");
+    expect(listResponse?.error).toBeUndefined();
+    const layerList = listResponse.result;
+    expect(layerList.length).toBeTruthy();
 
     for (const layer of layerList) {
-        await sendMessage({
-            method: "layer_set_hidden",
-            params: {
-                name: layer,
-                hidden: true,
-            },
-        })
-
-        await sendMessage({
-            id: "currentValue",
-            method: "layer_get_hidden",
+        const setResponse = await callFrontendRPC(page, "layer_set_hidden", {
+            name: layer,
+            hidden: true,
         });
+        expect(setResponse?.error).toBeUndefined();
 
-        expect(async () => {
-            await expect(currentValue).toBeTruthy()
-        }).toPass();
+        const getResponse = await callFrontendRPC(page, "layer_get_hidden", { name: layer });
+        expect(getResponse?.error).toBeUndefined();
+        expect(getResponse.result.hidden).toBeTruthy();
 
-        await expect(frameLocator.getByTitle(layer)).toHaveClass(/(^|\s)--checked(\s|$)/);
+        await expect(page.getByTitle(layer)).toHaveClass(/(^|\s)--checked(\s|$)/);
 
-        await sendMessage({
-            method: "layer_set_hidden",
-            params: {
-                name: layer,
-                hidden: false,
-            },
-        })
+        const unsetResponse = await callFrontendRPC(page, "layer_set_hidden", {
+            name: layer,
+            hidden: false,
+        });
+        expect(unsetResponse?.error).toBeUndefined();
 
-        await sendMessage({
-            id: "currentValue",
-            method: "layer_get_hidden",
-            params: {
-                name: layer,
-            },
-        })
+        const getUnsetResponse = await callFrontendRPC(page, "layer_get_hidden", { name: layer });
+        expect(getUnsetResponse?.error).toBeUndefined();
+        expect(getUnsetResponse.result.hidden).toBeFalsy();
 
-        expect(async () => {
-            await expect(currentValue).toBeFalsy()
-        }).toPass();
-
-        await expect(frameLocator.getByTitle(layer)).not.toHaveClass(/(^|\s)--checked(\s|$)/);
+        await expect(page.getByTitle(layer)).not.toHaveClass(/(^|\s)--checked(\s|$)/);
     }
 });
 
-test("test panel toggling endpoints", async ({ page, pmId, sendMessage, receiveMessage }) => {
-    const frameLocator = page.frameLocator("#" + pmId);
+test("test panel toggling endpoints", async ({ page }) => {
+    // Close the node palette, which is open by default.
+    await page.getByLabel("node-palette").click();
 
-    await frameLocator.getByLabel("node-palette").click();
+    const listResponse = await callFrontendRPC(page, "panel_toggle", { name: null });
+    expect(listResponse?.error).toBeUndefined();
+    const panelList = listResponse.result;
+    expect(panelList.length).toBeTruthy();
 
-    let panelList = null;
-
-    await receiveMessage(async (data) => {
-        if (data.id === "panelList") {
-            panelList = data.result;
-        }
-    })
-
-    await sendMessage({
-        id: "panelList",
-        method: "panel_toggle",
-        params: {
-            name: null,
-        },
-    })
-
-    await expect(async () => {
-        await expect(panelList).not.toBeNull();
-        await expect(panelList.length).toBeTruthy();
-    }).toPass();
-
-    const panelSelectors = new Map([
-        ["notifications", ".notifications"],
-        ["palette", ".baklava-node-palette"],
-        ["settings", ".settings-panel"]
-    ])
+    const panelSelectors: Record<string, string> = {
+        notifications: ".notifications",
+        palette: ".baklava-node-palette",
+        settings: ".settings-panel",
+    };
 
     for (const panel of panelList) {
-        const selector = panelSelectors.get(panel);
+        const selector = panelSelectors[panel];
         if (selector === undefined) {
             continue;
         }
 
-        await expect(frameLocator.locator(selector)).not.toBeInViewport();
+        await expect(page.locator(selector)).not.toBeInViewport();
 
-        await sendMessage({
-            id: "panelList",
-            method: "panel_toggle",
-            params: {
-                name: panel,
-            },
-        })
+        const openResponse = await callFrontendRPC(page, "panel_toggle", { name: panel });
+        expect(openResponse?.error).toBeUndefined();
 
-        await expect(frameLocator.locator(selector)).toBeInViewport();
+        await expect(page.locator(selector)).toBeInViewport();
 
-        await sendMessage({
-            id: "panelList",
-            method: "panel_toggle",
-            params: {
-                name: panel,
-            },
-        })
+        const closeResponse = await callFrontendRPC(page, "panel_toggle", { name: panel });
+        expect(closeResponse?.error).toBeUndefined();
 
-        await expect(frameLocator.locator(selector)).not.toBeInViewport();
+        await expect(page.locator(selector)).not.toBeInViewport();
     }
 });
 
-test("test search query endpoints", async ({ page, pmId, sendMessage, receiveMessage }) => {
-    const frameLocator = page.frameLocator("#" + pmId);
-
+test("test search query endpoints", async ({ page }) => {
     const query = "Video";
-    let currentQuery = null;
 
-    await receiveMessage(async (data) => {
-        if (data.id === "currentQuery") {
-            currentQuery = data.result.query;
-        }
-    })
+    const setResponse = await callFrontendRPC(page, "search_set_query", { query });
+    expect(setResponse?.error).toBeUndefined();
 
-    await sendMessage({
-        method: "search_set_query",
-        params: {
-            query: query,
-        }
-    })
+    const getResponse = await callFrontendRPC(page, "search_get_query");
+    expect(getResponse?.error).toBeUndefined();
+    expect(getResponse.result.query).toBe(query);
 
-    await sendMessage({
-        id: "currentQuery",
-        method: "search_get_query",
-    })
-
-    await expect(async () => {
-        await expect(currentQuery).toBe(query);
-    }).toPass();
-
-    const totalNodes = await frameLocator.locator(".baklava-node").count();
-    const highlightedNodes = await frameLocator.locator(".baklava-node:not(.--greyed-out)").count();
-    const greyedOutNodes = await frameLocator.locator(".baklava-node.--greyed-out").count();
-    await expect(highlightedNodes).toBe(2);
-    await expect(greyedOutNodes).toBe(totalNodes - 2);
+    const totalNodes = await page.locator(".baklava-node").count();
+    const highlightedNodes = await page.locator(".baklava-node:not(.--greyed-out)").count();
+    const greyedOutNodes = await page.locator(".baklava-node.--greyed-out").count();
+    expect(highlightedNodes).toBe(2);
+    expect(greyedOutNodes).toBe(totalNodes - 2);
 })

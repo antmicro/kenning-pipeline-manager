@@ -18,12 +18,6 @@ export default defineConfig({
   use: {
       trace: 'on',
       video: 'on',
-      // We disable web security to allow for embedding the KPM inside an
-      // iframe for the API testing purposes.
-      bypassCSP: true,
-      launchOptions: {
-          args: ['--disable-web-security'],
-      },
       viewport: { width: 1920, height: 1080 },
   },
 });
