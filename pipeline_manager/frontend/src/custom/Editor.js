@@ -28,6 +28,7 @@ import CustomMenusManager from './CustomMenus.js';
 import { hideUnconnectedInterfaces, showHiddenInterfaces } from './CustomNode.js';
 
 import globalProperties from '../globalProperties.ts';
+import { CustomNodeInterface } from './CustomNodeInterface.js';
 
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
@@ -1481,7 +1482,6 @@ export default class PipelineManagerEditor extends Editor {
                 const nodeType = this.nodeTypes.get(node.name);
                 const nodeStyle = this.getNodeStyle(nodeType?.style);
                 const positionedInterfaces = Object.keys(nodeStyle?.positions || {});
-
                 // node.interfaces are plain saved-state objects, not interface instances
                 const twoSidedStubs = node.interfaces.filter((i) =>
                     i?.bus?.type === 'twoSided').flatMap((i) => i?.bus?.stubs ?? []);
@@ -1493,7 +1493,8 @@ export default class PipelineManagerEditor extends Editor {
                     );
                     if (intf?.bus?.type === 'oneSided') {
                         const stubConnections = state.connections.filter(
-                            (conn) => intf.hasBusStub(conn?.from) || intf.hasBusStub(conn?.to),
+                            (conn) => CustomNodeInterface.hasBusStub(intf, conn?.from)
+                                || CustomNodeInterface.hasBusStub(intf, conn?.to),
                         );
                         connections = connections.concat(stubConnections);
                     }
@@ -1502,11 +1503,11 @@ export default class PipelineManagerEditor extends Editor {
                     let lefts = 0;
                     let rights = 0;
                     connections.forEach((connection) => {
-                        const key = (connection.from === intf.id || intf.hasBusStub(connection.from)) ? 'from' : 'to';
+                        const key = (connection.from === intf.id || CustomNodeInterface.hasBusStub(intf, connection.from)) ? 'from' : 'to';
                         const nextIntfId = key === 'from' ? connection.to : connection.from;
                         const nextNode = state.nodes.find(
                             (n) => n.interfaces.some((el) => el.id === nextIntfId
-                                || el.hasBusStub(nextIntfId)),
+                                || CustomNodeInterface.hasBusStub(el, nextIntfId)),
                         );
                         if (nextNode) {
                             if (nextNode.position.x + nextNode.width > node.position.x) {

@@ -317,13 +317,37 @@ export function withCustomNodeFunctions(Base) {
         }
 
         /**
+         * Finds a bus stub of an interface by its id.
+         *
+         * @param {Object} intf - The interface of the stub to find.
+         * @param {string} id - The id of the stub to find.
+         * @returns {Object|undefined} The stub with the given id, if found.
+         */
+        static findBusStub(intf, id) {
+            return (intf.bus?.stubs ?? []).find((stub) => stub.id === id);
+        }
+
+        /**
          * Finds a bus stub of this interface by its id.
          *
          * @param {string} id - The id of the stub to find.
          * @returns {Object|undefined} The stub with the given id, if found.
          */
         findBusStub(id) {
-            return (this.bus?.stubs ?? []).find((stub) => stub.id === id);
+            // eslint-disable-next-line no-use-before-define
+            return CustomNodeInterface.findBusStub(this, id);
+        }
+
+        /**
+         * Checks whether an interface has a bus stub of the given id.
+         *
+         * @param {Object} intf - The interface of the stub to find.
+         * @param {string} id - The id of the stub to look for.
+         * @returns {boolean} True if the interface has a bus stub of the given id.
+         */
+        static hasBusStub(intf, id) {
+            // eslint-disable-next-line no-use-before-define
+            return CustomNodeInterface.findBusStub(intf, id) !== undefined;
         }
 
         /**
@@ -333,7 +357,8 @@ export function withCustomNodeFunctions(Base) {
          * @returns {boolean} True if the interface has a bus stub of the given id.
          */
         hasBusStub(id) {
-            return this.findBusStub(id) !== undefined;
+            // eslint-disable-next-line no-use-before-define
+            return CustomNodeInterface.hasBusStub(this, id);
         }
 
         /**
