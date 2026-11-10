@@ -6,12 +6,16 @@
 
 import fcntl
 import os
+import shutil
 import signal
 import subprocess
 import time
+import urllib.parse
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
+import playwright as playwright_package
 import pytest
 from playwright.sync_api import BrowserContext, sync_playwright
 
@@ -23,6 +27,13 @@ PROCESS_SHUTDOWN_TIME = 5
 BUILD_TIMEOUT = 300
 
 REPOSITORY_ROOT = Path(__file__).parents[2]
+
+TRACE_VIEWER_SOURCE = Path(playwright_package.__file__).parent.joinpath(
+    "driver/package/lib/vite/traceViewer"
+)
+TRACE_VIEWER_DIR = "trace-viewer"
+
+TRACE_PATH = pytest.StashKey[Path]()
 
 
 def pytest_addoption(parser: pytest.Parser):
@@ -47,6 +58,50 @@ def pytest_addoption(parser: pytest.Parser):
     )
 
 
+def get_report_dir(config: pytest.Config) -> Optional[Path]:
+    """Returns the directory of the `pytest-html` report, if enabled."""
+    html_path = getattr(config.option, "htmlpath", None)
+    if not html_path:
+        return None
+    return Path(config.invocation_params.dir, html_path).parent
+
+
+def pytest_configure(config: pytest.Config):
+    """
+    Copies the Playwright trace viewer next to the `pytest-html` report,
+    so the report can open traces in it.
+    """
+    report_dir = get_report_dir(config)
+    if report_dir and TRACE_VIEWER_SOURCE.is_dir():
+        shutil.copytree(
+            TRACE_VIEWER_SOURCE,
+            report_dir / TRACE_VIEWER_DIR,
+            dirs_exist_ok=True,
+        )
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item: pytest.Item):
+    """
+    A wrapper that adds a link opening the Playwright trace saved by the test
+    to the `pytest-html` report.
+    """
+    outcome = yield
+    report = outcome.get_result()
+    report_dir = get_report_dir(item.config)
+    trace_path = item.stash.get(TRACE_PATH, None)
+    # Run the hook on test teardown, after the report and traces get generated
+    if report.when != "teardown" or not report_dir or not trace_path:
+        return
+    trace = os.path.relpath(trace_path, report_dir / TRACE_VIEWER_DIR)
+    link = f"{TRACE_VIEWER_DIR}/index.html?trace={urllib.parse.quote(trace)}"
+    pytest_html = item.config.pluginmanager.getplugin("html")
+    report.extras = [
+        *getattr(report, "extras", []),
+        pytest_html.extras.url(link, name="Trace"),
+    ]
+
+
 @pytest.fixture
 def backend_port() -> int:
     """Free port for the Pipeline Manager backend."""
@@ -67,28 +122,22 @@ def browser_context(request: pytest.FixtureRequest):
     trace = not request.config.getoption("--no-playwright-trace")
     with sync_playwright() as playwright:
         browser = playwright.firefox.launch()
-        try:
-            context = browser.new_context(
-                viewport={"width": 1920, "height": 1080}
+        context = browser.new_context(viewport={"width": 1920, "height": 1080})
+        if trace:
+            context.tracing.start(
+                screenshots=True, snapshots=True, sources=True
             )
-            if trace:
-                context.tracing.start(
-                    screenshots=True,
-                    snapshots=True,
-                    sources=True,
-                )
-            try:
-                yield context
-            finally:
-                if trace:
-                    trace_dir = Path(
-                        request.config.getoption("--playwright-trace-dir")
-                    )
-                    ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-                    context.tracing.stop(
-                        path=trace_dir / f"{request.node.name}-{ts}.zip"
-                    )
+        try:
+            yield context
         finally:
+            if trace:
+                trace_dir = Path(
+                    request.config.getoption("--playwright-trace-dir")
+                )
+                ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+                trace_path = trace_dir / f"{request.node.name}-{ts}.zip"
+                context.tracing.stop(path=trace_path)
+                request.node.stash[TRACE_PATH] = trace_path
             browser.close()
 
 
