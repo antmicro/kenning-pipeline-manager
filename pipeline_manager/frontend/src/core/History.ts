@@ -6,9 +6,11 @@
 
 /* eslint-disable max-classes-per-file */
 import {
-    reactive, Ref, ref, watch,
+    reactive, Ref, ref, toRaw, watch,
 } from 'vue';
-import { Graph, AbstractNode } from '@baklavajs/core';
+import {
+    Graph, AbstractNode, Connection,
+} from '@baklavajs/core';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,6 +19,9 @@ import {
 } from '@baklavajs/renderer-vue';
 import notifyEvents from '../custom/notifyEvents.js';
 import { resolveConnectionEndpoints } from '../custom/CustomNodeInterface.js';
+import {
+    connectionSaveState, endpointSide, settleEndpoint,
+} from '../custom/compositeInterfaces.js';
 
 export const suppressingHistory: Ref<boolean> = ref(false);
 const transactionId: Ref<string> = ref('');
@@ -245,8 +250,17 @@ class MultipleSteps extends Step {
     }
 }
 
+interface AnchorPoint {
+    x: number;
+    y: number;
+}
+
 class ConnectionStep extends Step {
     conn: any = undefined;
+
+    saved: any | undefined = undefined;
+
+    anchors: AnchorPoint [] = [];
 
     constructor(type: string, topic: any, tid: string = uuidv4()) {
         if (tid === '') tid = uuidv4(); // eslint-disable-line no-param-reassign
@@ -254,50 +268,44 @@ class ConnectionStep extends Step {
     }
 
     add(graph: Ref<Graph>) {
-        if (this.conn !== undefined) {
-            // The object of the interfaces itself has changed and despite
-            // having all the same fields, it will not assign the connection
-            // correctly. That's why it is necessary to extract the nodeId
-            // from what we have and find the interface in said node manually
-
-            const fromNode = graph.value.findNodeById(this.conn.from.nodeId);
-            const toNode = graph.value.findNodeById(this.conn.to.nodeId);
-            if (!fromNode || !toNode) return;
-
-            const {
-                from: fromIntf, to: toIntf, offset: stubPos,
-                stubID: stubId, stubSide,
-            } = resolveConnectionEndpoints(this.conn);
-            const from = [
-                ...Object.values(fromNode.inputs),
-                ...Object.values(fromNode.outputs),
-            ].filter(
-                (iface) => iface.port,
-            ).find((iface) => iface.id === fromIntf.id);
-
-            const to = [
-                ...Object.values(toNode.inputs),
-                ...Object.values(toNode.outputs),
-            ].filter(
-                (iface) => iface.port,
-            ).find((iface) => iface.id === toIntf.id);
-
-            if (!from || !to) return;
-
-            const connAdded = (<any>graph).value.addConnection(from, to, stubPos, stubId, stubSide);
-            if (connAdded === undefined) {
-                return;
-            }
-            connAdded.id = this.conn.id;
+        if (this.conn === undefined) return;
+        // The endpoint objects themselves may have been replaced since the
+        // connection was removed (e.g. by collapsing composite interfaces),
+        // so the endpoints are resolved from the saved leaf-port ids, the
+        // same way `graph.load` restores connections.
+        if (this.saved === undefined) {
+            this.saved = connectionSaveState(this.conn);
+            this.anchors = [...(this.conn.anchors ?? [])];
         }
+        const from = (<any>graph.value).findNodeInterface(this.saved.from);
+        const to = (<any>graph.value).findNodeInterface(this.saved.to);
+        if (from === undefined || to === undefined) return;
+
+        const conn = (<any>graph.value).addConnection(from, to);
+        if (!conn) return;
+        this.anchors.forEach((anchor: any) => {
+            (<any>graph.value).addAnchor(anchor, conn, anchor.index);
+        });
+        conn.id = this.conn.id;
+
+        [from, to].forEach((intf: any) => {
+            if (toRaw(intf).isCompositeSub === true) {
+                intf.postConnectionCheck();
+                const side = endpointSide(conn, intf);
+                if (side !== undefined) settleEndpoint(conn, side, intf);
+            }
+        });
     }
 
     remove(graph: Ref<Graph>) {
         const connToRemove = graph.value.connections.find(
-            (n) => n.from.id === this.conn.from.id &&
-                n.to.id === this.conn.to.id);
+            (n) => n === this.conn ||
+                (n.from.id === this.conn.from.id &&
+                    n.to.id === this.conn.to.id));
         if (connToRemove !== undefined) {
             this.conn = connToRemove;
+            this.saved = connectionSaveState(connToRemove);
+            this.anchors = [...((<any>connToRemove).anchors ?? [])];
             graph.value.removeConnection(connToRemove);
         }
     }
@@ -587,11 +595,13 @@ export function useHistory(graph: Ref<any>, commandHandler: ICommandHandler): IH
             subscribeEvent((conn : any) => {
                 const inTransaction = transactionId.value !== '';
                 if (!inTransaction) startTransaction();
+                const step = new ConnectionStep('rem', conn.id.toString(), transactionId.value);
+                step.conn = conn;
+                step.saved = connectionSaveState(conn);
+                step.anchors = [...(conn.anchors ?? [])];
                 (conn.anchors ?? []).reverse().forEach((_: any, idx: number) => {
                     newGraph.removeAnchor(conn, idx);
                 });
-                const step = new ConnectionStep('rem', conn.id.toString(), transactionId.value);
-                step.conn = conn;
                 if (!inTransaction) commitTransaction();
                 return step;
             }, 'removeConnection');
