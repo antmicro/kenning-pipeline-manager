@@ -578,9 +578,8 @@ export default function createPipelineManagerGraph(graph) {
         from.hidden = false;
         // the target interface is a bus, we have to create a connection point
         [to, from] = [to, from].map((intf) => {
-            const n = this.getNode(intf.nodeId);
             const other = (intf === to ? from : to);
-            return intf.preConnectionCheck(other, n, ...kwargs);
+            return intf.preConnectionCheck(other, ...kwargs);
         });
         const checkConnectionResult = this.checkConnection(from, to);
         if (!checkConnectionResult.connectionAllowed) {

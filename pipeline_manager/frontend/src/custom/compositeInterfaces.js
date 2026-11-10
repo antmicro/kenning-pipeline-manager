@@ -429,6 +429,8 @@ export function connectionSaveState(connection) {
             const leaf = provenanceLeaf(raw, connection.id);
             if (leaf !== undefined) return toRaw(leaf).id;
         }
+        // bus stub
+        if (raw.parent) return raw.parent.id;
         return raw.id;
     };
     return { from: savedId(connection.from), to: savedId(connection.to) };

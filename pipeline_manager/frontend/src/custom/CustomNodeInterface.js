@@ -78,6 +78,8 @@ export function createStub(intf, offset = undefined, stubID = undefined, stubSid
     stub.offset = offset ?? ((intf.bus?.size ?? 0) / 2);
     stub.parent = intf;
     // needed for when the connection creation succeeds
+    stub.isBusInterface = intf.isBusInterface.bind(stub);
+    stub.preConnectionCheck = intf.preConnectionCheck.bind(stub);
     stub.postConnectionCheck = intf.postConnectionCheck.bind(stub);
     stub.onConnectionRemove = intf.onConnectionRemove.bind(stub);
     return stub;
@@ -248,7 +250,6 @@ export function withCustomNodeFunctions(Base) {
          */
         isInterfaceHidable() {
             // Disable hiding composite interfaces
-            if (this.isCompositeInterface()) return false;
             if (this.bus === undefined) {
                 const subPortsConnected = (this.compositePorts ?? []).some(
                     (port) => (port?.connectionCount ?? 0) > 0,
@@ -399,14 +400,13 @@ export function withCustomNodeFunctions(Base) {
          * interface (or stub) that should actually be used for the connection.
          *
          * @param {Object} other - The interface on the other end of the connection.
-         * @param {Object} node - The node that owns the interfaces being connected.
          * @param {number | undefined} offset - Position offset used when creating a bus stub.
          * @param {string | undefined} stubID - Optional explicit ID for the created stub.
          * @param {string | undefined} stubSide - Optional side override for the created stub.
          * @returns {Object} The interface or stub to use for the connection.
          */
         // eslint-disable-next-line no-unused-vars
-        preConnectionCheck(other, node, offset, stubID, stubSide) {
+        preConnectionCheck(other, offset, stubID, stubSide) {
             if (this.isBusInterface()) {
                 if (this.bus.stubs === undefined) {
                     // eslint-disable-next-line no-param-reassign
@@ -428,7 +428,6 @@ export function withCustomNodeFunctions(Base) {
         postConnectionCheck() {
             if (this.parent) {
                 // eslint-disable-next-line no-param-reassign
-                this.parent.connectionCount += 1;
                 this.parent.bus.stubs.push(this);
             }
             if (this.parentComposite) {
@@ -471,6 +470,7 @@ export function withCustomNodeFunctions(Base) {
             if (index !== -1) {
                 stubs.splice(index, 1);
             }
+            this.connectionCount = Math.max(this.connectionCount - 1, 0);
         }
 
         /**
@@ -490,7 +490,7 @@ export function withCustomNodeFunctions(Base) {
             if ((this.compositePorts ?? []).some((port) =>
                 [connection.to, connection.from].some(
                     (end) => end === port || end?.id === port?.id,
-                ))) {
+                ) || port.isInConnection(connection))) {
                 return true;
             }
             return [connection.to, connection.from].some(
