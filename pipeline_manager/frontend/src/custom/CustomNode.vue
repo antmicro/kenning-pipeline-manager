@@ -79,12 +79,6 @@ from moving or deleting the nodes.
                 :style="subgraphStyle"
                 v-if="isGraphNode || nodeHasRelatedGraphs"
             />
-            <div
-                v-if="pillText !== undefined"
-                class="pill"
-                :style="nodePillStyle"
-                v-html="DOMPurify.sanitize(pillText)"
-            />
             <!-- disable transition to avoid rendering additional redraw for viewport adjustment -->
 
         </div>
@@ -186,8 +180,14 @@ from moving or deleting the nodes.
                     </template>
                 </div>
             </div>
-
         </div>
+
+        <div
+            v-if="pillText !== undefined"
+            class="pill"
+            :style="nodePillStyle"
+            v-html="DOMPurify.sanitize(pillText)"
+        />
     </div>
 
 </template>
