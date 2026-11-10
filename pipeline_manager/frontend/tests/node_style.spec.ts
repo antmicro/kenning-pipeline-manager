@@ -30,7 +30,7 @@ test('node pill from dataflow overrides node pill from spec', async ({ page }) =
     const fileChooser = await openFileChooser(page, 'dataflow');
     await fileChooser.setFiles(outputPath);
 
-    const pill = getNode(page, 'GaussianKernel').locator('.__title').locator('.pill');
+    const pill = getNode(page, 'GaussianKernel').locator('.pill');
     const color = convertHexToRGB('#123456');
 
     await expect(pill).toHaveText('updated text');
@@ -58,9 +58,26 @@ test('node pill from spec overrides node pill from style', async ({ page }) => {
 
     await loadDataflow(page, 'sample-dataflow.json');
 
-    const pill = getNode(page, 'GaussianKernel').locator('.__title').locator('.pill');
+    const pill = getNode(page, 'GaussianKernel').locator('.pill');
     const color = convertHexToRGB('#999999');
 
     await expect(pill).toHaveText('kernel');
+    await expect(pill).toHaveCSS('background-color', `rgb(${color.red}, ${color.green}, ${color.blue})`);
+});
+
+test('node pill is visible in minimal node', async ({ page }) => {
+    await page.goto(getUrl());
+
+    await loadSpecification(page, 'sample-rectangle-grouping-specification.json');
+    await loadDataflow(page, 'sample-rectangle-grouping-dataflow.json');
+
+    const minimalNode = getNode(page, 'SaveModel');
+    await expect(minimalNode).toBeVisible();
+    await expect(minimalNode.locator('.__title')).toBeHidden();
+
+    const pill = minimalNode.locator('.pill');
+    const color = convertHexToRGB('#999999');
+
+    await expect(pill).toHaveText('user');
     await expect(pill).toHaveCSS('background-color', `rgb(${color.red}, ${color.green}, ${color.blue})`);
 });
