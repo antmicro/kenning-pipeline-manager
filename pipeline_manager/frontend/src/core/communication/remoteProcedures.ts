@@ -22,7 +22,7 @@ import EditorManager from '../EditorManager';
 import NotificationHandler, { LOG_LEVEL } from '../notifications';
 import { MAIN_TERMINAL, terminalStore } from '../stores';
 import {
-    saveSpecificationConfiguration, saveLayoutConfiguration, serializeGraph,
+    saveSpecificationConfiguration, serializeGraph,
     renderGraphImage, ImageFormat, GraphSaveOptions,
 } from '../../components/saveConfiguration.ts';
 
@@ -53,6 +53,17 @@ function getGraph(graph_id: string): any {
         throw new Error(`Graph with id '${graph_id}' does not exist.`);
     }
     return graph;
+}
+
+/**
+ * Finds specified graph or returns the currently displayed graph.
+ *
+ * @param graph_id Id of a graph to find
+ * @returns found graph
+ */
+function getGraphOrDisplayed(graph_id?: string): any {
+    if (graph_id === undefined) return editorManager.baklavaView.editor.graph;
+    return getGraph(graph_id);
 }
 
 /**
@@ -948,22 +959,24 @@ export function graph_set_name(params: { name: string, graph_id?: string }) {
 }
 
 /**
- * @returns layout of the currently displayed graph
+ * @returns layout of a graph.
  */
-export function layout_get() {
-    return saveLayoutConfiguration.getSave();
+export function layout_get(params?: { graph_id?: string }) {
+    const graph = getGraphOrDisplayed(params?.graph_id);
+    return {
+        graph_id: graph.id,
+        ...editorManager.extractGraphLayout(graph.save()),
+    };
 }
 
 /**
- * Applies a layout to the currently displayed graph.
+ * Applies a layout to a graph.
  *
  * @returns errors that occurred while applying the layout
  */
-export function layout_set(params: { layout: any }) {
-    const errors = EditorManager.importGraphLayout(
-        editorManager.baklavaView.editor.graph,
-        params,
-    );
+export function layout_set(params: { layout: any, graph_id?: string }) {
+    const graph = getGraphOrDisplayed(params.graph_id);
+    const errors = EditorManager.importGraphLayout(graph, params);
     return { errors };
 }
 

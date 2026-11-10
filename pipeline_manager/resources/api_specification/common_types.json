@@ -581,9 +581,13 @@
             "default": []
         },
         "graph_layout": {
-            "description": "Layout of the currently displayed graph.",
+            "description": "Layout of a graph.",
             "type": "object",
             "properties": {
+                "graph_id": {
+                    "description": "ID of the graph the layout belongs to, defaults to the currently displayed graph",
+                    "type": "string"
+                },
                 "layout": {
                     "description": "Mapping from node IDs to their layout",
                     "type": "object",

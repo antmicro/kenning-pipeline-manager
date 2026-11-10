@@ -1449,8 +1449,7 @@ export default class EditorManager {
     extractGraphLayout(graph) {
         const layout = new Map();
         const { currentViews } = this.editor;
-        const displayedGraphId = this.editor.editorManager?.baklavaView.displayedGraph.id;
-        const curName = currentViews.get(displayedGraphId) ?? this.editor.defaultView;
+        const curName = currentViews.get(graph.id) ?? this.editor.defaultView;
 
         graph.nodes.forEach((node) => {
             const nodeType = this.editor.nodeTypes.get(node.name);
@@ -1494,9 +1493,7 @@ export default class EditorManager {
     static importGraphLayout(graph, content) {
         const { viewModel } = useViewModel();
         const { currentViews } = viewModel.value.editor;
-        const displayedGraphId =
-            viewModel.value.editor.editorManager?.baklavaView.displayedGraph.id;
-        const curName = currentViews.get(displayedGraphId) ?? viewModel.value.editor.defaultView;
+        const curName = currentViews.get(graph.id) ?? viewModel.value.editor.defaultView;
 
         const errors = [];
 

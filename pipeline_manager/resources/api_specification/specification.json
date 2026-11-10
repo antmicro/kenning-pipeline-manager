@@ -1000,38 +1000,6 @@
                 "$ref": "common_types#/$defs/null_or_empty"
             }
         },
-        "layout_get": {
-            "description": "Returns the layout of the currently displayed graph.",
-            "params": {
-                "$ref": "common_types#/$defs/null_or_empty"
-            },
-            "returns": {
-                "$ref": "common_types#/$defs/graph_layout"
-            }
-        },
-        "layout_set": {
-            "description": "Applies a layout to the currently displayed graph.",
-            "params": {
-                "$ref": "common_types#/$defs/graph_layout"
-            },
-            "returns": {
-                "description": "Result of applying the layout",
-                "type": "object",
-                "properties": {
-                    "errors": {
-                        "description": "Errors that occurred while applying the layout.",
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "required": [
-                    "errors"
-                ],
-                "additionalProperties": false
-            }
-        },
         "graph_export_image": {
             "description": "Renders the currently displayed graph to an image",
             "params": {
@@ -1078,6 +1046,49 @@
                 "required": [
                     "format",
                     "data"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "layout_get": {
+            "description": "Returns the layout of a graph.",
+            "params": {
+                "description": "Parameters for request",
+                "type": [
+                    "object",
+                    "null"
+                ],
+                "properties": {
+                    "graph_id": {
+                        "description": "ID of the graph, defaults to the currently displayed graph",
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "returns": {
+                "$ref": "common_types#/$defs/graph_layout"
+            }
+        },
+        "layout_set": {
+            "description": "Applies a layout to a graph.",
+            "params": {
+                "$ref": "common_types#/$defs/graph_layout"
+            },
+            "returns": {
+                "description": "Result of applying the layout",
+                "type": "object",
+                "properties": {
+                    "errors": {
+                        "description": "Errors that occurred while applying the layout.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "errors"
                 ],
                 "additionalProperties": false
             }
