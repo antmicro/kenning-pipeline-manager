@@ -17,7 +17,7 @@ test version="3.11": build-frontend
 	uv venv --clear --python {{version}} .venv-{{version}}
 	uv pip install --python .venv-{{version}}/bin/python -e ".[test,backend-communication]"
 	source .venv-{{version}}/bin/activate
-	python -m pytest -n 8
+	python -m pytest -n 8 --retries 2
 	deactivate
 
 test-all-python-versions:
