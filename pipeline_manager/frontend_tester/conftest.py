@@ -4,10 +4,10 @@
 
 """Module with `pytest` configuration."""
 
+import fcntl
 import os
 import signal
 import subprocess
-import tempfile
 import time
 from pathlib import Path
 
@@ -17,6 +17,7 @@ from pipeline_manager.utils.ports import get_free_port
 
 SERVER_ADDRESS = "127.0.0.1"
 PROCESS_SHUTDOWN_TIME = 5
+BUILD_TIMEOUT = 300
 
 REPOSITORY_ROOT = Path(__file__).parents[2]
 
@@ -83,9 +84,46 @@ def rpc_server(build_server_app: str, backend_port: int, tcp_server_port: int):
             os.killpg(process_group_id, signal.SIGKILL)
 
 
+def _run_server_app_build(output_directory: Path):
+    """
+    Builds the server app into `output_directory`.
+
+    `npm install` is skipped when `node_modules` is already present
+    (e.g. installed by `just build-frontend`).
+    """
+    args = [
+        str(REPOSITORY_ROOT / "build"),
+        "server-app",
+        "--output-directory",
+        str(output_directory),
+    ]
+    if (REPOSITORY_ROOT / "pipeline_manager/frontend/node_modules").is_dir():
+        args.append("--skip-install-deps")
+
+    process = subprocess.Popen(args, cwd=REPOSITORY_ROOT)
+    try:
+        return_code = process.wait(timeout=BUILD_TIMEOUT)
+    finally:
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=PROCESS_SHUTDOWN_TIME)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+    assert (
+        not return_code
+    ), f"Building a server app failed. Return non-zero code: {return_code}"
+
+
 @pytest.fixture(scope="session")
-def build_server_app(request: pytest.FixtureRequest):
-    """Context manager to build a server app in a temporary directory."""
+def build_server_app(
+    request: pytest.FixtureRequest,
+    tmp_path_factory: pytest.TempPathFactory,
+):
+    """
+    Builds the server app once per test run.
+    """
     frontend_directory = request.config.getoption(
         "--frontend-directory",
         default=None,
@@ -94,25 +132,29 @@ def build_server_app(request: pytest.FixtureRequest):
         yield frontend_directory
         return
 
-    process = None
-    try:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            os.sync()
-            args = [
-                str(REPOSITORY_ROOT / "build"),
-                "server-app",
-                "--output-directory",
-                tmp_dir,
-            ]
-            process = subprocess.Popen(args, cwd=REPOSITORY_ROOT)
-            return_code = process.wait(timeout=100)
-            assert not return_code, (
-                "Building a server app failed."
-                f"Return non-zero code: {return_code}"
-            )
-            yield tmp_dir
-    finally:
-        if process:
-            process.terminate()
-            time.sleep(PROCESS_SHUTDOWN_TIME)
-            process.kill()
+    if os.environ.get("PYTEST_XDIST_WORKER"):
+        # Parent of worker's basetemp is shared by all workers of this run
+        shared_root = tmp_path_factory.getbasetemp().parent
+    else:
+        shared_root = tmp_path_factory.mktemp("server-app-build")
+
+    output_directory = shared_root / "server-app"
+    done_marker = shared_root / "server-app.done"
+    failed_marker = shared_root / "server-app.failed"
+
+    with open(shared_root / "server-app.lock", "w") as lock_file:
+        fcntl.flock(lock_file, fcntl.LOCK_EX)
+        try:
+            if failed_marker.exists():
+                pytest.fail("Building a server app failed in another worker")
+            if not done_marker.exists():
+                try:
+                    _run_server_app_build(output_directory)
+                except BaseException:
+                    failed_marker.touch()
+                    raise
+                done_marker.touch()
+        finally:
+            fcntl.flock(lock_file, fcntl.LOCK_UN)
+
+    yield str(output_directory)
