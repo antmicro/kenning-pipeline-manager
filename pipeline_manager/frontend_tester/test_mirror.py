@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Optional
 
 import pytest
 from playwright.sync_api import Locator, Page, expect, sync_playwright
@@ -21,6 +22,8 @@ from pipeline_manager.utils.ports import get_free_port
 PROTOCOL = "http"
 SERVER_ADDRESS = "127.0.0.1"
 PROCESS_SHUTDOWN_TIME = 5
+# Loading the dataflow and mirroring it to the copy can be slow under load
+DATAFLOW_LOAD_TIMEOUT = 15000
 
 DATAFLOW_PATH = Path(__file__).parent / "frontend_tester_dataflow.json"
 NODE = next(
@@ -93,8 +96,12 @@ def mirrored_pages(mirror_server, mirror_ports: tuple[int, int]):
         open_pipeline_manager(original, mirror_ports[0])
 
         upload_dataflow_file(original)
-        expect_position(get_node(original), NODE_POSITION)
-        expect_position(get_node(copy), NODE_POSITION)
+        expect_position(
+            get_node(original), NODE_POSITION, timeout=DATAFLOW_LOAD_TIMEOUT
+        )
+        expect_position(
+            get_node(copy), NODE_POSITION, timeout=DATAFLOW_LOAD_TIMEOUT
+        )
         yield original, copy
 
 
@@ -119,10 +126,14 @@ def get_node(page: Page) -> Locator:
     return page.locator(f'[id="{NODE_ID}"]')
 
 
-def expect_position(node: Locator, position: tuple[str, str]):
+def expect_position(
+    node: Locator,
+    position: tuple[str, str],
+    timeout: Optional[float] = None,
+):
     """Check the position of the node on the editor."""
-    expect(node).to_have_css("left", position[0])
-    expect(node).to_have_css("top", position[1])
+    expect(node).to_have_css("left", position[0], timeout=timeout)
+    expect(node).to_have_css("top", position[1], timeout=timeout)
 
 
 def drag_node(page: Page, node: Locator, dx: int, dy: int):
