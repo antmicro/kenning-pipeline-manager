@@ -7,6 +7,7 @@ import base64
 import json
 import multiprocessing
 import random
+import socket
 import string
 import time
 from http import HTTPStatus
@@ -38,8 +39,10 @@ def tcp_server_port():
     return get_free_port()
 
 
-@pytest.fixture
-def app_client(backend_port, tcp_server_port):
+def _run_backend(backend_port: int, tcp_server_port: int):
+    """
+    Creates and runs the backend in the current process.
+    """
     sio, app, _ = create_backend(
         [
             "",
@@ -50,20 +53,44 @@ def app_client(backend_port, tcp_server_port):
             "--lazy-server-init",
         ]
     )
+    run_uvicorn(
+        app,
+        sio,
+        "127.0.0.1",
+        backend_port,
+        "127.0.0.1",
+        tcp_server_port,
+        True,
+    )
+
+
+def _wait_for_port(
+    host: str,
+    port: int,
+    process: multiprocessing.Process,
+    timeout: float = 30,
+):
+    """Waits until the backend started in `process` accepts connections."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if not process.is_alive():
+            pytest.fail(f"Backend process exited with code {process.exitcode}")
+        try:
+            with socket.create_connection((host, port), timeout=1):
+                return
+        except OSError:
+            time.sleep(0.1)
+    pytest.fail(f"Backend did not start on {host}:{port} in {timeout}s")
+
+
+@pytest.fixture
+def app_client(backend_port, tcp_server_port):
     server = multiprocessing.Process(
-        target=run_uvicorn,
-        args=(
-            app,
-            sio,
-            "127.0.0.1",
-            backend_port,
-            "127.0.0.1",
-            tcp_server_port,
-            True,
-        ),
+        target=_run_backend,
+        args=(backend_port, tcp_server_port),
     )
     server.start()
-    time.sleep(1)
+    _wait_for_port("127.0.0.1", backend_port, server)
     yield
     server.terminate()
     server.join()
