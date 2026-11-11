@@ -1069,7 +1069,7 @@ class Node(JsonConvertible):
     @override
     def to_json(self, as_str=True, minify=False) -> Union[str, Dict]:
         output = {}
-        for field_name, _ in get_type_hints(self).items():
+        for field_name, _ in get_type_hints(type(self)).items():
             if not hasattr(self, field_name):
                 continue
 
