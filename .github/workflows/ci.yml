@@ -9,7 +9,7 @@ on:
 jobs:
 
   PreCommit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
         uses: pre-commit/action@v3.0.0
 
   BuildServerApp:
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-24.04
       steps:
         - name: Checkout sources
           uses: actions/checkout@v4
@@ -41,7 +41,7 @@ jobs:
           run: ./build server-app
 
   TestWheel:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
         - name: Checkout sources
           uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
             path: dist/*.whl
 
   DeployDocs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
         - name: Checkout sources
           uses: actions/checkout@v4
