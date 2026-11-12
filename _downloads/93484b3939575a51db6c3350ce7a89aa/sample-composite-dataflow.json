@@ -1,0 +1,176 @@
+{
+    "graphs": [
+        {
+            "id": "a1b2c3d4-0000-4000-8000-000000000001",
+            "name": "Composite interfaces example",
+            "nodes": [
+                {
+                    "id": "a1b2c3d4-1111-4000-8000-000000000001",
+                    "position": {
+                        "x": -247,
+                        "y": 162
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "axi",
+                            "id": "a1b2c3d4-2222-4000-8000-000000000001",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0,
+                            "hidden": false,
+                            "compositeExpanded": false,
+                            "composite": [
+                                {
+                                    "id": "1ae968aa-0ec3-406e-9706-72583b7a1a3e",
+                                    "name": "AW",
+                                    "composite": [
+                                        {
+                                            "id": "e7413f91-3223-4c49-b8e0-9bfbd88e712e",
+                                            "name": "SIZE",
+                                            "composite": [
+                                                {
+                                                    "id": "1c824aa9-ab6d-4289-9634-37bfcc85f6fb",
+                                                    "name": "SIZE[0]"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "gpio",
+                            "id": "a1b2c3d4-2222-4000-8000-000000000002",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1,
+                            "hidden": false
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "CompositeGenerator",
+                    "instanceName": "CompositeGenerator"
+                },
+                {
+                    "id": "a1b2c3d4-3333-4000-8000-000000000001",
+                    "position": {
+                        "x": 268,
+                        "y": 62
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "axi",
+                            "id": "a1b2c3d4-4444-4000-8000-000000000001",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0,
+                            "hidden": false,
+                            "compositeExpanded": true,
+                            "composite": [
+                                {
+                                    "id": "1d9bfa88-e60f-42d0-bdff-d4eda8794754",
+                                    "name": "AW",
+                                    "composite": [
+                                        {
+                                            "id": "9b7247b9-db10-4be7-b6ff-909c822e0192",
+                                            "name": "SIZE",
+                                            "composite": [
+                                                {
+                                                    "id": "1ab310b9-bffe-4785-bf60-1cc64078c988",
+                                                    "name": "SIZE[0]"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "monitor",
+                            "id": "a1b2c3d4-4444-4000-8000-000000000002",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1,
+                            "hidden": false
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "value",
+                            "id": "a1b2c3d4-5555-4000-8000-000000000001",
+                            "value": 1,
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "CompositeConsumer",
+                    "instanceName": "CompositeConsumer"
+                },
+                {
+                    "id": "a1b2c3d4-9999-4000-8000-000000000001",
+                    "position": {
+                        "x": -253,
+                        "y": -205
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "timing",
+                            "id": "a1b2c3d4-9aaa-4000-8000-000000000001",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0,
+                            "hidden": false,
+                            "compositeExpanded": false
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "SyncGenerator",
+                    "instanceName": "SyncGenerator"
+                },
+                {
+                    "id": "a1b2c3d4-7777-4000-8000-000000000001",
+                    "position": {
+                        "x": 269,
+                        "y": -192
+                    },
+                    "width": 200,
+                    "twoColumn": false,
+                    "interfaces": [
+                        {
+                            "name": "timing",
+                            "id": "a1b2c3d4-7888-4000-8000-000000000001",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0,
+                            "hidden": false,
+                            "compositeExpanded": false
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "SyncConsumer",
+                    "instanceName": "SyncConsumer"
+                }
+            ],
+            "groups": [],
+            "connections": [
+                {
+                    "id": "5664cdb0-3600-40f8-8099-d3f31594dd33",
+                    "from": "1c824aa9-ab6d-4289-9634-37bfcc85f6fb",
+                    "to": "1ab310b9-bffe-4785-bf60-1cc64078c988"
+                }
+            ]
+        }
+    ],
+    "entryGraph": "a1b2c3d4-0000-4000-8000-000000000001",
+    "version": "20250623.14"
+}
+
