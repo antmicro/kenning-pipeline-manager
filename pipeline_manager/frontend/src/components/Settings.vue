@@ -34,6 +34,15 @@ import CheckboxInterface from '../interfaces/CheckboxInterface.js';
 import IntegerInterface from '../interfaces/IntegerInterface.js';
 import ButtonInterface from '../interfaces/ButtonInterface.js';
 import { loadingScreen, ConnectionStyles } from '../core/utils';
+import metadataSchema from '../../../resources/schemas/metadata_schema.json' with { type: 'json' };
+
+const getMetadataDescription = (key) => {
+    let prop = metadataSchema.properties[key];
+    if (prop?.$ref) {
+        prop = metadataSchema.$defs[prop.$ref.split('/').pop()];
+    }
+    return prop?.description;
+};
 
 export default {
     props: {
@@ -58,6 +67,7 @@ export default {
                 props.viewModel.connectionRenderer.style,
                 items,
             );
+            option.description = getMetadataDescription('connectionStyle');
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.connectionRenderer.style = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('connectionStyle', v);
@@ -70,6 +80,7 @@ export default {
                 'Align interface sides',
                 props.viewModel.connectionRenderer.alignInterfaceSides,
             );
+            option.description = getMetadataDescription('alignInterfaceSides');
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.connectionRenderer.alignInterfaceSides = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('alignInterfaceSides', v);
@@ -82,6 +93,7 @@ export default {
                 'Modify node types',
                 props.viewModel.settings.editableNodeTypes,
             ).setPort(false);
+            option.description = getMetadataDescription('editableTypes');
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.settings.editableNodeTypes = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('editableTypes', v);
@@ -95,6 +107,7 @@ export default {
                 'Hide anchors',
                 props.viewModel.settings.hideAnchors,
             ).setPort(false);
+            option.description = getMetadataDescription('hideAnchors');
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.settings.hideAnchors = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('hideAnchors', v);
@@ -108,6 +121,7 @@ export default {
                 'Show IDs',
                 props.viewModel.settings.showIds,
             ).setPort(false);
+            option.description = getMetadataDescription('showIds');
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.settings.showIds = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('showIds', v);
@@ -121,6 +135,7 @@ export default {
                 'Remove empty subgraphs',
                 props.viewModel.settings.removeEmptySubgraphs,
             ).setPort(false);
+            option.description = getMetadataDescription('removeEmptySubgraphs');
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.settings.removeEmptySubgraphs = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('removeEmptySubgraphs', v);
@@ -134,6 +149,7 @@ export default {
                 'Show hidden properties',
                 props.viewModel.settings.showHiddenProperties,
             ).setPort(false);
+            option.description = getMetadataDescription('showHiddenProperties');
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.settings.showHiddenProperties = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('showHiddenProperties', v);
@@ -147,6 +163,7 @@ export default {
                 'Background grid size',
                 props.viewModel.settings.background.gridSize,
             );
+            option.description = getMetadataDescription('backgroundSize');
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.settings.background.gridSize = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('backgroundSize', v);
@@ -159,6 +176,7 @@ export default {
                 'Node movement step',
                 props.viewModel.movementStep,
             );
+            option.description = getMetadataDescription('movementStep');
             option.events.setValue.subscribe(this, (v) => {
                 props.viewModel.movementStep = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
                 metadataChanged('movementStep', v);
@@ -176,6 +194,7 @@ export default {
                 layoutManager.usedAlgorithm,
                 items,
             );
+            option.description = getMetadataDescription('layout');
             option.events.setValue.subscribe(this, (v) => {
                 layoutManager.useAlgorithm(v);
                 metadataChanged('layout', v);
@@ -241,6 +260,9 @@ export default {
                         displayedGraphId,
                     ) ?? new Set()).has(layer.name),
                 );
+                if (option.defaultComponent !== undefined) {
+                    option.setDefaultComponent();
+                }
                 option.events.setValue.subscribe(this, () => {
                     if (props.viewModel.ignoredLayers.get(
                         displayedGraphId,
@@ -271,6 +293,7 @@ export default {
                 props.viewModel.logLevel,
                 Object.keys(LOG_LEVEL).map((s) => s.toUpperCase()),
             );
+            select.description = getMetadataDescription('logLevel');
             select.events.setValue.subscribe(this, (v) => {
                 props.viewModel.logLevel = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
             });
@@ -338,6 +361,11 @@ export default {
             if (props.viewModel.settings.toggleableEditableTypes) {
                 options.push(editableNodeTypes.value);
             }
+            options.forEach((option) => {
+                if (option.defaultComponent !== undefined) {
+                    option.setDefaultComponent();
+                }
+            });
             return options;
         });
 
