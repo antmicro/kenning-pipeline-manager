@@ -23,11 +23,18 @@ export default class CombinedError extends Error {
     constructor(message, errors = []) {
         super(message);
         this.name = 'CombinedError';
-        // Keep the original errors (with their stacks) instead of stringifying them.
-        this.errors = errors.map((error) => {
-            if (error instanceof Error) return error;
-            return new Error(String(error));
-        });
+        if (process.env.NODE_ENV === 'development') {
+            // Keep the original errors (with their stacks) instead of stringifying them.
+            this.errors = errors.map((error) => {
+                if (error instanceof Error) return error;
+                return new Error(String(error));
+            });
+        } else {
+            this.errors = errors.map((error) => {
+                if (error instanceof Error) return error.message;
+                return error;
+            });
+        }
     }
 
     /**
@@ -39,11 +46,11 @@ export default class CombinedError extends Error {
      */
     get fullMessage() {
         if (this.errors.length === 0) return this.message;
-        const render = (error) => (
+        const render = (process.env.NODE_ENV === 'development') ? (error) => (
             error instanceof CombinedError
                 ? error.fullMessage
                 : error.message
-        );
+        ) : (error) => error;
         return [this.message, ...this.errors.map(render)].join('\n    ');
     }
 }
