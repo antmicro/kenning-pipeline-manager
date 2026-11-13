@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
             ref="el"
             class="baklava-select"
             :class="{ '--open': open }"
-            :title="intf.name" @click="open = !open"
+            :title="intf.description ?? intf.name" @click="open = !open"
         >
             <div class="__selected">
                 <div class="__text">

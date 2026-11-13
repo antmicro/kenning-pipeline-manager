@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
             class="baklava-input hex-input"
             :class="{ '--invalid': invalid }"
             :placeholder="intf.name"
-            :title="intf.name"
+            :title="intf.description ?? intf.name"
             @keypress="handleRestrictedKeys"
             @blur="handleBlur"
             tabindex="-1"

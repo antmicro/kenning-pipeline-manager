@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
             type="text"
             class="baklava-input"
             :placeholder="intf.name"
-            :title="intf.name"
+            :title="intf.description ?? intf.name"
             tabindex="-1"
             :disabled="intf.readonly"
         />

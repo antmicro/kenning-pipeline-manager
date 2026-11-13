@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
             }"
             @click="enterEditMode"
         >
-            <div class="__label" :title="intf.name">
+            <div class="__label" :title="intf.description ?? intf.name">
                 {{ intf.name }}
             </div>
             <div class="__value">
