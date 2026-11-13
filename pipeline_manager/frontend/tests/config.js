@@ -421,9 +421,9 @@ export async function setYAMLEditorContent(page, content) {
  * @returns {Promise<void>} Resolves when a interface is added to a node.
  */
 export async function addInterface(page, node) {
-    await (await getNodeTitle(node)).click({ button: 'right', force: true });
+    await (await getNodeTitle(node)).click({ button: 'right' });
     await getContextMenu(page).getByText('Add interface').click();
-    await page.getByRole('button', { name: 'Add interface' }).click({ force: true });
+    await page.getByRole('button', { name: 'Add interface' }).click();
     await expect(page.locator('.blur-panel:visible')).toHaveCount(0);
 }
 
