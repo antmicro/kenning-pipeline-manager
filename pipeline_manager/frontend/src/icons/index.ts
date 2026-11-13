@@ -9,6 +9,7 @@ import Backend from './Backend.vue';
 import Bell from './Bell.vue';
 import Bin from './Bin.vue';
 import Buy from './Buy.vue';
+import Chevron from './Chevron.vue';
 import Cogwheel from './Cogwheel.vue';
 import Collapse from './Collapse.vue';
 import Cross from './Cross.vue';
@@ -42,6 +43,7 @@ export default {
     Bin,
     Buy,
     CassetteStop,
+    Chevron,
     Cogwheel,
     Collapse,
     Cross,
