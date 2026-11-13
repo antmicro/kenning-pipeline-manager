@@ -22,7 +22,8 @@ created out of an `interfaceComposites` specification entry.
                 '__square': isExposed,
                 '__port_composite_port_hidden': expanded,
             }"
-            :style="nested >= 1 ? { [intf.side]: `${-1.4 - (nested - 1)*0.3}em` } : {}"
+            :style="nested >= 1 ?
+                { [intf.side]: `calc(-1.1em - ${nested} * var(--kpm-nested-indent))` } : {}"
             @mouseenter="startHoverWrapper"
             @mouseleave="endHoverWrapper"
             @pointerdown.left="onMouseDown"
@@ -46,19 +47,15 @@ created out of an `interfaceComposites` specification entry.
                 :rotate="arrowRotation"
             />
         </div>
-        <div class="__port_composite_strip" :style="{ 'background-color': groupColor }" ></div>
-        <button
+        <Chevron
+            :rotate="expanded ? 'down' : invSide"
             v-if="subPorts.length"
-            type="button"
             class="__port_composite_toggle"
             :class="toggleClasses"
-            :title="toggleTitle"
             no-drag="true"
             @pointerdown.left.stop.prevent
             @click.stop="toggleComposite"
-        >
-            {{ expanded ? '−' : '+' }}
-        </button>
+            />
         <template v-if="expanded">
             <CustomInterface
                 v-for="sub in subPorts"
@@ -75,10 +72,10 @@ created out of an `interfaceComposites` specification entry.
 
 <script setup>
 import { computed } from 'vue';
-import { useViewModel } from '@baklavajs/renderer-vue';
 import Arrow from '../icons/Arrow.vue';
 import ExternalNameInput from './ExternalNameInput.vue';
 import CustomInterface from './CustomInterface.vue';
+import Chevron from '../icons/Chevron.vue';
 import { CustomNodeInterface } from './CustomNodeInterface.js';
 import { CustomNode } from '../core/NodeFactory.js';
 import { getCompositePorts, toggleCompositeInterfaces } from './compositeInterfaces';
@@ -101,26 +98,11 @@ const props = defineProps({
 
 const noop = () => {};
 
-const { viewModel } = useViewModel();
-
 const expanded = computed(() => props.intf.compositeExpanded ?? false);
 
 const subPorts = computed(() => getCompositePorts(props.intf));
 
-const groupColor = computed(() => {
-    if (!expanded.value) {
-        return undefined;
-    }
-    const types = viewModel.value?.interfaceTypes?.types ?? {};
-    const intfTypes = Array.isArray(props.intf.type) ? props.intf.type : [props.intf.type];
-    return intfTypes
-        .map((type) => types[type]?.interfaceColor)
-        .find((color) => color !== undefined);
-});
-
-const toggleTitle = computed(() => (expanded.value
-    ? 'Collapse the composite interface'
-    : 'Expand the composite interface'));
+const invSide = computed(() => (props.intf.side === 'left' ? 'right' : 'left'));
 
 const toggleComposite = () => {
     toggleCompositeInterfaces(props.intf, props.graph);
@@ -139,6 +121,61 @@ const toggleClasses = computed(() => ({
     margin-left: -0.5em;
     margin-right: -0.5em;
 
+    & .baklava-node-interface {
+        position: relative;
+        &:not(:has(> .__port_composite_expanded)):last-child {
+            border-color: transparent;
+            &.--input {
+                &::before {
+                    border-width: 0 0 1px 1px;
+                }
+            }
+            &.--output {
+                &::before {
+                    border-width: 0 1px 1px 0;
+                }
+            }
+        }
+        &::before {
+            content: '';
+            display: block;
+            position: absolute;
+            width: var(--kpm-nested-indent);
+            top: 0;
+            height: calc(1em + 1px);
+            border: 1px solid #{$gray-100};
+            border-width: 0 0 1px 0;
+        }
+        &.--input {
+            &::before {
+                left: -1px;
+            }
+            border-left: 1px solid #{$gray-100};
+            margin-left: var(--kpm-nested-indent);
+            & > .__port-name {
+                padding-left: 1em;
+            }
+        }
+        &.--output {
+            &::before {
+                right: -1px;
+            }
+            border-right: 1px solid #{$gray-100};
+            margin-right: var(--kpm-nested-indent);
+            & > .__port-name {
+                padding-right: 1em;
+            }
+        }
+        & .__port_composite {
+            & > .__port_composite_toggle {
+                right: var(--kpm-nested-indent);
+            }
+            & > .__port_composite_toggle_left {
+                left: var(--kpm-nested-indent);
+            }
+        }
+    }
+
     &.__port_composite_expanded {
         & > .__port_composite_port {
             position: absolute;
@@ -148,46 +185,29 @@ const toggleClasses = computed(() => ({
         }
     }
 
-    .__port_composite_strip {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 0.3em;
-        border-radius: 2px;
-        pointer-events: none;
-    }
-
     .__port_composite_toggle {
         position: absolute;
-        top: 1.1em;
-        right: 0.1em;
+        top: 1em;
+        right: -0.3em;
         z-index: 2;
         display: flex;
         align-items: center;
         justify-content: center;
         width: 1.1em;
         height: 1.1em;
-        padding: 0;
+        padding: 0.1em;
         font-size: 0.7em;
         line-height: 1;
         color: var(--baklava-control-color-foreground);
-        background-color: var(--baklava-control-color-background);
-        border: solid 1px var(--baklava-control-color-primary);
-        border-radius: 50%;
         cursor: pointer;
 
         &:hover {
             color: var(--baklava-control-color-background);
-            background-color: var(--baklava-control-color-primary);
         }
 
         &.__port_composite_toggle_left {
             right: auto;
-            left: 0.1em;
-        }
-
-        &.__port_composite_toggle_expanded {
-            top: 1.6em;
+            left: -0.3em;
         }
     }
 }
@@ -210,30 +230,11 @@ const toggleClasses = computed(() => ({
         left: -1em;
     }
 
-    // the group strip runs along the ports, on the respective side
-    &.--output .__port_composite .__port_composite_strip {
-        right: 0;
-    }
-
-    &.--input .__port_composite .__port_composite_strip {
-        left: 0;
-    }
-
-    // the composite port (and its name) hides while unrolled
     &.--composite-expanded {
-        padding: 0.8em !important;
         & > .__port-name {
             font-weight: bold;
             font-size: 1.125em;
         }
-    }
-
-    // add margin to port's name to make space for __port_composite_toggle
-    &.--input .__port-name:has(+ .__port_composite) {
-        margin-left: 0.5em;
-    }
-    &.--output .__port-name:has(+ .__port_composite) {
-        margin-right: 0.5em;
     }
 }
 </style>

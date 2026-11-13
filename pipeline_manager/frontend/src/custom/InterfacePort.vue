@@ -20,7 +20,8 @@ The normal (non-positioned) port of a node interface.
             picked: picked,
             '__square': isExposed,
         }"
-        :style="nested >= 1 ? { [intf.side]: `${-1.4 - (nested - 1)*0.3}em` } : {}"
+        :style="nested >= 1 ?
+            { [intf.side]: `calc(-1.1em - ${nested} * var(--kpm-nested-indent))` } : {}"
     >
         <ExternalNameInput
             :intf="intf"
