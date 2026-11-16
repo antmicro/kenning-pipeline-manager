@@ -192,9 +192,9 @@
             "description": "Hides anchors in all connections. The anchors are still visible on hover",
             "default": false
         },
-        "switchableInterfaces": {
+        "alignInterfaceSides": {
             "type": "boolean",
-            "description": "Enables automatic interfaces side switching for optimal layout",
+            "description": "Automatically updates interface sides for optimal layout when moving nodes",
             "default": false
         },
         "showIds": {
