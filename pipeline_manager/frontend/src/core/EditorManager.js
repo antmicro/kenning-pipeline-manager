@@ -2424,6 +2424,13 @@ export default class EditorManager {
             this.specification.currentSpecification.metadata.backgroundColor ??
             this.defaultMetadata.backgroundColor;
 
+        document.documentElement.style.setProperty(
+            '--kpm-background-grid-color',
+            this.defaultStyles.get(graphId)?.backgroundGridColor ??
+            this.specification.currentSpecification.metadata.backgroundGridColor ??
+            this.defaultMetadata.backgroundGridColor,
+        );
+
         this.baklavaView.settings.background.gridSize =
             this.defaultStyles.get(graphId)?.backgroundSize ??
             this.specification.currentSpecification.metadata?.backgroundSize ??

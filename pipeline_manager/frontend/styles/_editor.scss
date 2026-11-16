@@ -39,6 +39,9 @@
     // Sidebar
     --baklava-sidebar-color-background: #{$gray-600};
     --baklava-sidebar-color-foreground: #{$white};
+
+    // Background grid color
+    --kpm-background-grid-color: #{$gray-700};
 }
 
 .custom-connections-container {
@@ -84,8 +87,8 @@
 
 .baklava-editor {
     .background {
-        background-image: linear-gradient($gray-700 2%, transparent 2%),
-            linear-gradient(90deg, $gray-700 2%, transparent 2%);
+        background-image: linear-gradient(var(--kpm-background-grid-color) 2%, transparent 2%),
+            linear-gradient(90deg, var(--kpm-background-grid-color) 2%, transparent 2%);
     }
     .baklava-node-palette {
         position: fixed;
