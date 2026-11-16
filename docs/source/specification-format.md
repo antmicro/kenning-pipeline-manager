@@ -58,11 +58,13 @@ This object specifies additional editor options and contains the following optio
   The given URL classes can be referred to later in [Nodes](#node) with proper link suffix.
 * `collapseSidebar` - boolean value determining whether nodes sidebar should be collapsed by default.
   Default value is `true`
-* `movementStep` - Defines offset to which nodes snap in the grid.
+* `movementStep` - defines offset to which nodes snap in the grid.
   Default value is `1`.
-* `backgroundSize` - Defines size of the background grid.
+* `backgroundColor` - specifies the color of the background.
+  Default value is `#0f0f0f`.
+* `backgroundSize` - defines the size of the background grid.
   Default value is `100`.
-* `layout` - String specifying the name of autolayout algorithm used in placing nodes from dataflow
+* `layout` - string specifying the name of autolayout algorithm used in placing nodes from dataflow
   Default value is `NoLayout`
 * `icons` - contains definition of icon classes.
   Icon classes are key-value pairs, where key is the name of the icon class, and value is the URL prefix that is used to compute the actual path.
@@ -86,25 +88,29 @@ This object specifies additional editor options and contains the following optio
   The entries are of type [Context menu item](#context-menu-item).
 * `logLevel` - string specifying minimum level of verbosity notification has to have to be displayed.
   It can be one of `INFO`, `WARNING`, `ERROR`.
-* `tag` - String value assigned to each node type defined in the current specification (not in included subspecifications)
-* `editableTypes` - Boolean specifying whether nodes can be edited.
+* `tag` - string value assigned to each node type defined in the current specification (not in included subspecifications)
+* `editableTypes` - boolean specifying whether nodes can be edited.
   It may be changed later in the UI (given that `toggleableEditableTypes` is enabled in the specification).
   The default value is `false`.
-* `toggleableEditableTypes` - Boolean value determining whether node editibility can be toggled from the frontend.
+* `toggleableEditableTypes` - boolean value determining whether node editibility can be toggled from the frontend.
   The default value is `true`.
-* `newGraphNode` - Boolean value telling whether anonymous graphs should be available for the given specification or not.
-* `newNodeType` - Boolean value that controls whether the button for creation of new node types should be displayed or not.
+* `newGraphNode` - boolean value telling whether anonymous graphs should be available for the given specification or not.
+* `newNodeType` - boolean value that controls whether the button for creation of new node types should be displayed or not.
   The default value is `true`.
-* `notifyWhenChanged` - Boolean value specifying whether the frontend should send requests with information about changed values.
+* `notifyWhenChanged` - boolean value specifying whether the frontend should send requests with information about changed values.
   This option is only effective when Pipeline Manager is run in server-app mode.
   Notifications include events from the [list of available events](project:external-app-communication.md#external-app-api) ending with `_on_change`.
-* `hideAnchors` - Boolean value determining whether anchors in all connections should be hidden and only visible on hover.
+* `hideAnchors` - boolean value determining whether anchors in all connections should be hidden and only visible on hover.
   The default value is `false`.
-* `showIds` - Boolean value determining whether node IDs and graph IDs should be visible in the editor.
+* `showIds` - boolean value determining whether node IDs and graph IDs should be visible in the editor.
   The default value is `false`.
-* `showHiddenProperties` - Boolean value determining whether properties marked with `hideOnDefault` should be visible regardless of their value.
+* `showHiddenProperties` - boolean value determining whether properties marked with `hideOnDefault` should be visible regardless of their value.
   The default value is `false`.
-* `disableInterfaceExpose` - Boolean value which blocks option to expose node's interfaces. The default value is `false`.
+* `disableInterfaceExpose` - boolean value which blocks option to expose node's interfaces. The default value is `false`.
+* `removeEmptySubgraphs` - boolean value determining whether subgraphs with no nodes should be removed automatically.
+  The default value is `false`.
+* `alignInterfaceSides` - boolean value determining whether interface sides are automatically switched to ensure optimal layout when moving nodes.
+  The default value is `false`.
 
 An example:
 
