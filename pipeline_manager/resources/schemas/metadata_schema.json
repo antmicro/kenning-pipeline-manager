@@ -172,11 +172,6 @@
             "description": "Defines the default autolayout algorithm",
             "default": "CytoscapeEngine - dagre-longest-path"
         },
-        "randomizedOffset": {
-            "type": "boolean",
-            "description": "Determines whether connections should have randomized, but deterministic offset",
-            "default": false
-        },
         "removeEmptySubgraphs": {
             "type": "boolean",
             "description": "When enabled, subgraphs with no nodes will be removed automatically.",

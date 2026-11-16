@@ -65,18 +65,6 @@ export default {
             return option;
         });
 
-        const randomizedOffsetOption = computed(() => {
-            const option = new CheckboxInterface(
-                'Randomized offset',
-                props.viewModel.connectionRenderer.randomizedOffset,
-            );
-            option.events.setValue.subscribe(this, (v) => {
-                props.viewModel.connectionRenderer.randomizedOffset = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
-                metadataChanged('randomizedOffset', v);
-            });
-            return option;
-        });
-
         const switchableInterfacesOption = computed(() => {
             const option = new CheckboxInterface(
                 'Switchable interfaces',
@@ -338,7 +326,6 @@ export default {
                 backgroundGridSize.value,
                 clearEditor.value,
                 movementStep.value,
-                randomizedOffsetOption.value,
                 hideAnchors.value,
                 switchableInterfacesOption.value,
                 showIds.value,

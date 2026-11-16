@@ -173,8 +173,6 @@ export default class ConnectionRenderer {
 
     viewModel = null;
 
-    randomizedOffset = false;
-
     switchableInterfaces = false;
 
     shiftDistance = 15;
@@ -205,25 +203,6 @@ export default class ConnectionRenderer {
         const toPosition = ncTo.sidePosition ?? 0;
 
         const shiftIndex = (fromPosition + toPosition) / 2;
-
-        if (this.randomizedOffset) {
-            const fromInterfaceNeighbours = this.getInterfaceNeighbors(ncFrom, graph);
-            const toInterfaceNeighbours = this.getInterfaceNeighbors(ncTo, graph);
-
-            // the string is a sum of utf16 representation of each character
-            let toRandomIndex =
-                [...ncTo.id].reduce((accumulator, char) => accumulator + char.charCodeAt(0), 0) ??
-                0;
-            let fromRandomIndex =
-                [...ncFrom.id].reduce((accumulator, char) => accumulator + char.charCodeAt(0), 0) ??
-                0;
-
-            const randomIndex = (toRandomIndex ^ fromRandomIndex); // eslint-disable-line no-bitwise
-            fromRandomIndex = randomIndex % fromInterfaceNeighbours.length;
-            toRandomIndex = randomIndex % toInterfaceNeighbours.length;
-            const randomShiftIndex = (fromRandomIndex + toRandomIndex) / 2;
-            return this.shiftDistance * (randomShiftIndex / 2 + shiftIndex / 2);
-        }
 
         return this.shiftDistance * shiftIndex;
     }
@@ -2111,10 +2090,9 @@ export default class ConnectionRenderer {
         return this.curvedRenderLoopback(x1, y1, x2, y2, connection);
     }
 
-    constructor(viewModel, style, randomizedOffset = false) {
+    constructor(viewModel, style) {
         this.viewModel = viewModel;
         this.style = style;
-        this.randomizedOffset = randomizedOffset;
     }
 
     /**

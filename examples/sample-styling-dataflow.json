@@ -343,7 +343,6 @@
     ],
     "version": "20250623.14",
     "metadata": {
-        "movementStep": 100,
-        "randomizedOffset": false
+        "movementStep": 100
     }
 }
