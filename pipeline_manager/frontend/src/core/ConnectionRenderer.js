@@ -173,7 +173,7 @@ export default class ConnectionRenderer {
 
     viewModel = null;
 
-    switchableInterfaces = false;
+    alignInterfaceSides = false;
 
     shiftDistance = 15;
 
@@ -1865,7 +1865,7 @@ export default class ConnectionRenderer {
     }
 
     connectionRefresh(connection) {
-        if (this.switchableInterfaces && this.supportSwitchableInterfaces()) {
+        if (this.alignInterfaceSides && this.supportSwitchableInterfaces()) {
             const from = getDomElements(connection.from);
             const to = getDomElements(connection.to);
 

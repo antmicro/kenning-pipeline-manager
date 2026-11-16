@@ -192,7 +192,7 @@ export default class EditorManager {
         this.baklavaView.connectionRenderer = new ConnectionRenderer(
             this.baklavaView,
             this.defaultMetadata.connectionStyle,
-            this.defaultMetadata.switchableInterfaces,
+            this.defaultMetadata.alignInterfaceSides,
         );
 
         this.baklavaView.editor.layoutManager.useAlgorithm(this.defaultMetadata.layout);
@@ -2017,8 +2017,8 @@ export default class EditorManager {
             metadata?.showHiddenProperties ?? this.defaultMetadata.showHiddenProperties;
         this.baklavaView.settings.disableInterfaceExpose =
             metadata?.disableInterfaceExpose ?? this.defaultMetadata.disableInterfaceExpose;
-        this.baklavaView.connectionRenderer.switchableInterfaces =
-            metadata?.switchableInterfaces ?? this.defaultMetadata.switchableInterfaces;
+        this.baklavaView.connectionRenderer.alignInterfaceSides =
+            metadata?.alignInterfaceSides ?? this.defaultMetadata.alignInterfaceSides;
         this.baklavaView.settings.removeEmptySubgraphs =
             metadata?.removeEmptySubgraphs ?? this.defaultMetadata.removeEmptySubgraphs;
 

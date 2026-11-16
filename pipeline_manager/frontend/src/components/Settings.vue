@@ -65,14 +65,14 @@ export default {
             return option;
         });
 
-        const switchableInterfacesOption = computed(() => {
+        const alignInterfaceSidesOption = computed(() => {
             const option = new CheckboxInterface(
-                'Switchable interfaces',
-                props.viewModel.connectionRenderer.switchableInterfaces,
+                'Align interface sides',
+                props.viewModel.connectionRenderer.alignInterfaceSides,
             );
             option.events.setValue.subscribe(this, (v) => {
-                props.viewModel.connectionRenderer.switchableInterfaces = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
-                metadataChanged('switchableInterfaces', v);
+                props.viewModel.connectionRenderer.alignInterfaceSides = v; // eslint-disable-line vue/no-mutating-props,max-len,no-param-reassign
+                metadataChanged('alignInterfaceSides', v);
             });
             return option;
         });
@@ -327,7 +327,7 @@ export default {
                 clearEditor.value,
                 movementStep.value,
                 hideAnchors.value,
-                switchableInterfacesOption.value,
+                alignInterfaceSidesOption.value,
                 showIds.value,
                 showHiddenProperties.value,
                 removeEmptySubgraphs.value,
