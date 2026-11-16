@@ -39,7 +39,7 @@ test('test node position across views', async ({ page }) => {
     // Switch views.
     await openSettingsPanel(page);
 
-    const selectedView = page.getByTitle('Selected view');
+    const selectedView = page.getByTitle('Switches between preconfigured views for the graph');
     await selectedView.click();
     const dropdown = selectedView.locator('.__dropdown');
 

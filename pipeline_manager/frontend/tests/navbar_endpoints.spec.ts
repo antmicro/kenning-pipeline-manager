@@ -20,7 +20,7 @@ test('test notifications verbosity endpoints', async ({ page }) => {
         const getVerbosity = await callFrontendRPC(page, 'notifications_get_verbosity');
         expect(getVerbosity?.result?.verbosity).toBe(value);
 
-        await expect(page.getByTitle('Verbosity of notifications')).toContainText(value);
+        await expect(page.getByTitle('Defines the verbosity of pop-up notifications')).toContainText(value);
     }
 });
 
@@ -49,7 +49,7 @@ test('test background grid size endpoints', async ({ page }) => {
 
     const valueSelector = page
         .locator('.__content')
-        .filter({ has: page.getByTitle('background grid size') })
+        .filter({ has: page.getByTitle('Defines size of the background grid') })
         .locator('.__value');
 
     expect(valueSelector).toHaveText(currentValue.toString());
@@ -137,7 +137,7 @@ test('test layers endpoints', async ({ page }) => {
         expect(getResponse?.error).toBeUndefined();
         expect(getResponse.result.hidden).toBeTruthy();
 
-        await expect(page.getByTitle(layer)).toHaveClass(/(^|\s)--checked(\s|$)/);
+        await expect(page.getByText(layer).locator('..')).toHaveClass(/(^|\s)--checked(\s|$)/);
 
         const unsetResponse = await callFrontendRPC(page, 'layer_set_hidden', {
             name: layer,
@@ -149,7 +149,7 @@ test('test layers endpoints', async ({ page }) => {
         expect(getUnsetResponse?.error).toBeUndefined();
         expect(getUnsetResponse.result.hidden).toBeFalsy();
 
-        await expect(page.getByTitle(layer)).not.toHaveClass(/(^|\s)--checked(\s|$)/);
+        await expect(page.getByText(layer).locator('..')).not.toHaveClass(/(^|\s)--checked(\s|$)/);
     }
 });
 

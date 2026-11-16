@@ -57,7 +57,7 @@ test('import layout into other view', async ({ page }, testInfo) => {
     // Select a tree view and save it's layout
     await openSettingsPanel(page);
 
-    const selectedView = page.getByTitle('Selected view');
+    const selectedView = page.getByTitle('Switches between preconfigured views for the graph');
     await selectedView.click();
     const dropdown = selectedView.locator('.__dropdown');
 
@@ -100,7 +100,7 @@ test('preserve changes across views', async ({ page }, testInfo) => {
 
     await openSettingsPanel(page);
 
-    const selectedView = await page.getByTitle('Selected view');
+    const selectedView = await page.getByTitle('Switches between preconfigured views for the graph');
     await selectedView.click();
     const dropdown = await selectedView.locator('.__dropdown');
 
