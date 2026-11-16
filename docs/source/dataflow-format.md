@@ -268,6 +268,7 @@ All properties are optional.
 Currently supported properties include:
 
 * `backgroundColor` - Color of the editor background
+* `backgroundGridColor` - Color of the editor background grid
 * `backgroundSize` - Size of the background grid
 * `connectionStyle` - Rendering style used for connections.
 

@@ -162,6 +162,11 @@
             "description": "Color of the background",
             "default": "#0f0f0f"
         },
+        "backgroundGridColor": {
+            "type": "string",
+            "description": "Color of the background grid",
+            "default": "#151515"
+        },
         "backgroundSize": {
             "type": "number",
             "description": "Defines size of the background grid",
