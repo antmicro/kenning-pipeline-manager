@@ -426,7 +426,7 @@ export default defineComponent({
         /**
          * Format an error message into an HTML element.
          *
-         * @param {string|Error} error - The error object or message to format.
+         * @param {string | Error} error - The error object or message to format.
          * @returns {string} The formatted error message.
          */
         const formatError = (error) => {

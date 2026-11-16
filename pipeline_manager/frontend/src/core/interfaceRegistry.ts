@@ -33,8 +33,8 @@ export class InterfaceRegistry {
      * privatizing an interface we can remove it from all the graphs that use it.
      * If the interface is not registered, an error is thrown.
      *
-     * @param {string} intfId Id of the interface.
-     * @param {string} graphId Id of a graph that has the registered interface
+     * @param intfId Id of the interface.
+     * @param graphId Id of a graph that has the registered interface
      */
     pushGraphIdToRegistry(intfId: string, graphId: string) {
         const sharedInterface = this.exposedInterfaces.get(intfId);
@@ -49,7 +49,7 @@ export class InterfaceRegistry {
      * Seamlessly wraps passed `intf`, so that the properties `maxConnectionsCount`,
      * `connectionCount` and `type` are shared between those two interfaces.
      *
-     * @param {NodeInterface} intf Interface for which the wrapper is created.
+     * @param intf Interface for which the wrapper is created.
      */
     createSharedInterface(intf: NodeInterface) {
         const sharedInterface = this.exposedInterfaces.get(intf.id);
@@ -103,8 +103,8 @@ export class InterfaceRegistry {
     /**
      * Checks if the interface of given id is registered.
      *
-     * @param {string} intfId Id of the interface to check.
-     * @returns {boolean} True if the interface is registered, false otherwise.
+     * @param intfId Id of the interface to check.
+     * @returns True if the interface is registered, false otherwise.
      */
     isRegistered(intfId: string): boolean {
         return this.exposedInterfaces.has(intfId);
@@ -114,7 +114,7 @@ export class InterfaceRegistry {
      * Returns the registered interface of given id. If the interface is not registered,
      * an error is thrown.
      *
-     * @param {string} intfId Id of the interface to get.
+     * @param intfId Id of the interface to get.
      */
     getRegisteredInterface(intfId: string) {
         if (!this.exposedInterfaces.has(intfId)) {
@@ -127,7 +127,7 @@ export class InterfaceRegistry {
      * Deletes the registered interface of given id. If the interface is not registered,
      * an error is thrown.
      *
-     * @param {string} intfId Id of the interface to delete
+     * @param intfId Id of the interface to delete
      */
     deleteRegisteredInterface(intfId: string) {
         if (!this.exposedInterfaces.has(intfId)) {
@@ -140,7 +140,7 @@ export class InterfaceRegistry {
      * Registers an interface in the registry, so that it can be shared between
      * multiple graph nodes. If the interface is already registered, an error is thrown.
      *
-     * @param {NodeInterface} intf Interface to register.
+     * @param intf Interface to register.
      */
     registerInterface(intf: NodeInterface, graphId: string) {
         if (this.exposedInterfaces.has(intf.id)) {

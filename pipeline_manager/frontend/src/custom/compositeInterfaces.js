@@ -15,8 +15,8 @@ import { resolveComposite, isSameCompositeType } from '../core/interfaceComposit
 /**
  * Normalizes a sub-interface type to the array form used by the ports.
  *
- * @param {string|Array|undefined} type - Type of the sub-interface.
- * @returns {Array|undefined} The type as an array.
+ * @param {string | Array | undefined} type - Type of the sub-interface.
+ * @returns {Array | undefined} The type as an array.
  */
 function normalizeType(type) {
     if (type === undefined) return undefined;
@@ -66,7 +66,7 @@ function createSubPort(intf, sub) {
  * expanding.
  *
  * @param {Object} intf - composite interface.
- * @returns {Array<CustomNodeInterface>} sub-ports.
+ * @returns {CustomNodeInterface[]} sub-ports.
  */
 export function getCompositePorts(intf) {
     if (intf.compositePorts !== undefined) {
@@ -85,7 +85,7 @@ export function getCompositePorts(intf) {
  *
  * @param {Object} connection - connection to inspect.
  * @param {Object} intf - interface to look for.
- * @returns {string|undefined} `'from'`, `'to'`, or undefined if the interface
+ * @returns {string | undefined} `'from'`, `'to'`, or undefined if the interface
  * is not an endpoint of the connection.
  */
 export function endpointSide(connection, intf) {
@@ -203,7 +203,7 @@ export function toggleCompositeInterfaces(intf, graph) {
  *
  * @param {Object} fromIntf - One composite interface.
  * @param {Object} toIntf - The other composite interface.
- * @returns {Array<[Object, Object]>|undefined} The matched leaf-port pairs, or
+ * @returns {[Object, Object][] | undefined} The matched leaf-port pairs, or
  * undefined when the hierarchies of the two composites do not match.
  */
 export function getCompositeLeafPairs(fromIntf, toIntf) {
@@ -239,7 +239,7 @@ export function getCompositeLeafPairs(fromIntf, toIntf) {
  * @param {Object} connection - The connection to inspect.
  * @param {string} side - `'from'` or `'to'`.
  * @param {Object} root - The composite interface whose hierarchy to resolve in.
- * @returns {Object|undefined} The leaf port of the hierarchy the endpoint
+ * @returns {Object | undefined} The leaf port of the hierarchy the endpoint
  * belongs to, or undefined when the connection does not touch `root`.
  */
 function findPortById(ports, id) {
@@ -252,7 +252,7 @@ function findPortById(ports, id) {
  *
  * @param {Object} root - The group port holding the first provenance entry.
  * @param {string} connId - The id of the connection to resolve.
- * @returns {Object|undefined} The leaf port the endpoint was created on, or
+ * @returns {Object | undefined} The leaf port the endpoint was created on, or
  * undefined when it cannot be resolved.
  */
 function provenanceLeaf(root, connId) {
@@ -374,7 +374,7 @@ export function settleEndpoint(connection, side, port) {
  * @param {Object} graph - The graph the composite interfaces belong to.
  * @param {Object} from - One composite interface (output side).
  * @param {Object} to - The other composite interface (input side).
- * @returns {Object|undefined} One of the created connections (the others are
+ * @returns {Object | undefined} One of the created connections (the others are
  * listed in the graph), or undefined when the connection was rejected.
  */
 export function addCompositeConnection(graph, from, to) {
@@ -447,7 +447,7 @@ function subtreeConnected(port, connectedIds) {
  *
  * @param {Object} intf - The composite interface.
  * @param {Set<string>} connectedIds - Ids of the leaf ports held by connections.
- * @returns {Array|undefined} The tree `[{ id, name, composite? }]`, or
+ * @returns {Array | undefined} The tree `[{ id, name, composite? }]`, or
  * undefined when nothing in the hierarchy is connected.
  */
 export function compositeTreeToSave(intf, connectedIds) {
@@ -486,7 +486,7 @@ export function buildCompositePortsDeep(intf) {
  *
  * @param {Object} intf - The composite interface whose hierarchy to search.
  * @param {string} id - The id of the port to find.
- * @returns {Object|undefined} The port with the given id, if found.
+ * @returns {Object | undefined} The port with the given id, if found.
  */
 export function findPortInHierarchy(intf, id) {
     let result;

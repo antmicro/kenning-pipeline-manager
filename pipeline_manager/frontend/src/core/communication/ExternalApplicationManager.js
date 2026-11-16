@@ -80,7 +80,7 @@ function showVersionError(currentVersion, specification) {
  * Formats received error and logs it.
  *
  * @param {string} type - Notification type.
- * @param {Error|import('./rpcCommunication').RPCError} error - Captured error.
+ * @param {Error | import('./rpcCommunication').RPCError} error - Captured error.
  * @param {string} [message] - Custom error description.
  */
 function RPCTerminalLog(type, error, message) {
@@ -314,7 +314,7 @@ class ExternalApplicationManager {
      * Loads a dataflow once the backend has sent the specification, and
      * resolves when it is loaded.
      *
-     * @param {object|string} dataflow - Dataflow, or the URL to load it from.
+     * @param {object | string} dataflow - Dataflow, or the URL to load it from.
      */
     async loadDataflowAfterSpecification(dataflow) {
         if (this.editorManager.isSpecificationLoaded()) {

@@ -69,9 +69,9 @@ function prepareInterfaces(intfs) {
  *
  * @param {object} template - Graph template
  * @param {object} opts
- * @param {object|undefined} [opts.graphLoadingState] - Information about loaded graphs.
- * @param {string|undefined} [opts.newSubgraphNodeId] - New ID of the subgraph node.
- * @param {'resolved'|'spec'} opts.mode - New ID of the subgraph node.
+ * @param {object | undefined} [opts.graphLoadingState] - Information about loaded graphs.
+ * @param {string | undefined} [opts.newSubgraphNodeId] - New ID of the subgraph node.
+ * @param {'resolved' | 'spec'} opts.mode - New ID of the subgraph node.
  *
  * @returns {any} graph state ready to be loaded
  */
@@ -341,8 +341,8 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
         /**
          * Function called when the node is created using the nodePalette
          *
-         * @param {Object|undefined} graphLoadingState Information about loaded graphs.
-         * @param {string|undefined} nodeId New ID of the subgraph node.
+         * @param {Object | undefined} graphLoadingState Information about loaded graphs.
+         * @param {string | undefined} nodeId New ID of the subgraph node.
          */
         onPlaced(graphLoadingState, nodeId) {
             this.initialize(graphLoadingState, nodeId);
@@ -352,8 +352,8 @@ export default function CreateCustomGraphNodeType(template, graphNode, editorMan
          * Creates a new graph node instance based on the template, loads its graph state
          * and updates exposed interfaces based on the nodes in the subgraph.
          *
-         * @param {Object|undefined} graphLoadingState  Information about loaded graphs.
-         * @param {string|undefined} nodeId New ID of the subgraph node.
+         * @param {Object | undefined} graphLoadingState  Information about loaded graphs.
+         * @param {string | undefined} nodeId New ID of the subgraph node.
          */
         initialize(graphLoadingState, nodeId) {
             if (this.subgraph) {

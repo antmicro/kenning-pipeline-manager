@@ -53,9 +53,9 @@ export function resolveConnectionEndpoints(connection) {
  * Creates a stub object derived from an interface definition.
  *
  * @param {Object} intf - The source interface to base the stub on.
- * @param {number|undefined} [offset] - Position offset for the stub along the bus.
- * @param {string|undefined} [stubID] - Optional explicit ID for the stub.
- * @param {string|undefined} [stubSide] - Optional side override for the stub.
+ * @param {number | undefined} [offset] - Position offset for the stub along the bus.
+ * @param {string | undefined} [stubID] - Optional explicit ID for the stub.
+ * @param {string | undefined} [stubSide] - Optional side override for the stub.
  * @returns {BusStub} A stub object that mimics normal interface.
  */
 export function createStub(intf, offset = undefined, stubID = undefined, stubSide = undefined) {
@@ -321,7 +321,7 @@ export function withCustomNodeFunctions(Base) {
          *
          * @param {Object} intf - The interface of the stub to find.
          * @param {string} id - The id of the stub to find.
-         * @returns {Object|undefined} The stub with the given id, if found.
+         * @returns {Object | undefined} The stub with the given id, if found.
          */
         static findBusStub(intf, id) {
             return (intf.bus?.stubs ?? []).find((stub) => stub.id === id);
@@ -331,7 +331,7 @@ export function withCustomNodeFunctions(Base) {
          * Finds a bus stub of this interface by its id.
          *
          * @param {string} id - The id of the stub to find.
-         * @returns {Object|undefined} The stub with the given id, if found.
+         * @returns {Object | undefined} The stub with the given id, if found.
          */
         findBusStub(id) {
             // eslint-disable-next-line no-use-before-define
@@ -399,9 +399,9 @@ export function withCustomNodeFunctions(Base) {
          *
          * @param {Object} other - The interface on the other end of the connection.
          * @param {Object} node - The node that owns the interfaces being connected.
-         * @param {number|undefined} offset - Position offset used when creating a bus stub.
-         * @param {string|undefined} stubID - Optional explicit ID for the created stub.
-         * @param {string|undefined} stubSide - Optional side override for the created stub.
+         * @param {number | undefined} offset - Position offset used when creating a bus stub.
+         * @param {string | undefined} stubID - Optional explicit ID for the created stub.
+         * @param {string | undefined} stubSide - Optional side override for the created stub.
          * @returns {Object} The interface or stub to use for the connection.
          */
         // eslint-disable-next-line no-unused-vars

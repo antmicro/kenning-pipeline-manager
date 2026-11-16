@@ -27,7 +27,7 @@ export const parseJSON = (json) => {
  *
  * @param {import('ajv/dist/2019').Ajv2019} ajv - JSON validator.
  * @param {Object} schema - Validation schema.
- * @param {Object|string} data - Data to validate.
+ * @param {Object | string} data - Data to validate.
  * @param {string} reference - Schema entity.
  * @returns {string[]} Validation errors.
  */

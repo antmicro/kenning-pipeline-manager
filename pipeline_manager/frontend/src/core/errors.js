@@ -18,7 +18,7 @@
 export default class CombinedError extends Error {
     /**
      * @param {string} message - summary message describing the combined error
-     * @param {Array<Error|string>} errors - the errors being combined
+     * @param {(Error | string)[]} errors - the errors being combined
      */
     constructor(message, errors = []) {
         super(message);

@@ -10,7 +10,7 @@ import path from 'path';
 import webpack from 'webpack';
 
 export default (_, argv) =>
-/** @type {import("webpack").Configuration} */({
+/** @type {import('webpack').Configuration} */({
         target: 'web',
         mode: argv.mode || 'development',
         devtool: false,

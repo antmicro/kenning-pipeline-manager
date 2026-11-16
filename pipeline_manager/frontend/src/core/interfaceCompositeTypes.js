@@ -20,7 +20,7 @@ const interfaceCompositeTypes = new Map();
 /**
  * (Re)loads the composite interface definitions from the specification.
  *
- * @param {Object|undefined} composites Contents of the specification's
+ * @param {Object | undefined} composites Contents of the specification's
  * `interfaceComposites` field. Invalid entries are ignored, as they are
  * reported by the schema validation already.
  */
@@ -44,7 +44,7 @@ export function clearInterfaceCompositeTypes() {
  * Returns the sub-interface definitions of the composite of a given type name.
  *
  * @param {string} typeName - Name of the composite type.
- * @returns {Array|undefined} The list of sub-interface definitions, or
+ * @returns {Array | undefined} The list of sub-interface definitions, or
  * undefined when `typeName` does not name a composite.
  */
 export function getInterfaceCompositeType(typeName) {
@@ -87,7 +87,7 @@ export function isSameCompositeType(a, b) {
  *
  * @param {Object} io - Interface-like object with an optional `type` field
  * (either a string or a list of strings).
- * @returns {Object|undefined} A `{ type, interfaces }` object, or undefined
+ * @returns {Object | undefined} A `{ type, interfaces }` object, or undefined
  * when the interface is not a composite one.
  */
 export function resolveComposite(io) {

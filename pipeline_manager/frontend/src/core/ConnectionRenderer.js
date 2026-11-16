@@ -953,7 +953,7 @@ export default class ConnectionRenderer {
          *
          * @param {Object} p1 The starting point.
          * @param {Object} p2 The ending point.
-         * @returns {{axis: 'x'|'y', sign: number}|null} Direction of the segment,
+         * @returns {{axis: 'x' | 'y', sign: number} | null} Direction of the segment,
          * or null if the points do not form a horizontal or vertical segment.
          */
         function getDirection(p1, p2) {
@@ -974,7 +974,7 @@ export default class ConnectionRenderer {
          * @param {Object} p1 The point before the middle point.
          * @param {Object} p2 The middle point.
          * @param {Object} p3 The point after the middle point.
-         * @returns {'straight'|'reverse'|'turn'|null} Direction change:
+         * @returns {'straight' | 'reverse' | 'turn' | null} Direction change:
          * 'straight' if the path continues in the same direction,
          * 'reverse' if it makes a 180 deg turn,
          * 'turn' if it makes a 90 deg turn,

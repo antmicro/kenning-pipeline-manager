@@ -139,12 +139,12 @@ export default class EditorManager {
 
     /**
      * @type {import('baklavajs').IBaklavaViewModel & {
-     *    editor: PipelineManagerEditor & { events: any, searchQuery: any },
-     *    settings: any,
-     *    logLevel: any,
-     *    connectionRenderer: any,
-     *    layers: any,
-     *    ignoredLayers: any,
+     *   editor: PipelineManagerEditor & {events: any, searchQuery: any},
+     *   settings: any,
+     *   logLevel: any,
+     *   connectionRenderer: any,
+     *   layers: any,
+     *   ignoredLayers: any
      * }}
      */
     baklavaView = useBaklava(this.editor);
@@ -163,11 +163,11 @@ export default class EditorManager {
     defaultStyles = new Map();
 
     /**
-     * @type {
-     *     mounted: boolean,
-     *     panels: any,
-     *     togglePanel: function
-     * }
+     * @type {{
+     *   mounted: boolean,
+     *   panels: any,
+     *   togglePanel: function
+     * }}
      */
     navbarOptions = {
         mounted: false,
@@ -470,7 +470,7 @@ export default class EditorManager {
      * @param unmarkNewNodes Decides whether to remove styling of new nodes.
      * @param urloverrides Override metadata URLs in provided specification.
      * it and check its versioning. Can be used when loading parts of specification manually.
-     * @param {object|boolean} tryMinify If set, requests minification based resolved specification or a given dataflow.
+     * @param {object | boolean} tryMinify If set, requests minification based resolved specification or a given dataflow.
      * @returns An object consisting of errors and warnings arrays. If any array is empty
      * the updating process was successful.
      */
@@ -922,7 +922,7 @@ export default class EditorManager {
      * The node specification should be in the format of the node schema.
      *
      * @param {object} nodeSpecification Node specification to add
-     * @param {string|undefined} nodeToUpdate Node type to update
+     * @param {string | undefined} nodeToUpdate Node type to update
      * @param {boolean} removeUnused Whether keys missing from nodeSpecification should be removed
      * @param {boolean} override A flag that makes function override existing node specification.
      * @returns An object consisting of errors and warnings arrays. If both arrays are empty
@@ -2307,7 +2307,7 @@ export default class EditorManager {
      * @param {Boolean} obj.hideHud whether the dataflow should be saved in hideHud mode
      * @param {Boolean} obj.position whether the dataflow should store panning and scaling values
      * @param {Boolean} obj.hideLayers whether the dataflow should store hidden layers
-     * @param {string|null|undefined} obj.graphName graph name which is rendered to the user
+     * @param {string | null | undefined} obj.graphName graph name which is rendered to the user
      *
      * @returns Serialized dataflow.
      */
@@ -2721,7 +2721,7 @@ export default class EditorManager {
      * Adds style to all nodes in the specification.
      *
      * @param {object} specification specification to modify.
-     * @param {string|Array<string>} style style to be applied
+     * @param {string | string[]} style style to be applied
      */
     static includeWithStyle(specification, style) {
         specification.nodes?.forEach((node) => {
@@ -2733,9 +2733,9 @@ export default class EditorManager {
     /**
      * Merges two styles.
      *
-     * @param {string|Array<string>|undefined} style1 first style.
-     * @param {string|Array<string>|undefined} style2 second style.
-     * @returns {Array<string>|undefined} merged style.
+     * @param {string | string[] | undefined} style1 first style.
+     * @param {string | string[] | undefined} style2 second style.
+     * @returns {string[] | undefined} merged style.
      */
     static mergeStyles(style1, style2) {
         if (style1 === style2) return style1;

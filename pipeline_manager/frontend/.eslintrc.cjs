@@ -13,8 +13,11 @@ module.exports = {
     overrides: [{
         files: ['**/*.{ts,tsx}'],
         parser: '@typescript-eslint/parser',
-        plugins: ['@typescript-eslint'],
-        extends: ['plugin:@typescript-eslint/recommended']
+        plugins: ['@typescript-eslint', 'jsdoc'],
+        extends: ['plugin:@typescript-eslint/recommended'],
+        rules: {
+            'jsdoc/no-types': 1,
+        },
     }],
     parserOptions: {
         parser: '@typescript-eslint/parser',
@@ -23,7 +26,7 @@ module.exports = {
         sourceType: 'module',
         babelOptions: { plugins: ['@babel/plugin-syntax-import-assertions'], }
     },
-    plugins: ['vue', '@typescript-eslint'],
+    plugins: ['vue', '@typescript-eslint', 'jsdoc'],
     rules: {
         'import/no-extraneous-dependencies': 0,
         indent: ['error', 4, { SwitchCase: 1 }],
@@ -35,6 +38,8 @@ module.exports = {
         'import/extensions': ['error', { js: 'ignorePackages', json: 'ignorePackages', ts: 'ignorePackages' }],
         'no-unused-vars': ['error', {'vars': 'all', 'args': 'all', 'argsIgnorePattern': '^_'}],
         'no-console': ["error", { allow: ["warn", "error"] }],
+        'jsdoc/valid-types': ['error'],
+        'jsdoc/type-formatting': ['error', {'stringQuotes': 'single', 'objectFieldSeparator': 'comma-and-linebreak', 'objectFieldIndent': '  '}],
     },
     ignorePatterns: ["src/third-party/hterm_all.js", "specification_builder/specification_builder.js"],
 };
