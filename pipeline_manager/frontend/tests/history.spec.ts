@@ -393,6 +393,45 @@ test('test history by moving interface to left', async ({ page }) => {
     }).toBe(0);
 });
 
+test('test history by adding and removing anchor', async ({ page }) => {
+    await loadWebsite(page, loadVideoNodeId);
+
+    // Create an anchor.
+    const node = getNode(page, 'LoadVideo');
+    const outputPort = node.locator('.__content .__interfaces .__outputs .__port');
+    const interfaceLocation = await outputPort.boundingBox() ?? { x: 0, y: 0 };
+    const shiftToConnectionInPx = 50;
+    await page.mouse.click(
+        interfaceLocation.x + shiftToConnectionInPx,
+        interfaceLocation.y + interfaceLocation.height / 2,
+        { button: 'right' }
+    );
+
+    const connection = page.locator('.custom-connections-container > g').first();
+    const anchor = connection.locator('.anchor');
+    await expect(anchor, { message: 'Anchor cannot be added' }).toBeVisible();
+
+    await page.keyboard.press('Control+KeyZ');
+    await expect(anchor, { message: 'Adding anchor cannot be undone' }).not.toBeVisible();
+
+    await page.keyboard.press('Control+KeyY');
+    await expect(anchor, { message: 'Adding anchor cannot be redone' }).toBeVisible();
+
+    // Click on the anchor again to remove it.
+    await page.mouse.click(
+        interfaceLocation.x + shiftToConnectionInPx,
+        interfaceLocation.y + interfaceLocation.height / 2,
+        { button: 'right' }
+    );
+    await expect(anchor, { message: 'Anchor cannot be removed' }).not.toBeVisible();
+
+    await page.keyboard.press('Control+KeyZ');
+    await expect(anchor, { message: 'Removing anchor cannot be undone' }).toBeVisible();
+
+    await page.keyboard.press('Control+KeyY');
+    await expect(anchor, { message: 'Removing anchor cannot be redone' }).not.toBeVisible();
+});
+
 test('test history by removing node with connection', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
     // At the beginning, six connections exist.
