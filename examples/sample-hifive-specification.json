@@ -1072,6 +1072,7 @@
             "defaultStyle": {
                 "backgroundSize": 100,
                 "backgroundColor": "#1d1e27",
+                "backgroundGridColor": "#2094F3",
                 "connectionStyle": "curved"
             }
         }

@@ -606,6 +606,7 @@
             "defaultStyle": {
                 "backgroundSize": 100,
                 "backgroundColor": "#2E303E",
+                "backgroundGridColor": "#2094F3",
                 "connectionStyle": "curved"
             }
         },
