@@ -209,6 +209,7 @@ export default {
                 };
                 await loadingScreen(apply, props.viewModel.editor.events.setLoad);
             });
+            button.description = 'Apply the selected autolayout algorithm to the graph in the editor';
             return button;
         });
 
@@ -219,6 +220,7 @@ export default {
                 };
                 await loadingScreen(apply, props.viewModel.editor.events.setLoad);
             });
+            button.description = 'Change interfaces sides where applicable to improve graph layout';
             return button;
         });
 
@@ -229,6 +231,7 @@ export default {
                 };
                 await loadingScreen(apply, props.viewModel.editor.events.setLoad);
             });
+            button.description = 'Hide interfaces that are not connected to any other interface';
             return button;
         });
 
@@ -239,6 +242,7 @@ export default {
                 };
                 await loadingScreen(apply, props.viewModel.editor.events.setLoad);
             });
+            button.description = 'Show interfaces that were hidden previously';
             return button;
         });
 
@@ -246,6 +250,7 @@ export default {
             const button = new ButtonInterface('Clear editor', () => {
                 props.viewModel.editor.clear();
             });
+            button.description = 'Remove the current specification and graph from the editor';
             return button;
         });
 
@@ -281,6 +286,7 @@ export default {
                         graphIgnoredLayers.add(layer.name);
                     }
                 });
+                option.description = '';
                 options.value.push(option);
             });
 
@@ -330,6 +336,7 @@ export default {
                 );
                 editor.centerZoom();
             });
+            option.description = 'Switches between preconfigured views for the graph';
 
             return option;
         });
