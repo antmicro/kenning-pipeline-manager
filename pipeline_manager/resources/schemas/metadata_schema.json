@@ -174,7 +174,7 @@
         },
         "removeEmptySubgraphs": {
             "type": "boolean",
-            "description": "When enabled, subgraphs with no nodes will be removed automatically.",
+            "description": "When enabled, subgraphs with no nodes will be removed automatically",
             "default": false
         },
         "editableTypes": {
@@ -184,7 +184,7 @@
         },
         "toggleableEditableTypes": {
             "type": "boolean",
-            "description": "Determines whether node editibility can be toggled from the UI.",
+            "description": "Determines whether node editibility can be toggled from the UI",
             "default": true
         },
         "hideAnchors": {
@@ -337,7 +337,7 @@
             "default": false
         },
         "logLevel": {
-            "description": "Verbosity of pop-up notifications",
+            "description": "Defines the verbosity of pop-up notifications",
             "enum": [
                 "INFO",
                 "WARNING",
