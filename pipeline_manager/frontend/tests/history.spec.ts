@@ -1,12 +1,13 @@
-import { test, expect, Page, Locator } from '@playwright/test';
 import {
-    getUrl,getNodeByID,assertInputCount,assertOutputCount,waitForSubgraph,enterSubgraph,
-    leaveSubgraph,expectNode,getNode,deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
-    dragAndDrop, closeTerminal,loadSpecification,loadDataflow, getContextMenu,
+    test, expect, Page, Locator,
+} from '@playwright/test';
+import {
+    getUrl, getNodeByID, assertInputCount, assertOutputCount, waitForSubgraph, enterSubgraph,
+    leaveSubgraph, expectNode, getNode, deleteNode, loadVideoNodeId, enableNavigationBar, addNode,
+    dragAndDrop, closeTerminal, loadSpecification, loadDataflow, getContextMenu,
     AddConnection, getYAMLEditorContent, setYAMLEditorContent, assertPropertyCount,
-    enableSubgraphRemoval, addProperty, addInterface, assertInoutCount, getGroup, getNodeInterfaces
+    enableSubgraphRemoval, addProperty, addInterface, assertInoutCount, getGroup, getNodeInterfaces,
 } from './config.js';
-
 
 async function renameNodeType(page: Page, oldName: string, newName: string) {
     const node = getNode(page, oldName).locator('.__title');
@@ -73,7 +74,7 @@ test('test history by removing subgraph', async ({ page }) => {
 test('test history by removing node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
     await loadWebsite(page, loadVideoNodeId);
-    const node = getNodeByID(page,loadVideoNodeId);
+    const node = getNodeByID(page, loadVideoNodeId);
 
     await expectNode(
         true,
@@ -223,7 +224,7 @@ test('test history by adding connection', async ({ page }) => {
     const sourceInterface = getNodeInterfaces(page, 'LoadVideo').locator('.__port').first();
     const targetInterface = getNodeInterfaces(page, 'Filter2D', 'input').locator('.__port').first();
 
-    await AddConnection(page,sourceInterface,targetInterface);
+    await AddConnection(page, sourceInterface, targetInterface);
 
     await expect(connections, {
         message: 'Adding a connection (in place of a missing connection) failed.',
@@ -404,7 +405,7 @@ test('test history by adding and removing anchor', async ({ page }) => {
     await page.mouse.click(
         interfaceLocation.x + shiftToConnectionInPx,
         interfaceLocation.y + interfaceLocation.height / 2,
-        { button: 'right' }
+        { button: 'right' },
     );
 
     const connection = page.locator('.custom-connections-container > g').first();
@@ -421,7 +422,7 @@ test('test history by adding and removing anchor', async ({ page }) => {
     await page.mouse.click(
         interfaceLocation.x + shiftToConnectionInPx,
         interfaceLocation.y + interfaceLocation.height / 2,
-        { button: 'right' }
+        { button: 'right' },
     );
     await expect(anchor, { message: 'Anchor cannot be removed' }).not.toBeVisible();
 
@@ -440,7 +441,7 @@ test('test history by removing node with connection', async ({ page }) => {
         message: 'The initial condition of six connections being present are not met.',
     }).toHaveCount(6);
 
-    const node = getNodeByID(page,loadVideoNodeId);
+    const node = getNodeByID(page, loadVideoNodeId);
     await deleteNode(node, page);
 
     // Verify that the node and its connection have disappeared.
@@ -576,7 +577,6 @@ test('test history by node specification edit, change interface name', async ({ 
     // Get YAML editor content of the YAML editor
     content = await getYAMLEditorContent(page);
     expect(content.interfaces[0].name).toBe('frames1');
-
 });
 test('test history by node specification edit, add interface', async ({ page }) => {
     await loadWebsite(page, loadVideoNodeId);
@@ -586,13 +586,13 @@ test('test history by node specification edit, add interface', async ({ page }) 
     await loadVideo.locator('.__title').dblclick({ force: true });
 
     // Get YAML editor content of the YAML editor
-    let content = await getYAMLEditorContent(page);
+    const content = await getYAMLEditorContent(page);
     // Add a new interface
     content.interfaces.push(
         {
             name: 'in',
-            direction: 'input'
-        }
+            direction: 'input',
+        },
     );
     await setYAMLEditorContent(page, content);
     await loadVideo.locator('.__title').click();
@@ -619,14 +619,14 @@ test('test history by node specification edit, add properties', async ({ page })
     await loadVideo.locator('.__title').dblclick({ force: true });
 
     // Get YAML editor content of the YAML editor
-    let content = await getYAMLEditorContent(page);
+    const content = await getYAMLEditorContent(page);
     // Add a new property
     content.properties = [
         {
             name: 'size',
             type: 'integer',
-            default: 5
-        }
+            default: 5,
+        },
     ];
     await setYAMLEditorContent(page, content);
     await loadVideo.locator('.__title').click();
@@ -650,7 +650,7 @@ test('test history by node specification edit, test extend', async ({ page }) =>
     await loadVideo.locator('.__title').dblclick({ force: true });
 
     // Get YAML editor content of the YAML editor
-    let content = await getYAMLEditorContent(page);
+    const content = await getYAMLEditorContent(page);
     // Remove parents
     content.extends = [];
     await setYAMLEditorContent(page, content);
@@ -687,13 +687,13 @@ test('test connections preservation', async ({ page }) => {
 
     // add interface
     await addInterface(page, loadVideo);
-    await assertOutputCount(loadVideo,1);
-    await assertInputCount(loadVideo,1);
+    await assertOutputCount(loadVideo, 1);
+    await assertInputCount(loadVideo, 1);
     // undo changes
     await page.keyboard.press('Control+KeyZ');
 
-    await assertOutputCount(loadVideo,1);
-    await assertInputCount(loadVideo,0);
+    await assertOutputCount(loadVideo, 1);
+    await assertInputCount(loadVideo, 0);
 
     // take a path of the connection assigned to node
     const connections = page.locator('.custom-connections-container > g').last();
@@ -714,7 +714,6 @@ test('test connections preservation', async ({ page }) => {
 
     // connection path should be different after node is moved
     expect(pathAfter === pathBefore).toBeFalsy();
-
 });
 test('test node history in node groups', async ({ page }) => {
     await page.goto(getUrl());
@@ -729,21 +728,18 @@ test('test node history in node groups', async ({ page }) => {
     const groupBBoxBefore = await group.boundingBox();
 
     await nodeA.click();
-    await page.mouse.down({'button': 'left'});
-    await page.mouse.move(nodeBBoxBefore.x - 100 ,nodeBBoxBefore.y);
-    await page.mouse.up({'button': 'left'});
+    await page.mouse.down({ button: 'left' });
+    await page.mouse.move(nodeBBoxBefore.x - 100, nodeBBoxBefore.y);
+    await page.mouse.up({ button: 'left' });
 
     await page.keyboard.press('Control+KeyZ');
 
     const nodeBBoxAfter = await nodeA.boundingBox();
 
-    const checkBBoxes = (bboxA, bboxB) => {
+    const checkBBoxes = (bboxA, bboxB) => (Math.abs(bboxA.x - bboxB.x) < 20) &&
+        (Math.abs(bboxA.y - bboxB.y) < 20) &&
+        (Math.abs(bboxA.width - bboxB.width) < 20) &&
+        (Math.abs(bboxA.height - bboxB.height) < 20);
 
-        return ( Math.abs(bboxA.x - bboxB.x) < 20 ) &&
-        ( Math.abs(bboxA.y - bboxB.y) < 20 ) &&
-        ( Math.abs(bboxA.width - bboxB.width) < 20 ) &&
-        ( Math.abs(bboxA.height - bboxB.height) < 20 );
-    };
-
-    expect(checkBBoxes(nodeBBoxBefore,nodeBBoxAfter)).toBeTruthy();
+    expect(checkBBoxes(nodeBBoxBefore, nodeBBoxAfter)).toBeTruthy();
 });

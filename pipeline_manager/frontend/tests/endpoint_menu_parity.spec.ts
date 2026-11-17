@@ -14,6 +14,83 @@ type Action = (page: Page) => Promise<unknown>;
 type MenuEndpointPair = { endpoint: string, menuItem: string, viaMenu: Action, viaRPC: Action };
 
 /**
+ * Simulates menu item click.
+ */
+async function clickMenuItem(page: Page, text: string) {
+    await page.locator('.logo').hover();
+    await page.getByText(text, { exact: true }).click();
+}
+
+/**
+ * Returns the currently loaded specification.
+ */
+async function getSpecification(page: Page) {
+    return (await callFrontendRPC(page, 'frontend_specification_get')).result.specification;
+}
+
+/**
+ * Returns the layout of the displayed graph.
+ */
+async function getLayoutViaRPC(page: Page) {
+    const { result } = await callFrontendRPC(page, 'layout_get');
+    delete result.graph_id;
+    return result;
+}
+
+/**
+ * Returns the sample dataflow with a renamed graph and moved nodes,
+ * so that loading it changes the editor.
+ */
+async function getOtherDataflow() {
+    const dataflow = JSON.parse(
+        await fs.readFile(getPathToJsonFile('sample-dataflow.json'), 'utf-8'),
+    );
+    const [graph] = dataflow.graphs;
+    graph.name = 'Loaded graph';
+    graph.nodes.forEach((node: any) => {
+        // eslint-disable-next-line no-param-reassign
+        node.position.x += 100;
+    });
+    return dataflow;
+}
+
+/**
+ * Returns the current layout with every node moved, so that loading it changes the editor.
+ */
+async function getMovedLayout(page: Page) {
+    const { layout } = (await callFrontendRPC(page, 'layout_get')).result;
+    Object.values(layout).forEach((node: any) => {
+        // eslint-disable-next-line no-param-reassign
+        node.position.x += 100;
+        // eslint-disable-next-line no-param-reassign
+        node.position.y += 50;
+    });
+    return { layout };
+}
+
+/**
+ * Replaces random class names that html-to-image generates with consistent names.
+ */
+function normalizeSvg(svg: string) {
+    const names = [...svg.matchAll(/<style>\.(\w+)::/g)].map(([, name]) => name);
+    return names.reduce((result, name, i) => result.split(name).join(`pseudo-${i}`), svg);
+}
+
+/**
+ * Returns the dataflow in a comparable form.
+ */
+async function getComparableDataflow(page: Page, dataflow?: any) {
+    const comparable = dataflow ?? (await callFrontendRPC(page, 'graph_get')).result.dataflow;
+    comparable.graphs.forEach((graph: any) => graph.connections?.forEach((connection: any) => {
+        // eslint-disable-next-line no-param-reassign
+        delete connection.id;
+    }));
+    return JSON.parse(
+        JSON.stringify(comparable).split(comparable.entryGraph).join('displayed-graph'),
+    );
+}
+
+/**
  * Pairs of a file menu option and an equivalent RPC call.
  */
 const menuEndpointPairs: MenuEndpointPair[] = [
@@ -184,79 +261,6 @@ const menuEndpointPairs: MenuEndpointPair[] = [
         },
     },
 ];
-
-/**
- * Simulates menu item click.
- */
-async function clickMenuItem(page: Page, text: string) {
-    await page.locator('.logo').hover();
-    await page.getByText(text, { exact: true }).click();
-}
-
-/**
- * Returns the currently loaded specification.
- */
-async function getSpecification(page: Page) {
-    return (await callFrontendRPC(page, 'frontend_specification_get')).result.specification;
-}
-
-/**
- * Returns the layout of the displayed graph.
- */
-async function getLayoutViaRPC(page: Page) {
-    const { result } = await callFrontendRPC(page, 'layout_get');
-    delete result.graph_id;
-    return result;
-}
-
-/**
- * Returns the sample dataflow with a renamed graph and moved nodes,
- * so that loading it changes the editor.
- */
-async function getOtherDataflow() {
-    const dataflow = JSON.parse(
-        await fs.readFile(getPathToJsonFile('sample-dataflow.json'), 'utf-8'),
-    );
-    const [graph] = dataflow.graphs;
-    graph.name = 'Loaded graph';
-    graph.nodes.forEach((node: any) => {
-        node.position.x += 100;
-    });
-    return dataflow;
-}
-
-/**
- * Returns the current layout with every node moved, so that loading it changes the editor.
- */
-async function getMovedLayout(page: Page) {
-    const { layout } = (await callFrontendRPC(page, 'layout_get')).result;
-    Object.values(layout).forEach((node: any) => {
-        node.position.x += 100;
-        node.position.y += 50;
-    });
-    return { layout };
-}
-
-/**
- * Replaces random class names that html-to-image generates with consistent names.
- */
-function normalizeSvg(svg: string) {
-    const names = [...svg.matchAll(/<style>\.(\w+)::/g)].map(([, name]) => name);
-    return names.reduce((result, name, i) => result.split(name).join(`pseudo-${i}`), svg);
-}
-
-/**
- * Returns the dataflow in a comparable form.
- */
-async function getComparableDataflow(page: Page, dataflow?: any) {
-    const comparable = dataflow ?? (await callFrontendRPC(page, 'graph_get')).result.dataflow;
-    comparable.graphs.forEach((graph: any) => graph.connections?.forEach((connection: any) => {
-        delete connection.id;
-    }));
-    return JSON.parse(
-        JSON.stringify(comparable).split(comparable.entryGraph).join('displayed-graph'),
-    );
-}
 
 /**
  * Captures what the user can observe after an action.

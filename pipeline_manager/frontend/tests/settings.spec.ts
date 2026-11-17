@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { dragAndDrop, getNode, getNodeInterfaces, getUrl, loadSpecification, loadDataflow, openSettingsPanel } from './config.js';
+import {
+    dragAndDrop, getNode, getNodeInterfaces, getUrl,
+    loadSpecification, loadDataflow, openSettingsPanel,
+} from './config.js';
 
 async function setOption(page: Page, name: string) {
     openSettingsPanel(page);

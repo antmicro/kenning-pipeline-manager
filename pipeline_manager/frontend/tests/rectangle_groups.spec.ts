@@ -4,7 +4,8 @@ import {
     Locator,
 } from '@playwright/test';
 import {
-    deleteNode, getGroup, getContextMenu, getUrl, loadDataflow, loadSpecification, openSettingsPanel,
+    deleteNode, getGroup, getContextMenu, getUrl,
+    loadDataflow, loadSpecification, openSettingsPanel,
 } from './config.js';
 
 function getNode(page: Page, name: string): Locator {
@@ -12,24 +13,13 @@ function getNode(page: Page, name: string): Locator {
 }
 
 async function getRect(nodes: Locator[]) {
-    let left = Infinity;
-    let right = -Infinity;
-    let top = Infinity;
-    let bottom = -Infinity;
-    // eslint-disable-next-line no-restricted-syntax
-    for (const node of nodes) {
-        // eslint-disable-next-line no-await-in-loop
-        const rect = await node.boundingBox();
-        if (!rect) {
-            // eslint-disable-next-line no-continue
-            continue;
-        }
+    const rects = (await Promise.all(nodes.map((node) => node.boundingBox())))
+        .filter((rect) => rect);
 
-        left = Math.min(left, rect.x);
-        right = Math.max(right, rect.x + rect.width);
-        top = Math.min(top, rect.y);
-        bottom = Math.max(bottom, rect.y + rect.height);
-    }
+    const left = Math.min(...rects.map((rect) => rect.x));
+    const right = Math.max(...rects.map((rect) => rect.x + rect.width));
+    const top = Math.min(...rects.map((rect) => rect.y));
+    const bottom = Math.max(...rects.map((rect) => rect.y + rect.height));
     return {
         x: left,
         y: top,
@@ -51,7 +41,6 @@ async function removeFromGroup(node: Locator, page: Page) {
     await getContextMenu(page).getByText('Remove from group').click();
 }
 async function createGroup(nodes: Locator[], page: Page) {
-    // eslint-disable-next-line no-restricted-syntax
     for (let i = 0; i < nodes.length; i += 1) {
         // eslint-disable-next-line no-await-in-loop
         await nodes[i].locator('.__title').click({ modifiers: ['ControlOrMeta'] });
@@ -191,23 +180,27 @@ test('groups are preserved after swapping interfaces', async ({ page }) => {
     await expect(groupsCount).toBe(6);
     await expect(selectedGroup).toBeVisible();
 });
-test('move multiple groups', async ({page}) => {
+test('move multiple groups', async ({ page }) => {
     await page.goto(getUrl());
 
     await loadSpecification(page, 'sample-rectangle-grouping-specification.json');
     await loadDataflow(page, 'sample-rectangle-grouping-dataflow.json');
 
-    const groupA = getGroup(page,'Runtime - Target');
-    const groupB = getGroup(page,'Runtime Protocol - Target');
-    const nodeA = getNode(page,'Model loading').first();
+    const groupA = getGroup(page, 'Runtime - Target');
+    const groupB = getGroup(page, 'Runtime Protocol - Target');
+    const nodeA = getNode(page, 'Model loading').first();
 
     const groupABBoxBefore = await groupA.boundingBox();
     const groupBBBoxBefore = await groupB.boundingBox();
 
     const left = Math.min(groupBBBoxBefore?.x ?? 0, groupABBoxBefore?.x ?? 0);
     const top = Math.min(groupBBBoxBefore?.y ?? 0, groupABBoxBefore?.y ?? 0);
-    const right = Math.max((groupBBBoxBefore?.x ?? 0) + ( groupBBBoxBefore?.width ?? 0 ),(groupABBoxBefore?.x ?? 0) + ( groupABBoxBefore?.width ?? 0 ));
-    const bottom = Math.max((groupBBBoxBefore?.y ?? 0) + ( groupBBBoxBefore?.height ?? 0 ),(groupABBoxBefore?.y ?? 0) + ( groupABBoxBefore?.height ?? 0 ));
+    const rightA = (groupABBoxBefore?.x ?? 0) + (groupABBoxBefore?.width ?? 0);
+    const rightB = (groupBBBoxBefore?.x ?? 0) + (groupBBBoxBefore?.width ?? 0);
+    const bottomA = (groupABBoxBefore?.y ?? 0) + (groupABBoxBefore?.height ?? 0);
+    const bottomB = (groupBBBoxBefore?.y ?? 0) + (groupBBBoxBefore?.height ?? 0);
+    const right = Math.max(rightB, rightA);
+    const bottom = Math.max(bottomB, bottomA);
 
     await page.mouse.move(left, top);
 
@@ -216,7 +209,7 @@ test('move multiple groups', async ({page}) => {
     await page.mouse.down({ button: 'right' });
     await page.mouse.move(
         right,
-        bottom
+        bottom,
     );
     await page.mouse.up({ button: 'right' });
     await page.keyboard.up('Shift');
@@ -224,16 +217,16 @@ test('move multiple groups', async ({page}) => {
     const nodeABBox = await nodeA.boundingBox();
     // move groups around
     await page.keyboard.down('Control');
-    await nodeA.click({force: true});
-    await page.mouse.move(nodeABBox.x + 10 ,nodeABBox.y + 10);
+    await nodeA.click({ force: true });
+    await page.mouse.move(nodeABBox.x + 10, nodeABBox.y + 10);
     await page.mouse.down();
-    await page.mouse.move(nodeABBox.x + 200,nodeABBox.y);
+    await page.mouse.move(nodeABBox.x + 200, nodeABBox.y);
     await page.keyboard.up('Control');
     await page.mouse.up();
 
     const groupABBoxAfter = await groupA.boundingBox();
     const groupBBBoxAfter = await groupB.boundingBox();
 
-    expect(Math.abs( groupABBoxAfter.x - groupABBoxBefore.x - 200) < 25).toBeTruthy();
-    expect(Math.abs( groupBBBoxAfter.x - groupBBBoxBefore.x - 200) < 25).toBeTruthy();
+    expect(Math.abs(groupABBoxAfter.x - groupABBoxBefore.x - 200) < 25).toBeTruthy();
+    expect(Math.abs(groupBBBoxAfter.x - groupBBBoxBefore.x - 200) < 25).toBeTruthy();
 });

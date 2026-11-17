@@ -4,16 +4,14 @@ import {
     loadSpecification, loadDataflow, openSettingsPanel,
 } from './config.js';
 
-
-async function getNodePositions(node: Locator)
-{
-    const left = await getElementStyleAttribute(node,'left');
-    const top = await getElementStyleAttribute(node,'top');
+async function getNodePositions(node: Locator) {
+    const left = await getElementStyleAttribute(node, 'left');
+    const top = await getElementStyleAttribute(node, 'top');
 
     return {
         x: left,
-        y: top
-    }
+        y: top,
+    };
 }
 
 test('test node position across views', async ({ page }) => {
@@ -24,14 +22,14 @@ test('test node position across views', async ({ page }) => {
     const zoomButton = page.locator('.zoom-center');
 
     // get node position
-    const node = await getNode(page,"Source").first();
+    const node = await getNode(page, 'Source').first();
     const nodeStartPosition = await node.boundingBox();
     expect(nodeStartPosition !== null).toBeTruthy();
 
     // move node
     await node.click();
     await page.mouse.down();
-    await page.mouse.move(nodeStartPosition!.x + 100,nodeStartPosition!.y);
+    await page.mouse.move(nodeStartPosition!.x + 100, nodeStartPosition!.y);
     await page.mouse.up();
 
     await zoomButton.dispatchEvent('click');

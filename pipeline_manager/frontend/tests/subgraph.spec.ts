@@ -1,27 +1,29 @@
-import { test, expect, Page, Locator } from '@playwright/test';
 import {
-    waitForNodeSubgraph,disableNavigationBar,addSubgraph,dragAndDrop,
-    loadSpecification,loadDataflow,verifyNodeCount,getPathToJsonFile,checkForSubgraph,
-    waitForSubgraph,getYAML,deleteProperty,addProperty,addInterface,enterSubgraph,
-    leaveSubgraph,getNode,deleteNode, getUrl, openFileChooser, enableEditingNodes,
-    enableNavigationBar, addNode, getContextMenu, AddConnection,
-    assertPropertyCount,
-} from './config.js';
+    test, expect, Page, Locator,
+} from '@playwright/test';
 
 import os from 'os';
 import fs from 'fs/promises';
 import path from 'path';
+import {
+    waitForNodeSubgraph, disableNavigationBar, addSubgraph, dragAndDrop,
+    loadSpecification, loadDataflow, verifyNodeCount, getPathToJsonFile, checkForSubgraph,
+    waitForSubgraph, getYAML, deleteProperty, addProperty, addInterface, enterSubgraph,
+    leaveSubgraph, getNode, deleteNode, getUrl, openFileChooser, enableEditingNodes,
+    enableNavigationBar, addNode, getContextMenu, AddConnection,
+    assertPropertyCount,
+} from './config.js';
 
 const countOfInitiallyExposedInterface = 3;
 
 const countOfInitiallyExposedProperties = 1;
 
-const temporaryDir = os.tmpdir() + '/';
+const temporaryDir = `${os.tmpdir()}/`;
 
 async function prepareSubgraphPage(page: Page) {
     await page.goto(getUrl());
-    await loadSpecification(page,'sample-subgraph-specification.json');
-    await loadDataflow(page,'sample-subgraph-dataflow.json');
+    await loadSpecification(page, 'sample-subgraph-specification.json');
+    await loadDataflow(page, 'sample-subgraph-dataflow.json');
     await verifyNodeCount(page, 5);
 }
 
@@ -56,7 +58,7 @@ async function placeNewNode(page: Page, location: { x: number; y: number }) {
     await disableNavigationBar(page);
 }
 
-async function createNewNode(page: Page, location: { x: number; y: number },nodeName: string = "Custom Node") {
+async function createNewNode(page: Page, location: { x: number; y: number }, nodeName = 'Custom Node') {
     await enableNavigationBar(page);
     const newNodeType = page.getByText('New Node Type').first();
     await dragAndDrop(page, newNodeType, location.x, location.y);
@@ -68,9 +70,9 @@ async function createNewNode(page: Page, location: { x: number; y: number },node
 
 async function createNewGraphNode(page: Page, location: { x: number; y: number }) {
     await enableNavigationBar(page);
-    await createNewNode(page,location,'New Graph Node');
-    const newGraphNodeType = getNode(page,'New Graph Node').first();
-    await addSubgraph(newGraphNodeType,page);
+    await createNewNode(page, location, 'New Graph Node');
+    const newGraphNodeType = getNode(page, 'New Graph Node').first();
+    await addSubgraph(newGraphNodeType, page);
 }
 
 test('test preserving changes to subgraph', async ({ page }) => {
@@ -103,28 +105,28 @@ async function verifyPropertyCount(node: Locator, expectedNumber: number): Promi
     return exposedProperties;
 }
 
-test('test disable expose interfaces metadata option',async ({page}) => {
+test('test disable expose interfaces metadata option', async ({ page }) => {
     await page.goto(getUrl());
 
-    const node = getNode(page,'LoadVideo');
-    const interfacePort = node.locator('.__interfaces .__outputs .__port').first();
-    await interfacePort.click({button: 'right'});
+    const node = getNode(page, 'LoadVideo');
+    const outputPort = node.locator('.__interfaces .__outputs .__port').first();
+    await outputPort.click({ button: 'right' });
 
     await expect(page.getByText('Expose interface')).toBeVisible();
 
     // Load specification with disabled expose interface option
     const specification = {
-        "version": "20250623.14",
-        "include": [
+        version: '20250623.14',
+        include: [
             {
-                "url": "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-specification.json"
-            }
+                url: 'https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-specification.json',
+            },
         ],
-        "nodes": [],
-        "metadata": {
-            "disableInterfaceExpose": true
-        }
-    }
+        nodes: [],
+        metadata: {
+            disableInterfaceExpose: true,
+        },
+    };
     const outputPath = path.join(temporaryDir, 'modified-specification.json');
     await fs.writeFile(outputPath, JSON.stringify(specification, null, 2), 'utf-8');
 
@@ -133,7 +135,7 @@ test('test disable expose interfaces metadata option',async ({page}) => {
 
     await loadDataflow(page, 'sample-dataflow.json');
 
-    await interfacePort.click({button: 'right'});
+    await outputPort.click({ button: 'right' });
     await expect(page.getByText('Expose interface')).not.toBeVisible();
 });
 
@@ -596,6 +598,7 @@ test('test connecting to an inout interface of a graph node with its graph in th
     graphNode.interfaces.forEach((intf) => {
         if (exposedInterfaceIds.has(intf.name)) {
             const oldId = intf.id;
+            // eslint-disable-next-line no-param-reassign
             intf.id = exposedInterfaceIds.get(intf.name);
             const source = dataflow.graphs[0].connections.find((conn) => conn.from === oldId);
             if (source) source.from = intf.id;

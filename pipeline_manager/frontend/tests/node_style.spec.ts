@@ -1,17 +1,19 @@
 import { test, expect } from '@playwright/test';
-import { getPathToJsonFile, getNode, getUrl, loadSpecification, loadDataflow, openFileChooser } from './config.js';
 
 import os from 'os';
 import fs from 'fs/promises';
 import path from 'path';
+import {
+    getPathToJsonFile, getNode, getUrl, loadSpecification, loadDataflow, openFileChooser,
+} from './config.js';
 
 function convertHexToRGB(hex) {
-  hex = hex.replace(/^#/, '');
-  return {
-    red: parseInt(hex.substring(0, 2), 16),
-    green: parseInt(hex.substring(2, 4), 16),
-    blue: parseInt(hex.substring(4, 6), 16),
-  };
+    const digits = hex.replace(/^#/, '');
+    return {
+        red: parseInt(digits.substring(0, 2), 16),
+        green: parseInt(digits.substring(2, 4), 16),
+        blue: parseInt(digits.substring(4, 6), 16),
+    };
 }
 
 test('node pill from dataflow overrides node pill from spec', async ({ page }) => {
@@ -23,7 +25,7 @@ test('node pill from dataflow overrides node pill from spec', async ({ page }) =
     );
 
     const nodeWithPill = dataflow.graphs[0].nodes.find((n) => n.name === 'GaussianKernel');
-    nodeWithPill['pill'] = {'text': 'updated text', "color": '#123456'};
+    nodeWithPill.pill = { text: 'updated text', color: '#123456' };
     const outputPath = path.join(os.tmpdir(), 'sample-dataflow-with-pill.json');
     await fs.writeFile(outputPath, JSON.stringify(dataflow, null, 2), 'utf-8');
 
@@ -46,9 +48,9 @@ test('node pill from spec overrides node pill from style', async ({ page }) => {
     );
 
     const nodeWithPill = specification.nodes.find((n) => n.name === 'GaussianKernel');
-    nodeWithPill['style'] = 'test';
-    specification.metadata['style'] = {
-        'pill': {'text': 'updated text', "color": '#123456'}
+    nodeWithPill.style = 'test';
+    specification.metadata.style = {
+        pill: { text: 'updated text', color: '#123456' },
     };
     const outputPath = path.join(os.tmpdir(), 'sample-specification-with-pill.json');
     await fs.writeFile(outputPath, JSON.stringify(specification, null, 2), 'utf-8');

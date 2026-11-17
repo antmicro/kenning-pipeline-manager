@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { getUrl, loadSpecification, loadDataflow } from './config.js';
 
-test("test incremental search", async ({ page }) => {
+test('test incremental search', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-inheritance-specification.json');
     await loadDataflow(page, 'sample-inheritance-dataflow.json');
@@ -26,4 +26,3 @@ test("test incremental search", async ({ page }) => {
     expect(highlightedNodes).toBe(2);
     expect(greyedOutNodes + highlightedNodes).toBe(totalNodes);
 });
-

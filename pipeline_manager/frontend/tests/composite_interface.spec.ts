@@ -69,7 +69,6 @@ test('unrolling a composite interface hides its port and renders the sub-interfa
     await expect(generator.locator('.__port_composite_port_hidden')).toHaveCount(1);
 
     await expect(generator.locator('.--composite-sub')).toHaveCount(subInterfaceNames.length);
-    // eslint-disable-next-line no-restricted-syntax
     for (const name of subInterfaceNames) {
         // eslint-disable-next-line no-await-in-loop
         await expect(subRow(generator, name)).toHaveCount(1);
@@ -150,7 +149,6 @@ test('connecting composite interfaces of the same exact type connects every matc
 
     await compositeToggle(consumer, 'axi').click();
     await compositeToggle(generator, 'axi').click();
-    // eslint-disable-next-line no-restricted-syntax
     for (const name of subInterfaceNames) {
         // eslint-disable-next-line no-await-in-loop
         await expect(subRow(generator, name)).toHaveClass(/--connected/);

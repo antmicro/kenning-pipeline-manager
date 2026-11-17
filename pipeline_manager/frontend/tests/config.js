@@ -4,18 +4,16 @@ import { fileURLToPath } from 'url';
 import path, { dirname, join } from 'path';
 import { expect } from 'playwright/test';
 
-import os from 'os';
-import fs from 'fs';
 import YAML from 'yaml';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const currentFile = fileURLToPath(import.meta.url);
+const currentDir = dirname(currentFile);
 
 // Configuration for path and directory of static HTML-based version of the frontend.
 const config = {
     directory: './dist',
     file: 'index.html',
-    directoryWithJsonFile: path.join(__dirname, '../../../examples'),
+    directoryWithJsonFile: path.join(currentDir, '../../../examples'),
 };
 
 export const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
@@ -28,7 +26,7 @@ export function getContextMenu(page) {
  * @returns {string} URL of the main page.
  */
 export function getUrl() {
-    return `file://${join(__dirname, `../${config.directory}/${config.file}`)}`;
+    return `file://${join(currentDir, `../${config.directory}/${config.file}`)}`;
 }
 
 /**
@@ -50,9 +48,9 @@ export async function saveFileAs(
     checkboxesToApply = [],
 ) {
     const optionSelection = {
-        'specification': 'Save specification as...',
-        'dataflow': 'Save graph as file as...',
-        'layout': 'Save layout as file as...'
+        specification: 'Save specification as...',
+        dataflow: 'Save graph as file as...',
+        layout: 'Save layout as file as...',
     };
 
     const text = optionSelection[purpose];
@@ -64,7 +62,7 @@ export async function saveFileAs(
     if (checkboxesToApply) {
         for (const checkboxToApply of checkboxesToApply) {
             const checkbox = page.locator('.create-menu .baklava-checkbox').filter({ hasText: checkboxToApply });
-            const isChecked = await checkbox.evaluate(el => el.classList.contains('--checked'));
+            const isChecked = await checkbox.evaluate((el) => el.classList.contains('--checked'));
             if (!isChecked) {
                 await checkbox.click();
             }
@@ -73,8 +71,7 @@ export async function saveFileAs(
 
     const graphList = await page.locator('.graph_list');
 
-    for(const graph of selectGraphs)
-    {
+    for (const graph of selectGraphs) {
         await graphList.getByText(graph).first().click();
     }
 
@@ -107,9 +104,11 @@ export function getPathToJsonFile(filename) {
  * @param {string} name - Name of the target CSS property
  * @returns {Promise<string>}
  */
-export async function getElementStyleAttribute(element,name)
-{
-    return await element.evaluate((el,_name)=> window.getComputedStyle(el).getPropertyValue(_name),name);
+export async function getElementStyleAttribute(element, name) {
+    return element.evaluate(
+        (el, _name) => window.getComputedStyle(el).getPropertyValue(_name),
+        name,
+    );
 }
 
 /**
@@ -123,7 +122,7 @@ export async function openFileChooser(page, purpose) {
     await page.mouse.move(25, 25);
     const text = purpose === 'specification' ? 'Load specification' : 'Load graph file';
     await page.getByText(text).click();
-    return await fileChooserPromise;
+    return fileChooserPromise;
 }
 
 /**
@@ -133,16 +132,14 @@ export async function openFileChooser(page, purpose) {
  * @param {import('@playwright/test').Locator} targetInterface - Target interface of connection
  * @returns {Promise<void>}
  */
-export async function AddConnection(page, sourceInterface, targetInterface)
-{
+export async function AddConnection(page, sourceInterface, targetInterface) {
     const [sourcePosition, targetPosition] = await Promise.all(
         [sourceInterface, targetInterface]
             .map(async (locator) => {
                 const bbox = await locator.boundingBox();
 
-                if(bbox === null)
-                {
-                    return [0,0]
+                if (bbox === null) {
+                    return [0, 0];
                 }
 
                 return [bbox.x + bbox.width / 2, bbox.y + bbox.height / 2];
@@ -263,12 +260,10 @@ export async function leaveSubgraph(page) {
  * @param {import('@playwright/test').Locator} node - The Playwright Locator representing a node.
  * @returns {Promise<import('@playwright/test').Locator>} Locator of node title or node itself.
  */
-async function getNodeTitle(node)
-{
+async function getNodeTitle(node) {
     const title = node.locator('.__title');
 
-    if(await title.isVisible())
-    {
+    if (await title.isVisible()) {
         return title;
     }
 
@@ -318,8 +313,8 @@ export async function checkForSubgraph(node, page) {
         const title = await getNodeTitle(node);
         await title.click({ button: 'right' });
     }
-    expect(await contextMenuOption).toHaveCount(1,{ timeout: 10_000 });
-    await (await getNodeTitle(node)).click({ button: 'right'});
+    expect(await contextMenuOption).toHaveCount(1, { timeout: 10_000 });
+    await (await getNodeTitle(node)).click({ button: 'right' });
     expect(await contextMenuOption).toBeVisible();
     await (await getNodeTitle(node)).click({ button: 'right' });
 }
@@ -335,7 +330,7 @@ export async function addSubgraph(node, page) {
     const title = await getNodeTitle(node);
     await title.click({ button: 'right' });
     const contextMenuOption = getContextMenu(page).getByText('Add subgraph');
-    await contextMenuOption.click({force: true});
+    await contextMenuOption.click({ force: true });
     expect(await title.locator('.__subgraph-icon')).toHaveCount(1);
 }
 
@@ -413,7 +408,6 @@ export async function setYAMLEditorContent(page, content) {
     await page.getByText('Apply', { exact: true }).click();
 }
 
-
 /**
  * Interface and property section
  */
@@ -469,7 +463,6 @@ export async function addInputInterface(page, node) {
     await expect(page.locator('.blur-panel:visible')).toHaveCount(0);
 }
 
-
 /**
  * Add a new property to a selected node.
  *
@@ -512,10 +505,10 @@ export async function assertInputCount(node, count) {
     const inputs = await node
         .locator('.__interfaces .__inputs > div')
         .count();
-    const positionedInputs = await node.
-        locator('.baklava-node-interface.--positioned > .--input')
+    const positionedInputs = await node
+        .locator('.baklava-node-interface.--positioned > .--input')
         .count();
-    expect(inputs+positionedInputs).toBe(count);
+    expect(inputs + positionedInputs).toBe(count);
 }
 
 /**
@@ -530,10 +523,10 @@ export async function assertInoutCount(node, count) {
     const inputs = await node
         .locator('.__interfaces .__inputs > div')
         .count();
-    const positionedInputs = await node.
-        locator('.baklava-node-interface.--positioned > .--inout')
+    const positionedInputs = await node
+        .locator('.baklava-node-interface.--positioned > .--inout')
         .count();
-    expect(inputs+positionedInputs).toBe(count);
+    expect(inputs + positionedInputs).toBe(count);
 }
 
 /**
@@ -548,10 +541,10 @@ export async function assertOutputCount(node, count) {
     const inputs = await node
         .locator('.__interfaces .__outputs > div')
         .count();
-    const positionedOutputs = await node.
-        locator('.baklava-node-interface.--positioned > .--output')
+    const positionedOutputs = await node
+        .locator('.baklava-node-interface.--positioned > .--output')
         .count();
-    expect(inputs+positionedOutputs).toBe(count);
+    expect(inputs + positionedOutputs).toBe(count);
 }
 
 /**
@@ -567,6 +560,34 @@ export async function assertPropertyCount(node, count) {
         .locator('.__properties > div')
         .count();
     expect(props).toBe(count);
+}
+
+/**
+ * Get a nodes with a specific name.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright Page object.
+ * @param {string} name - node name to look for.
+ * @returns {import('@playwright/test').Locator} A locator pointing to a nodes with specific names.
+ */
+export function getNode(page, name) {
+    return page.locator(`.baklava-node[data-node-type="${name}"]`);
+}
+
+/**
+ * Drag-and-drop operation on the specified locator element.
+ *
+ * @async
+ * @param {import('playwright').Page} page - Playwright Page to perform actions on.
+ * @param {import('playwright').Locator} locator - Locator of the element to drag.
+ * @param {number} x - X-coordinate to move the mouse to (relative to the viewport).
+ * @param {number} y - Y-coordinate to move the mouse to (relative to the viewport).
+ * @returns {Promise<void>} Promise that resolves when the drag-and-drop operation is complete.
+ */
+export async function dragAndDrop(page, locator, x, y) {
+    await locator.hover();
+    await page.mouse.down();
+    await page.mouse.move(x, y);
+    await page.mouse.up();
 }
 
 /**
@@ -678,18 +699,7 @@ export async function reopenNode(page, node) {
  */
 export async function verifyNodeCount(page, count) {
     const nodes = page.locator('.node-container > div');
-    await expect(nodes).toHaveCount(count); //toBe(expectedCount,{timeout: 3000});
-}
-
-/**
- * Get a nodes with a specific name.
- *
- * @param {import('@playwright/test').Page} page - The Playwright page object.
- * @param {string} name - node name to look for.
- * @returns {import('@playwright/test').Locator} A locator pointing to a nodes with specific names.
- */
-export function getNode(page, name) {
-    return page.locator(`.baklava-node[data-node-type="${name}"]`);
+    await expect(nodes).toHaveCount(count); // toBe(expectedCount,{timeout: 3000});
 }
 
 /**
@@ -770,7 +780,7 @@ export async function enableEditingNodes(page) {
     expect(addNodeButton).toBeHidden();
 
     const checkbox = page.getByText('Modify node types');
-    await checkbox.dispatchEvent("click");
+    await checkbox.dispatchEvent('click');
 }
 
 /**
@@ -788,24 +798,7 @@ export async function enableSubgraphRemoval(page) {
 
     const checkbox = page.getByText('Remove empty subgraphs');
     expect(checkbox).toBeVisible();
-    await checkbox.dispatchEvent("click");
-}
-
-/**
- * Drag-and-drop operation on the specified locator element.
- *
- * @async
- * @param {import('playwright').Page} page - Playwright Page to perform actions on.
- * @param {import('playwright').Locator} locator - Locator of the element to drag.
- * @param {number} x - X-coordinate to move the mouse to (relative to the viewport).
- * @param {number} y - Y-coordinate to move the mouse to (relative to the viewport).
- * @returns {Promise<void>} Promise that resolves when the drag-and-drop operation is complete.
- */
-export async function dragAndDrop(page, locator, x, y) {
-    await locator.hover();
-    await page.mouse.down();
-    await page.mouse.move(x, y);
-    await page.mouse.up();
+    await checkbox.dispatchEvent('click');
 }
 
 /**
@@ -817,7 +810,8 @@ export async function dragAndDrop(page, locator, x, y) {
  */
 export async function closeTerminal(page) {
     if (await page.isVisible('#hterm-terminal')) {
-        await page.locator('.terminal-wrapper').locator('.container').getByRole('button').last().click();
+        await page.locator('.terminal-wrapper').locator('.container').getByRole('button').last()
+            .click();
     }
     await expect(page.locator('#hterm-terminal')).not.toBeVisible();
 }
@@ -829,8 +823,8 @@ export async function closeTerminal(page) {
  * @param {string[]} allowedErrors - Error messages that are expected to
  */
 export function expectNoConsoleErrors(page, allowedErrors = []) {
-    page.on('console', msg => {
-        if (msg.type() !== "error") return;
+    page.on('console', (msg) => {
+        if (msg.type() !== 'error') return;
         let expectedError = false;
         for (let i = 0; i < allowedErrors.length; ++i) {
             if (msg.text() === allowedErrors[i] || msg.text().includes(allowedErrors[i])) {

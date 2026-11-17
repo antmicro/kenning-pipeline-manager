@@ -8,8 +8,8 @@ import fs from 'fs/promises';
 import {
     createNewNodeType, addInterface, getUrl, assertInputCount, getNode, getPathToJsonFile, addNode,
     openFileChooser, dragAndDrop, openNodePalette, setYAMLEditorContent, getContextMenu,
-    loadSpecification, loadDataflow, enableEditingNodes, addProperty,addOutputInterface,
-    assertOutputCount, addInputInterface, assertInoutCount
+    loadSpecification, loadDataflow, enableEditingNodes, addProperty, addOutputInterface,
+    assertOutputCount, addInputInterface, assertInoutCount,
 } from './config.js';
 
 const temporaryDir = `${os.tmpdir()}/`;
@@ -85,7 +85,7 @@ async function verifyNodePresence(page: Page,
     const specFile = await fs.readFile(specificationPath, 'utf-8');
     const specification = JSON.parse(specFile);
     const node = specification.nodes.find(
-            (node: any) => node.name === nodeName);
+        (specNode: any) => specNode.name === nodeName);
     expect(node).toBeTruthy();
     if (intflen !== -1) {
         expect(node.interfaces.length).toBe(intflen);
@@ -106,11 +106,10 @@ test('check loopback connections', async ({ page }) => {
     await loadSpecification(page, 'sample-loopback-specification.json');
     await loadDataflow(page, 'sample-loopback-dataflow.json');
 
-    async function checkPathIsLoopback(path)
-    {
+    async function checkPathIsLoopback(path) {
         const d = await path.locator('.baklava-connection').first().getAttribute('d');
-        const points = d.split(/\s/).filter((c)=> c !== '');
-        return points.at(1) === points.at(-2) && points.at(2) === points.at(-1)
+        const points = d.split(/\s/).filter((c) => c !== '');
+        return points.at(1) === points.at(-2) && points.at(2) === points.at(-1);
     }
 
     // Get connections in graph
@@ -140,7 +139,7 @@ test('check node resize with long title', async ({ page }) => {
     await addNode(page, 'Filesystem', 'LoadVideo', 750, 80);
     const node = getNode(page, 'LoadVideo').last();
 
-    await node.locator('.__title').click({ button: 'right'});
+    await node.locator('.__title').click({ button: 'right' });
     await page.getByText('Rename').click();
     await node.locator('.__title .baklava-input').first().fill('Load Video AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
     await page.keyboard.press('Enter');
@@ -158,7 +157,7 @@ test('add interface to custom node in specification with "include" keyword', asy
     const nodeName = 'Custom Node';
     await createNewNodeType(page);
     await addNode(page, 'Default category', nodeName, 750, 80);
-    const node = getNode(page,nodeName).last();
+    const node = getNode(page, nodeName).last();
     await addInterface(page, node);
     await assertInputCount(node, 1);
 });
@@ -172,7 +171,6 @@ test('register custom node in specification with "include" keyword', async ({ pa
     await createNewNodeType(page);
     await addNode(page, 'Default category', nodeName, 750, 80);
     const specificationPath = await saveSpecificationAs(page, 'new_specification');
-    console.log(specificationPath);
     await verifyNodePresence(page, specificationPath, nodeName);
 });
 
@@ -217,8 +215,8 @@ test('rename category node', async ({ page }, testInfo) => {
     await addParentAndChildNode(page, 200);
 
     await renameNodeType(page, 'Binary images', 'New node name');
-    const and_node = getNode(page,'Logical AND');
-    await assertInputCount(and_node, 2);
+    const andNode = getNode(page, 'Logical AND');
+    await assertInputCount(andNode, 2);
 
     // check category in custom sidebar
     const node = page.getByText('Logical AND').locator('..').last();
@@ -237,14 +235,14 @@ test('add interface to category node', async ({ page }, testInfo) => {
 
     await addParentAndChildNode(page, 200);
 
-    const node = getNode(page,'Binary images');
+    const node = getNode(page, 'Binary images');
     await addInterface(page, node);
-    const and_node = getNode(page,'Logical AND');
-    await assertInputCount(and_node, 3);
+    const andNode = getNode(page, 'Logical AND');
+    await assertInputCount(andNode, 3);
 
     await addParentAndChildNode(page, 200, false);
     await assertInputCount(node, 4);
-    await assertInputCount(and_node, 6);
+    await assertInputCount(andNode, 6);
 });
 
 test('check custom shape node interface popup', async ({ page }) => {
@@ -252,7 +250,7 @@ test('check custom shape node interface popup', async ({ page }) => {
     await loadSpecification(page, 'sample-with-shape-specification.json');
     await loadDataflow(page, 'sample-with-shape-dataflow.json');
 
-    const signalNode = getNode(page,'Signal');
+    const signalNode = getNode(page, 'Signal');
     await assertInoutCount(signalNode, 2);
     const interfaces = signalNode.locator('.baklava-node-interface.--positioned');
 
@@ -264,7 +262,7 @@ test('check custom shape node interface popup', async ({ page }) => {
     await downInterface.locator('.__port').hover();
     await expect(downInterface.locator('.__port-name')).toBeVisible();
 
-    const resistorNode = getNode(page,'Resistor');
+    const resistorNode = getNode(page, 'Resistor');
     await assertInoutCount(signalNode, 2);
     const interfacesResistor = resistorNode.locator('.baklava-node-interface.--positioned');
 
@@ -282,7 +280,7 @@ test('check custom shape node hidden interface name', async ({ page }) => {
     await loadSpecification(page, 'sample-with-shape-specification.json');
     await loadDataflow(page, 'sample-with-shape-dataflow.json');
 
-    const npnNode = getNode(page,'NPN');
+    const npnNode = getNode(page, 'NPN');
     await assertInoutCount(npnNode, 3);
     const interfaces = npnNode.locator('.baklava-node-interface.--positioned');
 
@@ -373,11 +371,11 @@ test('small custom shape node test', async ({ page }) => {
     await addNode(page, 'default', 'SmallBox', 300, 300, true);
     await zoomButton.dispatchEvent('click');
 
-    const node = getNode(page,'SmallBox');
+    const node = getNode(page, 'SmallBox');
     const bbox = await node.boundingBox();
 
-    const widthError = Math.abs( 30 - bbox.width);
-    const heightError = Math.abs( 30 - bbox.height);
+    const widthError = Math.abs(30 - bbox.width);
+    const heightError = Math.abs(30 - bbox.height);
 
     expect(widthError <= 50).toBeTruthy();
     expect(heightError <= 50).toBeTruthy();
@@ -588,7 +586,7 @@ test('editing properties', async ({ page }, testInfo) => {
     addInterface(page, node);
     // takes some time for the interface to show up, otherwise fails
     const inf = node.getByText('New interface', { exact: true });
-    await inf.waitFor({'state': 'visible', timeout: 2_000});
+    await inf.waitFor({ state: 'visible', timeout: 2_000 });
     await assertInputCount(node, 1);
 });
 test('editing bus node', async ({ page }) => {
@@ -619,23 +617,23 @@ test('editing bus node', async ({ page }) => {
     await verifyNodePresence(page, specificationPath, nodeName, -1, -1);
 });
 
-test('generalize and specialize node', async ({page}) => {
+test('generalize and specialize node', async ({ page }) => {
     await page.goto(getUrl());
-    const node = getNode(page,"Filter2D");
+    const node = getNode(page, 'Filter2D');
     await node.locator('.__title').dblclick();
 
     // Generalize selected node
     const replacePanel = page.locator('.baklava-sidebar .__content .__replace');
-    await replacePanel.getByText("Color images").click();
+    await replacePanel.getByText('Color images').click();
     // It should be replaced by Color images so it should not be visible
     await expect(node).not.toBeVisible();
     // Check for Color images
-    const generalizedNode = getNode(page,"Color images");
+    const generalizedNode = getNode(page, 'Color images');
     await expect(generalizedNode).toBeVisible();
 
     // Specialize color images node
     await generalizedNode.locator('.__title').dblclick();
-    await replacePanel.getByText("Filter2D").click();
+    await replacePanel.getByText('Filter2D').click();
 
     // It should be replaced by Filter2D so it should not be visible
     await expect(generalizedNode).not.toBeVisible();
@@ -643,12 +641,12 @@ test('generalize and specialize node', async ({page}) => {
     await expect(node).toBeVisible();
 });
 
-test('move left and move right interfaces', async ({page}) => {
+test('move left and move right interfaces', async ({ page }) => {
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-multiple-io-specification.json');
     await loadDataflow(page, 'sample-multiple-io-dataflow.json');
 
-    const node = await getNode(page,"MultipleIO").first();
+    const node = await getNode(page, 'MultipleIO').first();
 
     const leftInterfaces = await node.locator('.__interfaces .__inputs .baklava-node-interface .__port');
     const rightInterfaces = await node.locator('.__interfaces .__outputs .baklava-node-interface .__port');
@@ -658,16 +656,15 @@ test('move left and move right interfaces', async ({page}) => {
 
     // switch from left to right
     const leftInf = await leftInterfaces.nth(4);
-    await leftInf.click({button: 'right'});
+    await leftInf.click({ button: 'right' });
 
     await page.getByText('Move right').click();
-    expect(await rightInterfaces.count()).toBe(initialRightInterfacesCount+1);
+    expect(await rightInterfaces.count()).toBe(initialRightInterfacesCount + 1);
 
     // switch from right to left
     const rightInf = await rightInterfaces.nth(4);
-    await rightInf.click({button: 'right'});
+    await rightInf.click({ button: 'right' });
 
     await page.getByText('Move left').click();
     expect(await rightInterfaces.count()).toBe(initialLeftInterfacesCount);
-
 });

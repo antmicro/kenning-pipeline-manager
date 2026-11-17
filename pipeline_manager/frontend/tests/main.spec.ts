@@ -1,4 +1,6 @@
-import { test, expect, TestInfo, Locator } from '@playwright/test';
+import {
+    test, expect, TestInfo, Locator,
+} from '@playwright/test';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs/promises';
 import {
@@ -44,7 +46,6 @@ test('remove node', async ({ page }) => {
 test('show menu by right-clicking on node', async ({ page }) => {
     // Load a website and wait until nodes are loaded.
     await page.goto(getUrl());
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await page.waitForSelector(`#${loadVideoNodeId}`);
     const node = page.locator(`#${loadVideoNodeId}`);
 
@@ -52,7 +53,7 @@ test('show menu by right-clicking on node', async ({ page }) => {
     const nodeTitle = node.locator('.__title');
     await nodeTitle.click({ button: 'right' });
     const menu = getContextMenu(page);
-    await menu.waitFor()
+    await menu.waitFor();
     expect(await menu.filter({ hasText: 'Details' }).count()).toBeGreaterThan(0);
 
     // Close the context menu.
@@ -60,14 +61,13 @@ test('show menu by right-clicking on node', async ({ page }) => {
 
     // Right-click on the node's content.
     const nodeBody = node.locator('.__content');
-    await nodeBody.click({ button: 'right' , position: { x: 0, y: 0 }});
+    await nodeBody.click({ button: 'right', position: { x: 0, y: 0 } });
     expect(await menu.filter({ hasText: 'Details' }).count()).toBeGreaterThan(0);
 });
 
 test('show menu by right-clicking on interface', async ({ page }) => {
     // Load a website.
     await page.goto(getUrl());
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await page.waitForSelector(`#${loadVideoNodeId}`);
     const node = page.locator(`#${loadVideoNodeId}`);
 
@@ -83,7 +83,7 @@ test('show menu by right-clicking on interface', async ({ page }) => {
 
 test('show context menu with URLs button and click it', async ({ page }) => {
     // Do not allow errors in console, apart from Failed to load resource
-    expectNoConsoleErrors(page, ["Failed to load resource: net::ERR_FILE_NOT_FOUND"]);
+    expectNoConsoleErrors(page, ['Failed to load resource: net::ERR_FILE_NOT_FOUND']);
     // Load a website and wait until nodes are loaded.
     await page.goto(getUrl());
     await loadSpecification(page, 'sample-specification-urls.json');
@@ -105,13 +105,12 @@ test('show context menu with URLs button and click it', async ({ page }) => {
 test('test custom context menu visibility, with disconnected backend', async ({ page }) => {
     // Load a website.
     await page.goto(getUrl());
-    const loadVideoNodeId = 'f50b4f2a-a2e2-4409-a5c9-891a8de44a5b';
     await page.waitForSelector(`#${loadVideoNodeId}`);
 
-    const filter2D = getNode(page, "Filter2D");
-    await filter2D.click({ button: "right" });
+    const filter2D = getNode(page, 'Filter2D');
+    await filter2D.click({ button: 'right' });
 
-    const nodeInfo = page.getByText("Node info");
+    const nodeInfo = page.getByText('Node info');
     // When backend is disconnected it should not be visible
     expect(nodeInfo).not.toBeVisible();
 });
@@ -121,7 +120,7 @@ test('check metadata override', async ({ page }) => {
     // Load specification first and check if New Graph Node is present
     await loadSpecification(page, 'sample-with-shape-specification.json');
     await openNodePalette(page);
-    const newNodeType = page.getByText("New Node Type");
+    const newNodeType = page.getByText('New Node Type');
 
     expect(newNodeType).not.toBeVisible();
 

@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { getUrl, openSettingsPanel, getNode, getElementStyleAttribute } from './config.js';
+import {
+    getUrl, openSettingsPanel, getNode, getElementStyleAttribute,
+} from './config.js';
 
 test('test zoom', async ({ page }) => {
     await page.goto(getUrl());
@@ -7,25 +9,25 @@ test('test zoom', async ({ page }) => {
     const zoomButton = page.locator('.zoom-center');
     const editor = await page.locator('.baklava-editor');
 
-    const loadVideo = await getNode(page,'LoadVideo');
-    const saveVideo = await getNode(page,'SaveVideo');
+    const loadVideo = await getNode(page, 'LoadVideo');
+    const saveVideo = await getNode(page, 'SaveVideo');
 
     await zoomButton.click();
 
-    const scaleBefore = await getElementStyleAttribute(editor,'--scale');
+    const scaleBefore = await getElementStyleAttribute(editor, '--scale');
 
     await openSettingsPanel(page);
     // get layers section
-    const layers = page.getByText("Hide Layers:").locator('..');
+    const layers = page.getByText('Hide Layers:').locator('..');
 
-    await layers.getByText("IOs").dispatchEvent("click");
+    await layers.getByText('IOs').dispatchEvent('click');
     await page.locator('.baklava-node-palette').hover();
 
-    await loadVideo.waitFor({state:'hidden'});
-    await saveVideo.waitFor({state:'hidden'});
+    await loadVideo.waitFor({ state: 'hidden' });
+    await saveVideo.waitFor({ state: 'hidden' });
 
-    await zoomButton.click({force: true});
-    const scaleAfter = await getElementStyleAttribute(editor,'--scale');
+    await zoomButton.click({ force: true });
+    const scaleAfter = await getElementStyleAttribute(editor, '--scale');
 
     expect(scaleBefore).not.toBe(scaleAfter);
 });

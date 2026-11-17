@@ -1,30 +1,29 @@
 import { test, expect } from '@playwright/test';
-import fs from "node:fs/promises";
-import path from "node:path";
-import crypto from "node:crypto";
-import { getUrl, loadVideoNodeId, closeTerminal, getContextMenu, openFileChooser, getPathToJsonFile, loadSpecification } from './config.js';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {
+    getUrl, openFileChooser, getPathToJsonFile,
+} from './config.js';
 
-async function enableReadOnly(spec)
-{
+async function enableReadOnly(spec) {
     const filePath = getPathToJsonFile(spec);
-    const outFilePath = `/tmp/readonly${crypto.randomBytes(4).readUInt32LE(0)}.json`
+    const outFilePath = `/tmp/readonly${crypto.randomBytes(4).readUInt32LE(0)}.json`;
 
     const data = await fs.readFile(filePath);
 
     const specification = JSON.parse(data);
 
-    if(!Object.hasOwn(specification,"metadata"))
-    {
-        specification["metadata"] = {};
+    if (!Object.hasOwn(specification, 'metadata')) {
+        specification.metadata = {};
     }
 
-    specification["metadata"]["readonly"] = true;
+    specification.metadata.readonly = true;
 
-    await fs.writeFile(outFilePath,JSON.stringify(specification));
+    await fs.writeFile(outFilePath, JSON.stringify(specification));
 
     return outFilePath;
 }
-
 
 test('empty settings panel', async ({ page }) => {
     await page.goto(getUrl());

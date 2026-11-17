@@ -123,7 +123,9 @@ async function dragAndDropFile(page: Page, selector: string, fileName: string, t
     return true;
 }
 
-examples.forEach(({ dataflow, specification, timeout, graphCount }) => {
+examples.forEach(({
+    dataflow, specification, timeout, graphCount,
+}) => {
     test(`spec loading ${specification}`, async ({ page }, testInfo) => {
         if (timeout) {
             test.setTimeout(timeout);
@@ -293,7 +295,7 @@ test(`entryGraph ${exampleNested.specification} in middle of structure`, async (
     const fileChooserSpec = await openFileChooser(page, 'dataflow');
     await fileChooserSpec.setFiles(outputPath);
     expect(getNode(page, 'MultipleIOGraphNode')).not.toBeVisible();
-    await page.locator(".logo ~ .hoverbox").hover();
+    await page.locator('.logo ~ .hoverbox').hover();
     await page.locator('span').getByText('Graphs').click();
     const entryCount = await page.locator('.entries').locator('.__entry').count();
     expect(entryCount).toBe(2);

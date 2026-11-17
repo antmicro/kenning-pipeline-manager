@@ -18,6 +18,12 @@ module.exports = {
         rules: {
             'jsdoc/no-types': 1,
         },
+    }, {
+        files: ['tests/**/*.{spec.ts,js}'],
+        rules: {
+            'no-await-in-loop': 0,
+            'no-plusplus': 0,
+        },
     }],
     parserOptions: {
         parser: '@typescript-eslint/parser',
