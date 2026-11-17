@@ -287,7 +287,6 @@ export function properties_change(
     const node = getNode(params.graph_id, params.node_id);
 
     // First iteration to validate that every property exists
-    // eslint-disable-next-line no-restricted-syntax
     const propertyList = params.properties.map(
         (property) => [property, getProperty(node, property.id, property.name)],
     );
@@ -304,7 +303,6 @@ export function interfaces_change(
 ) {
     const node = getNode(params.graph_id, params.node_id);
     // First iteration to validate that every property exists
-    // eslint-disable-next-line no-restricted-syntax
     const interfaceList = params.interfaces.map(
         (intf) => [intf, getInterface(node, intf.id, intf.name)],
     );
@@ -465,22 +463,20 @@ export async function properties_get(
     const properties: GetPropertiesReturnType = [];
 
     if (params.properties === undefined) {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const property of Object.values((node as any).inputs) as any) {
-            if (property.side === undefined) {
-                properties.push({
-                    id: property.id,
-                    name: property.name,
-                    value: property.value,
-                });
-            }
-        }
+        type NodeInput = { id: string, name: string, value: unknown, side?: string };
+        const inputs = Object.values((node as any).inputs) as NodeInput[];
+        properties.push(...inputs
+            .filter((property) => property.side === undefined)
+            .map((property) => ({
+                id: property.id,
+                name: property.name,
+                value: property.value,
+            })));
 
         return properties;
     }
 
-    // eslint-disable-next-line no-restricted-syntax
-    for (const property of params.properties) {
+    params.properties.forEach((property) => {
         const prop = getProperty(node, property.id, property.name);
 
         properties.push({
@@ -488,7 +484,7 @@ export async function properties_get(
             name: prop.name,
             value: prop.value,
         });
-    }
+    });
 
     return properties;
 }

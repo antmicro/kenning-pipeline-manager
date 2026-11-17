@@ -1745,7 +1745,6 @@ export default class EditorManager {
             const idToGraph = new Map(graphs.map((graph) => [graph.id, graph]));
             const sortedGraphs = EditorManager.sortGraphs(graphs, idToNested);
 
-            // eslint-disable-next-line no-restricted-syntax
             const subgraphNodes = nodes.filter(({ subgraphId }) => subgraphId !== undefined);
             const subgraphIdToNodes = new Map(nodes.map((node) => [node.subgraphId, []]));
             subgraphNodes.forEach((node) => subgraphIdToNodes.get(node.subgraphId).push(node));
@@ -1784,7 +1783,6 @@ export default class EditorManager {
             };
 
             // Validate subgraphs
-            // eslint-disable-next-line no-restricted-syntax
             for (const [node, graph, graphName] of subgraphNodesWithGraphs) {
                 visitedSubgraphs.add(graph.id);
 
@@ -1820,7 +1818,7 @@ export default class EditorManager {
             errors.push(...subgraphNotFoundErrors);
 
             // Validate related graphs
-            for (const graphId of relatedGraphIds) { // eslint-disable-line no-restricted-syntax
+            for (const graphId of relatedGraphIds) {
                 const graph = graphs.find(({ id }) => id === graphId);
                 if (graph === undefined) {
                     errors.push([new Error(`The related graph with ID ${graphId} was not found`)]);

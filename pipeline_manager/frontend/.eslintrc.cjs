@@ -38,6 +38,7 @@ module.exports = {
         'import/extensions': ['error', { js: 'ignorePackages', json: 'ignorePackages', ts: 'ignorePackages' }],
         'no-unused-vars': ['error', {'vars': 'all', 'args': 'all', 'argsIgnorePattern': '^_'}],
         'no-console': ["error", { allow: ["warn", "error"] }],
+        'no-restricted-syntax': ['off', 'ForOfStatement'],
         'jsdoc/valid-types': ['error'],
         'jsdoc/type-formatting': ['error', {'stringQuotes': 'single', 'objectFieldSeparator': 'comma-and-linebreak', 'objectFieldIndent': '  '}],
     },
