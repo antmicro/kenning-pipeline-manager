@@ -194,13 +194,13 @@ export async function disableNavigationBar(page) {
 }
 
 /**
- * Checks whether any errors is present in terminal.
+ * Counts any errors present.
  *
  * @async
  * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
- * @returns {Promise<void>} Succeed when there is no error found.
+ * @returns {Promise<number>} Number of errors found.
  */
-export async function expectNoErrors(page) {
+export async function countErrors(page) {
     const loading = page.locator('.loading-screen');
     await loading.waitFor({ state: 'hidden' });
     await expect(loading).not.toBeVisible();
@@ -208,7 +208,31 @@ export async function expectNoErrors(page) {
         '.notifications > .panel > ul > *:not(:has(.info))',
     );
     const count = await notifications.count();
+    return count;
+}
+
+/**
+ * Checks whether any errors is present in terminal.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @returns {Promise<void>} Succeed when there is no error found.
+ */
+export async function expectNoErrors(page) {
+    const count = await countErrors(page);
     expect(count).toBe(0);
+}
+
+/**
+ * Checks if there are errors present in terminal.
+ *
+ * @async
+ * @param {import('@playwright/test').Page} page - The Playwright Page object to interact with.
+ * @returns {Promise<void>} Succeed when there are errors found.
+ */
+export async function expectSomeErrors(page) {
+    const count = await countErrors(page);
+    expect(count).not.toBe(0);
 }
 
 /**
