@@ -744,6 +744,7 @@ export default defineComponent({
                     nodesDeleted.push(node.id);
                 }
             });
+            if (!nodesAdded.length && !nodesDeleted.length) return;
             const data = {
                 graph_id: graph.value.id,
                 nodes: {
@@ -778,6 +779,7 @@ export default defineComponent({
                     });
                 }
             });
+            if (!connectionsAdded.length && !connectionsDeleted.length) return;
             const data = {
                 graph_id: graph.value.id,
                 connections: {
@@ -805,6 +807,7 @@ export default defineComponent({
                     nodesUnselected.push(node.id);
                 }
             });
+            if (!nodesSelected.length && !nodesUnselected.length) return;
             const data = {
                 graph_id: graph.value.id,
                 nodes: {
