@@ -23,6 +23,7 @@ the root element, and picks the right one for the given interface.
         :id="intf.id"
         :data-port-name="intf.port ? intf.name : undefined"
         ref="el"
+        no-drag="true"
         class="baklava-node-interface"
         :class="newClasses(intf)"
     >
