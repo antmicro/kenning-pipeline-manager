@@ -5,7 +5,7 @@ import {
 } from './config.js';
 
 async function setOption(page: Page, name: string) {
-    openSettingsPanel(page);
+    await openSettingsPanel(page);
 
     const checkbox = page.getByText(name);
     expect(checkbox).toBeVisible();
@@ -64,4 +64,36 @@ test('hide layers', async ({ page }) => {
     await expect(node).toBeVisible();
     await setOption(page, 'IOs');
     await expect(node).not.toBeVisible();
+});
+
+const descriptions = new Map([
+    ['Verbosity of notifications', 'Defines the verbosity of pop-up notifications'],
+    ['Connection style', 'Defines connection style'],
+    ['Autolayout algorithm', 'Defines the default autolayout algorithm'],
+    ['Apply autolayout', 'Apply the selected autolayout algorithm to the graph in the editor'],
+    ['Swap interfaces', 'Change interfaces sides where applicable to improve graph layout'],
+    ['Hide unconnected interfaces', 'Hide interfaces that are not connected to any other interface'],
+    ['Show hidden interfaces', 'Show interfaces that were hidden previously'],
+    ['Background grid size', 'Defines size of the background grid'],
+    ['Clear editor', 'Remove the current specification and graph from the editor'],
+    ['Node movement step', 'Defines offset to which nodes snap in the grid'],
+    ['Hide anchors', 'Hides anchors in all connections. The anchors are still visible on hover'],
+    ['Align interface sides', 'Automatically updates interface sides for optimal layout when moving nodes'],
+    ['Show IDs', 'Displays node ID in the node details view'],
+    ['Show hidden properties', `Determines whether properties marked with 'hideOnDefault' should be visible regardless of their value`],
+    ['Remove empty subgraphs', 'When enabled, subgraphs with no nodes will be removed automatically'],
+    ['Selected view', 'Switches between preconfigured views for the graph'],
+    ['Modify node types', 'Determines whether the user can edit existing and add new node types'],
+]);
+
+descriptions.forEach((value, key) => {
+    test(`test ${key} has description`, async ({ page }) => {
+        await loadSpecification(page, 'sample-views-specification.json');
+        await loadDataflow(page, 'sample-views-dataflow.json');
+
+        await openSettingsPanel(page);
+        const option = page.locator('[title]', { hasText: key }).first();
+        await expect(option).toBeVisible();
+        await expect(option).toHaveAttribute('title', value);
+    });
 });
