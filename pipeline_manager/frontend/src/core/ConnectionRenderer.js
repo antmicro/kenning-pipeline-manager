@@ -428,7 +428,7 @@ export default class ConnectionRenderer {
         A ${leftRx} ${leftRy} 0 0 1 ${leftx} ${lefty}`;
     }
 
-    correctAnchor(anchor, anchors, nc) {
+    correctOrthogonalAnchor(anchor, anchors, nc) {
         const path = this.orthogonalAnchorsPath(anchors, nc);
         let minDist = Infinity;
         let minIdx = -1;
@@ -457,7 +457,7 @@ export default class ConnectionRenderer {
 
     orthogonalAnchorsPath(anchors, nc) {
         anchors.filter((a) => a.index === -1)
-            .forEach((a, i) => this.correctAnchor(a, anchors.slice(0, i), nc));
+            .forEach((a, i) => this.correctOrthogonalAnchor(a, anchors.slice(0, i), nc));
 
         const ogPath = this.orthogonalRender(nc.x1, nc.y1, nc.x2, nc.y2, nc);
         const anchored = Array(ogPath.length).fill(undefined);
@@ -2080,8 +2080,12 @@ export default class ConnectionRenderer {
                 .concat([{ x: x2, y: y2 }]);
         }
         const path = [{ x: x1, y: y1 }];
+        let c = 0;
         (connection.anchors ?? []).forEach((anchor) => {
+            // eslint-disable-next-line no-param-reassign
+            if (anchor.index === -1) anchor.index = c;
             path.splice(anchor.index + 1, 0, { x: anchor.x, y: anchor.y });
+            c += 1;
         });
         return path.concat([{ x: x2, y: y2 }]);
     }
