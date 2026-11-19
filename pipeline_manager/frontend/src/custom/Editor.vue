@@ -693,15 +693,48 @@ export default defineComponent({
         );
         const ignoredNodesId = computed(() => ignoredNodes.value.map((n) => n.id));
 
-        const visibleConnections = computed(() =>
-            connections.value.filter(
-                (c) =>
-                    !c.from.type?.some((t) => ignoredInterfacesTypes.value.has(t)) &&
-                    !c.to.type?.some((t) => ignoredInterfacesTypes.value.has(t)) &&
-                    !ignoredNodesId.value.includes(c.from.nodeId) &&
-                    !ignoredNodesId.value.includes(c.to.nodeId),
-            ),
-        );
+        /**
+         * Gets top-most composite interface that is not expanded.
+         * @param {CustomNodeInterface} c - Composite interface.
+         * @returns {CustomNodeInterface} Top-most, collapsed, composite interface
+             that is a parent of c.
+         */
+        const getTopCollapsedCompositeIntf = (c) => {
+            let root = c;
+            while (root.parentComposite && !root.parentComposite.compositeExpanded) {
+                root = root?.parentComposite;
+            }
+            return root;
+        };
+
+        const visibleConnections = computed(() => {
+            const cons = [];
+            const compositeIntfSet = new Set();
+            connections.value.forEach((c) => {
+                if (
+                    c.from.type?.some((t) => ignoredInterfacesTypes.value.has(t)) ||
+                    c.to.type?.some((t) => ignoredInterfacesTypes.value.has(t)) ||
+                    ignoredNodesId.value.includes(c.from.nodeId) ||
+                    ignoredNodesId.value.includes(c.to.nodeId)
+                ) return;
+                if (
+                    c.from.isCompositeInterface() && !c.from.compositeExpanded &&
+                    c.to.isCompositeInterface() && !c.to.compositeExpanded
+                ) {
+                    const fromHash = getTopCollapsedCompositeIntf(c.from).name;
+                    const toHash = getTopCollapsedCompositeIntf(c.to).name;
+                    const hash = `${fromHash}-${toHash}`;
+                    // Do not render composite interfaces
+                    if (!compositeIntfSet.has(hash)) {
+                        compositeIntfSet.add(hash);
+                    } else {
+                        return;
+                    }
+                }
+                cons.push(c);
+            });
+            return cons;
+        });
 
         const highlightedNodes = computed(() =>
             visibleNodes.value.filter(
