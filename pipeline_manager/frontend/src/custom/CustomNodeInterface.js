@@ -77,6 +77,8 @@ export function createStub(intf, offset = undefined, stubID = undefined, stubSid
     stub.sidePosition = 0;
     stub.offset = offset ?? ((intf.bus?.size ?? 0) / 2);
     stub.parent = intf;
+    stub.composite = undefined;
+    stub.isCompositeInterface = intf.isCompositeInterface.bind(stub);
     // needed for when the connection creation succeeds
     stub.isBusInterface = intf.isBusInterface.bind(stub);
     stub.preConnectionCheck = intf.preConnectionCheck.bind(stub);
