@@ -1,0 +1,55 @@
+{
+    "version": "20250623.14",
+    "nodes" : [
+        {
+            "name": "MultipleIOGraphNode",
+            "category": "Test/Graphs",
+            "subgraphId": "79040424-1464-40a0-ba97-cc0ba6a1944f"
+        }
+    ],
+    "includeGraphs": [
+        {
+            "name": "MultipleIOGraphs",
+            "url": "https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-dataflow.json"
+        }
+    ],
+    "include": ["https://raw.githubusercontent.com/antmicro/kenning-pipeline-manager/main/examples/sample-multiple-io-specification.json"],
+    "metadata": {
+        "twoColumn": true,
+        "interfaces": {
+            "0": {
+                "interfaceColor": "#FF0000",
+                "interfaceConnectionColor": "#FF0000"
+            },
+            "1": {
+                "interfaceColor": "#FFFF00",
+                "interfaceConnectionColor": "#FFFF00"
+            },
+            "2": {
+                "interfaceColor": "#00FF00",
+                "interfaceConnectionColor": "#00FF00"
+            },
+            "3": {
+                "interfaceColor": "#6F6F6F",
+                "interfaceConnectionColor": "#6F6F6F"
+            },
+            "4": {
+                "interfaceColor": "#6F6F6F",
+                "interfaceConnectionColor": "#6F6F6F"
+            },
+            "5": {
+                "interfaceColor": "#6F6F6F",
+                "interfaceConnectionColor": "#6F6F6F"
+            },
+            "6": {
+                "interfaceColor": "#6F6F6F",
+                "interfaceConnectionColor": "#6F6F6F"
+            },
+            "7": {
+                "interfaceColor": "#6F6F6F",
+                "interfaceConnectionColor": "#6F6F6F"
+            }
+        },
+        "connectionStyle": "orthogonal"
+    }
+}

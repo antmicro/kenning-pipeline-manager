@@ -1,0 +1,446 @@
+{
+    "version": "20260623.14",
+    "nodes": [
+        {
+            "name": "input",
+            "abstract": false,
+            "category": "Input",
+            "interfaces": [
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "side": "left",
+                    "maxConnectionsCount": 3
+                }
+            ]
+        },
+        {
+            "name": "Transpose",
+            "abstract": false,
+            "interfaces": [
+                {
+                    "name": "input",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                }
+            ],
+            "category": "Layers",
+            "properties": [
+                {
+                    "name": "ID",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "operation version",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "bytes",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "parameters",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "data type",
+                    "type": "text",
+                    "default": "-",
+                    "hideOnDefault": true
+                }
+            ]
+        },
+        {
+            "name": "Conv",
+            "abstract": false,
+            "interfaces": [
+                {
+                    "name": "input",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                }
+            ],
+            "category": "Layers",
+            "properties": [
+                {
+                    "name": "ID",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "operation version",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "bytes",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "parameters",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "data type",
+                    "type": "text",
+                    "default": "-",
+                    "hideOnDefault": true
+                }
+            ]
+        },
+        {
+            "name": "Clip",
+            "abstract": false,
+            "interfaces": [
+                {
+                    "name": "input",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                }
+            ],
+            "category": "Layers",
+            "properties": [
+                {
+                    "name": "ID",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "operation version",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "bytes",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "parameters",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "data type",
+                    "type": "text",
+                    "default": "-",
+                    "hideOnDefault": true
+                }
+            ]
+        },
+        {
+            "name": "Pad",
+            "abstract": false,
+            "interfaces": [
+                {
+                    "name": "input",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                }
+            ],
+            "category": "Layers",
+            "properties": [
+                {
+                    "name": "ID",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "operation version",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "bytes",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "parameters",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "data type",
+                    "type": "text",
+                    "default": "-",
+                    "hideOnDefault": true
+                }
+            ]
+        },
+        {
+            "name": "Add",
+            "abstract": false,
+            "interfaces": [
+                {
+                    "name": "input",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                }
+            ],
+            "category": "Layers",
+            "properties": [
+                {
+                    "name": "ID",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "operation version",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "bytes",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "parameters",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "data type",
+                    "type": "text",
+                    "default": "-",
+                    "hideOnDefault": true
+                }
+            ]
+        },
+        {
+            "name": "GlobalAveragePool",
+            "abstract": false,
+            "interfaces": [
+                {
+                    "name": "input",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                }
+            ],
+            "category": "Layers",
+            "properties": [
+                {
+                    "name": "ID",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "operation version",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "bytes",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "parameters",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "data type",
+                    "type": "text",
+                    "default": "-",
+                    "hideOnDefault": true
+                }
+            ]
+        },
+        {
+            "name": "Squeeze",
+            "abstract": false,
+            "interfaces": [
+                {
+                    "name": "input",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                }
+            ],
+            "category": "Layers",
+            "properties": [
+                {
+                    "name": "ID",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "operation version",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "bytes",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "parameters",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "data type",
+                    "type": "text",
+                    "default": "-",
+                    "hideOnDefault": true
+                }
+            ]
+        },
+        {
+            "name": "Gemm",
+            "abstract": false,
+            "interfaces": [
+                {
+                    "name": "input",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                }
+            ],
+            "category": "Layers",
+            "properties": [
+                {
+                    "name": "ID",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "operation version",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "bytes",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "parameters",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "data type",
+                    "type": "text",
+                    "default": "-",
+                    "hideOnDefault": true
+                }
+            ]
+        },
+        {
+            "name": "Relu",
+            "abstract": false,
+            "interfaces": [
+                {
+                    "name": "input",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                },
+                {
+                    "name": "output",
+                    "direction": "inout",
+                    "maxConnectionsCount": 3
+                }
+            ],
+            "category": "Layers",
+            "properties": [
+                {
+                    "name": "ID",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "operation version",
+                    "type": "integer",
+                    "default": 0,
+                    "hidden": true
+                },
+                {
+                    "name": "bytes",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "parameters",
+                    "type": "integer",
+                    "default": 0
+                },
+                {
+                    "name": "data type",
+                    "type": "text",
+                    "default": "-",
+                    "hideOnDefault": true
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "readonly": false,
+        "connectionStyle": "curved",
+        "layout": "CytoscapeEngine - dagre-network-simplex"
+    }
+}

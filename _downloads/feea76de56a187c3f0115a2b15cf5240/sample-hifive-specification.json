@@ -1,0 +1,1080 @@
+{
+    "metadata": {
+        "connectionStyle": "orthogonal",
+        "icons": {
+            "designer": "https://designer.antmicro.com/",
+            "designer-media-icon": "https://raw.githubusercontent.com/antmicro/designer-media-files/main/",
+            "gh-antmicro": "https://raw.githubusercontent.com/antmicro/",
+            "hw-icon": "https://openhardware.antmicro.com",
+            "renodepedia": "https://renodepedia.renode.io/board_images/"
+        },
+        "hideAnchors": true,
+        "twoColumn": true,
+        "urls": {
+            "coverage": {
+                "icon": "coverage.svg",
+                "name": "Go to coverage dashboard",
+                "url": ""
+            },
+            "datasheet": {
+                "icon": "datasheet.svg",
+                "name": "Datasheet",
+                "url": ""
+            },
+            "designer": {
+                "icon": "antmicro.svg",
+                "name": "System Designer",
+                "url": "https://designer.antmicro.com/"
+            },
+            "designer_components": {
+                "icon": "devices.svg",
+                "name": "Go to component",
+                "url": "https://designer.antmicro.com/library/devices/"
+            },
+            "designer_device": {
+                "icon": "devices.svg",
+                "name": "Go to device",
+                "url": "https://designer.antmicro.com/library/devices/"
+            },
+            "designer_graph": {
+                "icon": "graph.svg",
+                "name": "Go to graph",
+                "url": "https://designer.antmicro.com/vsd/"
+            },
+            "designer_hwblock": {
+                "icon": "hw-blocks.svg",
+                "name": "Go to HW Block",
+                "url": "https://designer.antmicro.com/library/hw-blocks/"
+            },
+            "designer_soc": {
+                "icon": "soc_families.svg",
+                "name": "Go to SoC",
+                "url": "https://designer.antmicro.com/library/soc_families/"
+            },
+            "github": {
+                "icon": "github.svg",
+                "name": "Go to GitHub",
+                "url": "https://github.com/"
+            },
+            "hwp": {
+                "icon": "hwp.svg",
+                "name": "Open Hardware Portal",
+                "url": "https://openhardware.antmicro.com/"
+            },
+            "ren": {
+                "icon": "renode-model.svg",
+                "name": "Renode",
+                "url": "https://github.com/renode/renode-infrastructure/blob/master/src/Emulator/Peripherals/Peripherals/"
+            },
+            "ren_base": {
+                "icon": "renode-model.svg",
+                "name": "Renode",
+                "url": "https://github.com/renode/renode/blob/master/"
+            },
+            "zephyr": {
+                "icon": "zephyr.svg",
+                "name": "Zephyr",
+                "url": "https://github.com/zephyrproject-rtos/zephyr/blob/e560c91b1f74146baa3177b07b92a8733c60b7c7/"
+            }
+        },
+        "styles": {
+            "renodeStyle": {
+                "color": "#2e303e",
+                "interfaces": {
+                    "*": {
+                        "--baklava-control-color-primary": "#96979e"
+                    }
+                },
+                "properties": {
+                    "multiline": {
+                        "--baklava-control-color-hover": "#2e303e44",
+                        "--baklava-control-color-background": "transparent",
+                        "--baklava-control-color-foreground": "#FFFFFF",
+                        "--kpm-property-display-label": "none"
+                    },
+                    "*": {
+                        "display": "none"
+                    }
+                },
+                "nodes": {
+                    "title": {
+                        "justify-content": "center",
+                        "margin-bottom": "calc(var(--kpm-node-title-height) * -1)",
+                        "padding": "0 5em",
+                        "color": "#FFFFFF",
+                        "background-color": "transparent"
+                    },
+                    "content": {
+                        "border": "2px",
+                        "border-style": "solid",
+                        "border-color": "#FFFFFF",
+                        "border-radius": "10px"
+                    },
+                    "body": {
+                        "min-width": "150px",
+                        "width": "auto",
+                        "--baklava-node-color-background": "#2e303e",
+                        "background-color": "#2094F3"
+                    }
+                }
+            }
+        },
+        "movementStep": 50
+    },
+    "nodes": [
+        {
+            "name": "RISCv64 CPU",
+            "extends": [
+                "HW Blocks"
+            ],
+            "interfaces": [
+                {
+                    "name": "11",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "3",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "7",
+                    "type": "Connector",
+                    "direction": "input"
+                }
+            ]
+        },
+        {
+            "name": "plic",
+            "extends": [
+                "HW Blocks"
+            ],
+            "interfaces": [
+                {
+                    "name": "0",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "4",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "6",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "7",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "8",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "9",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "10",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "11",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "12",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "13",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "14",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "15",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "16",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "17",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "18",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "19",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "20",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "21",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "22",
+                    "type": "Connector",
+                    "direction": "input"
+                },
+                {
+                    "name": "52",
+                    "type": "Connector",
+                    "direction": "input"
+                }
+            ]
+        },
+        {
+            "name": "clint",
+            "extends": [
+                "HW Blocks"
+            ],
+            "interfaces": [
+                {
+                    "name": "0",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "1",
+                    "type": "Connector",
+                    "direction": "output"
+                }
+            ]
+        },
+        {
+            "name": "uart0",
+            "extends": [
+                "HW Blocks"
+            ],
+            "interfaces": [
+                {
+                    "name": "IRQ",
+                    "type": "Connector",
+                    "direction": "output"
+                }
+            ]
+        },
+        {
+            "name": "spi",
+            "extends": [
+                "HW Blocks"
+            ],
+            "interfaces": [
+                {
+                    "name": "0",
+                    "type": "Connector",
+                    "direction": "output"
+                }
+            ]
+        },
+        {
+            "name": "gpio",
+            "extends": [
+                "HW Blocks"
+            ],
+            "interfaces": [
+                {
+                    "name": "0",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "1",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "2",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "3",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "4",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "5",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "6",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "7",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "8",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "9",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "10",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "11",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "12",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "13",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "14",
+                    "type": "Connector",
+                    "direction": "output"
+                },
+                {
+                    "name": "15",
+                    "type": "Connector",
+                    "direction": "output"
+                }
+            ]
+        },
+        {
+            "category": "HW Blocks",
+            "isCategory": true
+        },
+        {
+            "category": "Memory/DDR/H5AN8G8NAFR-UH",
+            "description": "SK-Hynix H5AN8G8NAFR-UH DDR4 x32 SDRAM Memory, 8GB",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "ddr",
+                    "side": "left",
+                    "type": "ddr"
+                }
+            ],
+            "isCategory": true
+        },
+        {
+            "category": "Interfacing/Ethernet/GbE Phy GMII",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "GbE",
+                    "side": "right",
+                    "type": "gmii"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "ethernet",
+                    "side": "left",
+                    "type": "ethernet"
+                }
+            ],
+            "isCategory": true
+        },
+        {
+            "abstract": false,
+            "description": "Interface Bridges, USB to UART, FIFO, 3 V, 5.25 V, LQFP, 48 Pins, -40 °C\n\n### Additional information\n\n*Datasheet*: [DS_FT2232D.pdf](https://ftdichip.com/wp-content/uploads/2020/08/DS_FT2232D.pdf)",
+            "extends": [
+                "FT2232D"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/lqfp-48-7x7mm-p0-5mm-padclearance0-2mm-pad0-3x1-2mm/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "FTDI Chip FT2232D",
+            "urls": {
+                "datasheet": "https://ftdichip.com/wp-content/uploads/2020/08/DS_FT2232D.pdf",
+                "designer_components": "ftdi-chip-ft2232d",
+                "hwp": "components/ftdi-chip-ft2232d"
+            }
+        },
+        {
+            "category": "Interfacing/USB/FTDI UART+JTAG/FT2232D",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "jtag",
+                    "side": "left",
+                    "type": "jtag"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "uart",
+                    "side": "right",
+                    "type": "serial"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "usb",
+                    "side": "left",
+                    "type": "usb"
+                }
+            ],
+            "isCategory": true
+        },
+        {
+            "category": "SoCs/SiFive/fu540",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "chiplink",
+                    "side": "right",
+                    "type": "chiplink"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "ddr",
+                    "side": "right",
+                    "type": "ddr"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "eth0",
+                    "side": "right",
+                    "type": [
+                        "ethernet"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "gmii",
+                    "side": "left",
+                    "type": "gmii"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "gpio",
+                    "side": "left",
+                    "type": [
+                        "gpio"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "gpio0",
+                    "side": "right",
+                    "type": [
+                        "gpio"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "i2c0",
+                    "side": "left",
+                    "type": [
+                        "i2c"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "jtag",
+                    "side": "right",
+                    "type": "jtag"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "mmc",
+                    "side": "right",
+                    "type": [
+                        "emmc"
+                    ]
+                },
+                {
+                    "array": [
+                        1,
+                        9
+                    ],
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "pwm",
+                    "side": "left",
+                    "type": "gpio"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "pwm0",
+                    "side": "left",
+                    "type": [
+                        "pwm"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "pwm1",
+                    "side": "right",
+                    "type": [
+                        "pwm"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "qspi0",
+                    "side": "right",
+                    "type": [
+                        "qspi",
+                        "spi"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "qspi1",
+                    "side": "left",
+                    "type": [
+                        "qspi",
+                        "spi"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "qspi2",
+                    "side": "left",
+                    "type": [
+                        "qspi",
+                        "spi"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "reset",
+                    "side": "left",
+                    "type": "gpio"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "spi0",
+                    "side": "left",
+                    "type": [
+                        "spi"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "spi1",
+                    "side": "right",
+                    "type": [
+                        "spi"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "spi2",
+                    "side": "left",
+                    "type": [
+                        "spi"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "uart0",
+                    "side": "left",
+                    "type": [
+                        "serial"
+                    ]
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "uart1",
+                    "side": "right",
+                    "type": [
+                        "serial"
+                    ]
+                }
+            ],
+            "isCategory": true,
+            "urls": {
+                "designer_soc": "fu540",
+                "zephyr": "dts/riscv/sifive/riscv64-fu540.dtsi"
+            },
+            "subgraphId": "e7b92922-e893-4614-b54f-9d5632e3faab"
+        },
+        {
+            "abstract": false,
+            "description": "Modular Jack, 1 x 1 (Port), 8P8C, Cat5, Through Hole Mount\n\n### Additional information\n\n*Datasheet*: [615008141321.pdf](https://www.we-online.com/components/products/datasheet/615008141321.pdf)",
+            "extends": [
+                "RJ45 Ethernet"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/rj45-wurth-615008137421/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "Würth Elektronik 615008137421",
+            "urls": {
+                "datasheet": "https://www.we-online.com/components/products/datasheet/615008141321.pdf",
+                "designer_components": "wurth-elektronik-615008137421",
+                "hwp": "components/wurth-elektronik-615008137421"
+            }
+        },
+        {
+            "category": "Connectors/Ethernet/RJ45 Ethernet",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "ethernet",
+                    "side": "right",
+                    "type": "ethernet"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "rj45",
+                    "side": "left",
+                    "type": "rj45"
+                }
+            ],
+            "isCategory": true
+        },
+        {
+            "abstract": false,
+            "description": "USB - micro AB USB 2.0 Receptacle Connector 5 Position Surface Mount, Right Angle\n\n### Additional information\n\n*Datasheet*: [629105150921.pdf](https://www.we-online.com/components/products/datasheet/629105150921.pdf)",
+            "extends": [
+                "USB Micro"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/usb-micro-b-receptacle-we-629105150921/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "Würth Elektronik 629105150921",
+            "urls": {
+                "datasheet": "https://www.we-online.com/components/products/datasheet/629105150921.pdf",
+                "designer_components": "wurth-elektronik-629105150921",
+                "hwp": "components/wurth-elektronik-629105150921"
+            }
+        },
+        {
+            "category": "Connectors/USB/USB Micro",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "usb",
+                    "side": "left",
+                    "type": "usb"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "usb micro",
+                    "side": "right",
+                    "type": "usb micro"
+                }
+            ],
+            "isCategory": true
+        },
+        {
+            "abstract": false,
+            "description": "Pin Header, Right Angle, Board-to-Board, 2.54 mm, 2 Rows, 10 Contacts, Through Hole Right Angle\n\n### Additional information\n\n*Datasheet*: [htsw_th-2854340.pdf](https://www.mouser.com/datasheet/2/527/htsw_th-2854340.pdf)",
+            "extends": [
+                "IO Header"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/pinheader-2x5-p2-54mm-drill1-1mm/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "Samtec HTSW-105-08-F-D",
+            "urls": {
+                "datasheet": "https://www.mouser.com/datasheet/2/527/htsw_th-2854340.pdf",
+                "designer_components": "samtec-htsw-105-08-f-d",
+                "hwp": "components/samtec-htsw-105-08-f-d"
+            }
+        },
+        {
+            "category": "Connectors/IO Header",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "gpio",
+                    "side": "left"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "gpio header",
+                    "side": "right",
+                    "type": "gpio header"
+                }
+            ],
+            "isCategory": true
+        },
+        {
+            "abstract": false,
+            "description": "LED, Green, SMD, 0603, 20 mA, 1.9 V, 571 nm\n\n### Additional information\n\n*Datasheet*: [LTST-C190KGKT.PDF](https://optoelectronics.liteon.com/upload/download/DS22-2000-074/LTST-C190KGKT.PDF)",
+            "extends": [
+                "LEDs"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/led-0603-1608metric-g/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "Lite-On LTST-C190KGKT",
+            "urls": {
+                "datasheet": "https://optoelectronics.liteon.com/upload/download/DS22-2000-074/LTST-C190KGKT.PDF",
+                "designer_components": "lite-on-ltst-c190kgkt",
+                "hwp": "components/lite-on-ltst-c190kgkt"
+            }
+        },
+        {
+            "category": "IO/LEDs",
+            "extends": [
+                "gpio-sensor"
+            ],
+            "isCategory": true,
+            "urls": {
+                "ren": "Miscellaneous/LED.cs"
+            }
+        },
+        {
+            "abstract": true,
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "gpio",
+                    "side": "left",
+                    "type": "gpio"
+                }
+            ],
+            "name": "gpio-sensor",
+            "properties": [
+                {
+                    "default": "0x0",
+                    "name": "address (gpio)",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "abstract": false,
+            "description": "Tactile Switch, PTS645 Series, Top Actuated, Surface Mount, Round Button, 160 gf, 50mA at 12VDC\n\n### Additional information\n\n*Datasheet*: [pts645.pdf](https://www.ckswitches.com/media/1471/pts645.pdf)",
+            "extends": [
+                "Buttons"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/sw-pts645sm43smtr92lfs-smd/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "C&K PTS645SM43SMTR92LFS",
+            "urls": {
+                "datasheet": "https://www.ckswitches.com/media/1471/pts645.pdf",
+                "designer_components": "c-k-pts645sm43smtr92lfs",
+                "hwp": "components/c-k-pts645sm43smtr92lfs"
+            }
+        },
+        {
+            "category": "IO/Buttons",
+            "extends": [
+                "gpio-sensor"
+            ],
+            "isCategory": true,
+            "urls": {
+                "ren": "Miscellaneous/Button.cs"
+            }
+        },
+        {
+            "abstract": false,
+            "description": "Memory Card Connector, SD, Push-Push, 11 Contacts, Copper Alloy, Gold Plated Contacts\n\n### Additional information\n\n*Datasheet*: [bwb_sdmemorycard.pdf](https://cdn.amphenol-cs.com/media/wysiwyg/files/documentation/datasheet/boardwiretoboard/bwb_sdmemorycard.pdf)",
+            "extends": [
+                "SD Card socket"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/sd-10067847-001rlf/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "Amphenol 10067847-001RLF",
+            "urls": {
+                "datasheet": "https://cdn.amphenol-cs.com/media/wysiwyg/files/documentation/datasheet/boardwiretoboard/bwb_sdmemorycard.pdf",
+                "designer_components": "amphenol-10067847-001rlf",
+                "hwp": "components/amphenol-10067847-001rlf"
+            }
+        },
+        {
+            "category": "Connectors/SD/SD Card socket",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "sd-card",
+                    "side": "right",
+                    "type": "sd-card"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "sdio",
+                    "side": "left",
+                    "type": [
+                        "sdio",
+                        "spi"
+                    ]
+                }
+            ],
+            "isCategory": true
+        },
+        {
+            "abstract": false,
+            "description": "PCB Receptacle, Board-to-Board, 2 mm, 2 Rows, 20 Contacts, Surface Mount, Tiger Beam TLE\n\n### Additional information\n\n*Datasheet*: [55510.pdf](https://cdn.amphenol-cs.com/media/wysiwyg/files/drawing/55510.pdf)",
+            "extends": [
+                "IO Header"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/pinsocket-2x10-p2mm-smd/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "Amphenol 55510-120LF",
+            "urls": {
+                "datasheet": "https://cdn.amphenol-cs.com/media/wysiwyg/files/drawing/55510.pdf",
+                "designer_components": "amphenol-55510-120lf",
+                "hwp": "components/amphenol-55510-120lf"
+            }
+        },
+        {
+            "abstract": false,
+            "description": "2.00mm Pitch Milli-Grid Receptacle, Surface Mount, Top Entry, 0.76µm Gold (Au) Plating, with Cover, without Locating Pegs, 40 Circuits, Lead-Free\n\n### Additional information\n\n*Datasheet*: [873814063_sd.pdf?inline](https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/873/87381/873814063_sd.pdf?inline)",
+            "extends": [
+                "IO Header"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/pinsocket-2x20-p2mm-smd/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "Molex 873814063",
+            "urls": {
+                "datasheet": "https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/873/87381/873814063_sd.pdf?inline",
+                "designer_components": "molex-873814063",
+                "hwp": "components/molex-873814063"
+            }
+        },
+        {
+            "abstract": false,
+            "description": "Mezzanine Connector, Array, 1.27 mm, 10 Rows, 400 Contacts, Surface Mount\n\n### Additional information\n\n*Datasheet*: [asp-134602-01-mkt.pdf](https://suddendocs.samtec.com/prints/asp-134602-01-mkt.pdf)",
+            "extends": [
+                "ChipLink"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/conn-fmc-samtec-asp-134602-01/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "Samtec ASP-134602-01",
+            "urls": {
+                "datasheet": "https://suddendocs.samtec.com/prints/asp-134602-01-mkt.pdf",
+                "designer_components": "samtec-asp-134602-01",
+                "hwp": "components/samtec-asp-134602-01"
+            }
+        },
+        {
+            "category": "Connectors/Board to Board/ChipLink",
+            "description": "Microchip ChipLink FMC Mezzanine Connector",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "chiplink",
+                    "side": "left",
+                    "type": "chiplink"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "chiplink fmc",
+                    "side": "left",
+                    "type": "chiplink"
+                },
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "gpio",
+                    "side": "right",
+                    "type": "gpio"
+                }
+            ],
+            "isCategory": true
+        },
+        {
+            "abstract": false,
+            "description": "FLASH - NOR Memory IC 1Mbit SPI 104 MHz 8-SOP\n\n### Additional information\n\n*Datasheet*: [MX25L1006E,%203V,%201Mb,%20v1.4.pdf](https://www.macronix.com/Lists/Datasheet/Attachments/8623/MX25L1006E,%203V,%201Mb,%20v1.4.pdf)",
+            "extends": [
+                "QSPI Flash"
+            ],
+            "icon": {
+                "hw-icon": "/imported/components/sop-8-3-9x5-05mm-p1-27mm/previews/isoT_thumbnail_64x64.webp"
+            },
+            "name": "Macronix MX25L1006EMI-10G",
+            "urls": {
+                "datasheet": "https://www.macronix.com/Lists/Datasheet/Attachments/8623/MX25L1006E,%203V,%201Mb,%20v1.4.pdf",
+                "designer_components": "macronix-mx25l1006emi-10g",
+                "hwp": "components/macronix-mx25l1006emi-10g"
+            }
+        },
+        {
+            "category": "Memory/Flash/QSPI Flash",
+            "interfaces": [
+                {
+                    "direction": "inout",
+                    "maxConnectionsCount": -1,
+                    "name": "qspi",
+                    "side": "left",
+                    "type": "qspi"
+                }
+            ],
+            "isCategory": true
+        }
+    ],
+    "version": "20250623.14",
+    "graphs": [
+        {
+            "id": "e7b92922-e893-4614-b54f-9d5632e3faab",
+            "name": "fu540",
+            "nodes": [
+                {
+                    "id": "d5d51e70-487d-4dc1-97be-97aa340f6578",
+                    "name": "Würth Elektronik 615008137421",
+                    "instanceName": "Ethernet Connector",
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "rj45",
+                            "id": "223c2238-ed23-43a0-bf9e-90d299bb8566",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "ethernet",
+                            "id": "6fa9eccd-9713-4426-aca6-cbaeb3ad9e8b",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "default",
+                            "style": "renodeStyle",
+                            "position": {
+                                "x": 100,
+                                "y": 200
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "ff82d9b8-5e7e-4dde-8e19-d3c9c9032e98",
+                    "name": "GbE Phy GMII",
+                    "width": 200,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "ethernet",
+                            "id": "e3a191dd-9053-409c-98a7-9eb6847e81fe",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "GbE",
+                            "id": "341063e4-21a1-4f5d-afa8-9220599ab5c8",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "views": [
+                        {
+                            "name": "default",
+                            "style": "renodeStyle",
+                            "position": {
+                                "x": 700,
+                                "y": 500
+                            }
+                        }
+                    ]
+                }
+            ],
+            "groups": [],
+            "connections": [
+                {
+                    "id": "2b1c8708-c49e-4f83-8f15-1a99b71c3639",
+                    "from": "6fa9eccd-9713-4426-aca6-cbaeb3ad9e8b",
+                    "to": "e3a191dd-9053-409c-98a7-9eb6847e81fe"
+                }
+            ],
+            "defaultStyle": {
+                "backgroundSize": 100,
+                "backgroundColor": "#1d1e27",
+                "backgroundGridColor": "#2094F3",
+                "connectionStyle": "curved"
+            }
+        }
+    ]
+}

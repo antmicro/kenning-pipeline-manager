@@ -1,0 +1,281 @@
+{
+    "version": "20250623.14",
+    "nodes": [
+        {
+            "name": "CompositeGenerator",
+            "interfaces": [
+                {
+                    "name": "axi",
+                    "type": "axi",
+                    "direction": "output"
+                },
+                {
+                    "name": "gpio",
+                    "type": "signal",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "description": "Node exposing a composite (AXI) output interface next to a plain one.",
+            "color": "#e9a726"
+        },
+        {
+            "name": "CompositeConsumer",
+            "interfaces": [
+                {
+                    "name": "axi",
+                    "type": "axi",
+                    "direction": "input"
+                },
+                {
+                    "name": "monitor",
+                    "type": "signal",
+                    "direction": "input"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "value",
+                    "type": "number",
+                    "default": 1.0
+                }
+            ],
+            "description": "Node consuming a composite (AXI) input interface.",
+            "color": "#004972"
+        },
+        {
+            "name": "SyncGenerator",
+            "interfaces": [
+                {
+                    "name": "timing",
+                    "type": "sync",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "description": "Node exposing a composite (sync) output interface.",
+            "color": "#26A69A"
+        },
+        {
+            "name": "SyncConsumer",
+            "interfaces": [
+                {
+                    "name": "timing",
+                    "type": ["display", "sync"],
+                    "direction": "input"
+                }
+            ],
+            "properties": [],
+            "description": "Node consuming a composite (display) input interface. It shares the sync type with SyncGenerator so that the two are compatible by type, yet they are composite interfaces of different, non-exact types.",
+            "color": "#7E57C2"
+        }
+    ],
+    "interfaceComposites": {
+        "sync": [
+            {
+                "name": "hsync",
+                "type": "signal"
+            },
+            {
+                "name": "vsync",
+                "type": "signal"
+            }
+        ],
+        "display": [
+            {
+                "name": "hsync",
+                "type": "signal"
+            },
+            {
+                "name": "vsync",
+                "type": "signal"
+            },
+            {
+                "name": "de",
+                "type": "signal"
+            }
+        ],
+        "axi": [
+            {
+                "name": "AW",
+                "type": "aw"
+            },
+            {
+                "name": "W",
+                "type": "wsig"
+            },
+            {
+                "name": "B",
+                "type": "bsig"
+            },
+            {
+                "name": "AR",
+                "type": "arsig"
+            },
+            {
+                "name": "R",
+                "type": "rsig"
+            }
+        ],
+        "aw": [
+            {
+                "name": "ID",
+                "type": "awid"
+            },
+            {
+                "name": "ADDR",
+                "type": "awaddr"
+            },
+            {
+                "name": "REGION",
+                "type": "awregion"
+            },
+            {
+                "name": "LEN",
+                "type": "awlen"
+            },
+            {
+                "name": "SIZE",
+                "type": "awsize"
+            },
+            {
+                "name": "BURST",
+                "type": "awburst"
+            },
+            {
+                "name": "LOCK",
+                "type": "awlocksig"
+            },
+            {
+                "name": "CACHE",
+                "type": "awcache"
+            },
+            {
+                "name": "PROT",
+                "type": "awprot"
+            },
+            {
+                "name": "QOS",
+                "type": "awqos"
+            },
+            {
+                "name": "USER",
+                "type": "awusersig"
+            },
+            {
+                "name": "VALID",
+                "type": "awvalidsig"
+            },
+            {
+                "name": "READY",
+                "type": "awreadysig"
+            }
+        ],
+        "awid": [
+            {
+                "name": "ID",
+                "type": "signal",
+                "array": [0, 4]
+            }
+        ],
+        "awaddr": [
+            {
+                "name": "ADDR",
+                "type": "signal",
+                "array": [0, 32]
+            }
+        ],
+        "awregion": [
+            {
+                "name": "REGION",
+                "type": "signal",
+                "array": [0, 4]
+            }
+        ],
+        "awlen": [
+            {
+                "name": "LEN",
+                "type": "signal",
+                "array": [0, 8]
+            }
+        ],
+        "awsize": [
+            {
+                "name": "SIZE",
+                "type": "signal",
+                "array": [0, 3]
+            }
+        ],
+        "awburst": [
+            {
+                "name": "BURST",
+                "type": "signal",
+                "array": [0, 2]
+            }
+        ],
+        "awcache": [
+            {
+                "name": "CACHE",
+                "type": "signal",
+                "array": [0, 4]
+            }
+        ],
+        "awprot": [
+            {
+                "name": "PROT",
+                "type": "signal",
+                "array": [0, 3]
+            }
+        ],
+        "awqos": [
+            {
+                "name": "QOS",
+                "type": "signal",
+                "array": [0, 3]
+            }
+        ]
+    },
+    "metadata": {
+        "interfaces": {
+            "sync": {
+                "interfaceColor": "#26A69A"
+            },
+            "display": {
+                "interfaceColor": "#7E57C2"
+            },
+            "axi": {
+                "interfaceColor": "#4abbe7"
+            },
+            "aw": {
+                "interfaceColor": "#a7bbb6"
+            },
+            "awid": {
+                "interfaceColor": "#0071a6"
+            },
+            "awaddr": {
+                "interfaceColor": "#1a47c2"
+            },
+            "awregion": {
+                "interfaceColor": "#710bf3"
+            },
+            "awlen": {
+                "interfaceColor": "#ac41d1"
+            },
+            "awsize": {
+                "interfaceColor": "#9e377b"
+            },
+            "awburst": {
+                "interfaceColor": "#eb9269"
+            },
+            "awcache": {
+                "interfaceColor": "#6010bd"
+            },
+            "awprot": {
+                "interfaceColor": "#429613"
+            },
+            "awqos": {
+                "interfaceColor": "#be4b24"
+            }
+        }
+    }
+}
